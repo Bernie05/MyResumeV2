@@ -15,13 +15,10 @@ import { useThemeClasses } from "@/theme/useThemeClasses";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getThemeColor } from "@/theme/constants";
 
-// add here the dark mode toggle and theme context provider if needed
-
 export default function Home() {
   const { isDarkMode, toggleTheme } = useThemeContext();
   const { cx, text, bg, button } = useThemeClasses();
   const mode = getThemeColor(isDarkMode);
-  console.log();
 
   return (
     <main className="w-full min-h-screen">
