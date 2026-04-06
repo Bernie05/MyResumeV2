@@ -22,6 +22,7 @@ import {
   Work as BriefcaseIcon,
 } from "@mui/icons-material";
 import { useThemeContext } from "@/context/ThemeContext";
+import { getSectionPalette } from "../../theme/sectionPalette";
 
 interface SkillItem {
   name: string;
@@ -51,6 +52,7 @@ function getIconForSkill(skillName: string): any {
   for (const [key, icon] of Object.entries(SKILL_ICONS)) {
     if (name.includes(key)) return icon;
   }
+
   return SKILL_ICONS.default;
 }
 
@@ -60,17 +62,56 @@ export default function ServicesSection({
   skills: SkillCategory[];
 }) {
   const { isDarkMode } = useThemeContext();
+  const {
+    primaryAccent,
+    accentText,
+    titleColor,
+    mutedColor,
+    bodyColor,
+    sectionBackground,
+    surfaceBackground,
+    softBackground,
+    outline,
+    buttonGradient,
+    hoverShadow,
+  } = getSectionPalette(isDarkMode);
 
   return (
-    <Box sx={{ mb: 8 }}>
+    <Box
+      sx={{
+        mb: 8,
+        p: { xs: 3, md: 4.5 },
+        borderRadius: { xs: 4, md: 5 },
+        background: sectionBackground,
+        border: `1px solid ${outline}`,
+      }}
+    >
       {/* Section Header */}
       <Box sx={{ mb: 6 }}>
+        <Box
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            px: 1.75,
+            py: 0.75,
+            borderRadius: 999,
+            background: buttonGradient,
+            color: accentText,
+            fontWeight: 700,
+            fontSize: "0.75rem",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            mb: 2,
+          }}
+        >
+          Services
+        </Box>
         <Typography
           variant="h3"
           sx={{
             fontWeight: 800,
             fontSize: { xs: "2rem", md: "2.5rem" },
-            color: isDarkMode ? "#ffffff" : "#000000",
+            color: titleColor,
             mb: 2,
           }}
         >
@@ -80,7 +121,7 @@ export default function ServicesSection({
           variant="h6"
           sx={{
             fontSize: "1.125rem",
-            color: isDarkMode ? "#a5a5a5" : "#666666",
+            color: mutedColor,
             fontWeight: 400,
           }}
         >
@@ -104,17 +145,14 @@ export default function ServicesSection({
           <Card
             key={category.category}
             sx={{
-              background: isDarkMode
-                ? "linear-gradient(to bottom right, #1e293b, #0f172a)"
-                : "#ffffff",
+              background: surfaceBackground,
+              border: `1px solid ${outline}`,
               borderRadius: "1rem",
               transition: "all 0.3s ease",
               height: "100%",
               "&:hover": {
                 transform: "translateY(-8px)",
-                boxShadow: isDarkMode
-                  ? "0 20px 25px rgba(59, 130, 246, 0.15)"
-                  : "0 20px 25px rgba(0, 0, 0, 0.1)",
+                boxShadow: hoverShadow,
               },
             }}
           >
@@ -132,9 +170,7 @@ export default function ServicesSection({
                   sx={{
                     p: 2,
                     borderRadius: "0.75rem",
-                    backgroundColor: isDarkMode
-                      ? "rgba(59, 130, 246, 0.2)"
-                      : "rgba(59, 130, 246, 0.1)",
+                    backgroundColor: softBackground,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -143,7 +179,7 @@ export default function ServicesSection({
                   <CodeIcon
                     sx={{
                       fontSize: "1.75rem",
-                      color: "#3b82f6",
+                      color: primaryAccent,
                     }}
                   />
                 </Box>
@@ -153,7 +189,7 @@ export default function ServicesSection({
                     sx={{
                       fontWeight: 700,
                       fontSize: "1.5rem",
-                      color: isDarkMode ? "#ffffff" : "#000000",
+                      color: titleColor,
                     }}
                   >
                     {category.category} Development
@@ -162,7 +198,7 @@ export default function ServicesSection({
                     variant="caption"
                     sx={{
                       fontSize: "0.875rem",
-                      color: isDarkMode ? "#9ca3af" : "#999999",
+                      color: mutedColor,
                       display: "block",
                       mt: 0.5,
                     }}
@@ -189,7 +225,7 @@ export default function ServicesSection({
                       <ListItemIcon
                         sx={{
                           minWidth: "32px",
-                          color: "#3b82f6",
+                          color: primaryAccent,
                         }}
                       >
                         <IconComponent sx={{ fontSize: "1.25rem" }} />
@@ -200,7 +236,7 @@ export default function ServicesSection({
                           sx: {
                             fontWeight: 500,
                             fontSize: "1rem",
-                            color: isDarkMode ? "#d1d5db" : "#555555",
+                            color: bodyColor,
                           },
                         }}
                       />
@@ -209,10 +245,8 @@ export default function ServicesSection({
                           label={`${Math.round(skill.proficiency / 20) * 20}%`}
                           size="small"
                           sx={{
-                            backgroundColor: isDarkMode
-                              ? "rgba(59, 130, 246, 0.2)"
-                              : "rgba(59, 130, 246, 0.1)",
-                            color: "#3b82f6",
+                            backgroundColor: softBackground,
+                            color: primaryAccent,
                             fontWeight: 600,
                             fontSize: "0.75rem",
                           }}

@@ -10,57 +10,72 @@ import Skills from "@/components/resume/Skills";
 import Portfolio from "@/components/resume/Portfolio";
 import Projects from "@/components/resume/Projects";
 import Certifications from "@/components/resume/Certifications";
-
-import { useThemeClasses } from "@/theme/useThemeClasses";
 import { useThemeContext } from "@/context/ThemeContext";
-import { getThemeColor } from "@/theme/constants";
+import { Box, Container, Stack, Typography } from "@mui/material";
 
 export default function Home() {
-  const { isDarkMode, toggleTheme } = useThemeContext();
-  const { cx, text, bg, button } = useThemeClasses();
-  const mode = getThemeColor(isDarkMode);
+  const { isDarkMode } = useThemeContext();
 
   return (
-    <main className="w-full min-h-screen">
-      {/* Navigation Bar */}
+    <Box component="main" sx={{ width: "100%", minHeight: "100vh" }}>
       <Navbar />
 
-      {/* Hero Section / About */}
-      <section id="about">
+      <Box component="section" id="about">
         <HeroSection
           personalInfo={resumeData.personalInfo}
           stats={resumeData.stats}
         />
-      </section>
+      </Box>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <div className="space-y-20 md:space-y-28">
+      <Container
+        maxWidth="xl"
+        sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, sm: 3, lg: 4 } }}
+      >
+        <Stack spacing={{ xs: 10, md: 14 }}>
           <ServicesSection skills={resumeData.skills} />
-          <section id="experience">
+
+          <Box component="section" id="experience">
             <Experience experience={resumeData.experience} />
-          </section>
-          <section id="portfolio">
+          </Box>
+
+          <Box component="section" id="portfolio">
             <Portfolio portfolio={resumeData.portfolio} />
-          </section>
+          </Box>
+
           <Projects projects={resumeData.projects} />
           <Education education={resumeData.education} />
-          <section id="skills">
+
+          <Box component="section" id="skills">
             <Skills skills={resumeData.skills} />
-          </section>
+          </Box>
+
           <Certifications certifications={resumeData.certifications} />
 
-          {/* Footer / Contact */}
-          <footer
+          <Box
+            component="footer"
             id="contact"
-            className="text-center py-16 border-t border-gray-300 dark:border-gray-700 mt-20"
+            sx={{
+              textAlign: "center",
+              py: 8,
+              mt: 10,
+              borderTop: "1px solid",
+              borderColor: isDarkMode
+                ? "rgba(71, 85, 105, 0.55)"
+                : "rgba(203, 213, 225, 0.9)",
+            }}
           >
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              ${new Date().getFullYear()} &copy; {resumeData.personalInfo.name}.
-              All rights reserved.
-            </p>
-          </footer>
-        </div>
-      </div>
-    </main>
+            <Typography
+              variant="body2"
+              sx={{
+                color: isDarkMode ? "#94a3b8" : "#64748b",
+              }}
+            >
+              {new Date().getFullYear()} © {resumeData.personalInfo.name}. All
+              rights reserved.
+            </Typography>
+          </Box>
+        </Stack>
+      </Container>
+    </Box>
   );
 }

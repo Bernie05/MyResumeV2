@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { FiberManualRecord } from "@mui/icons-material";
 import { useThemeContext } from "@/context/ThemeContext";
+import { getSectionPalette } from "../../theme/sectionPalette";
 
 interface Job {
   id: number;
@@ -25,17 +26,55 @@ interface Job {
 
 export default function Experience({ experience }: { experience: Job[] }) {
   const { isDarkMode } = useThemeContext();
+  const {
+    primaryAccent,
+    titleColor,
+    bodyColor,
+    mutedColor,
+    sectionBackground,
+    surfaceBackground,
+    softBackground,
+    outline,
+    divider,
+    buttonGradient,
+    accentText,
+    hoverShadow,
+  } = getSectionPalette(isDarkMode);
 
   return (
-    <Box>
+    <Box
+      sx={{
+        p: { xs: 3, md: 4.5 },
+        borderRadius: { xs: 4, md: 5 },
+        background: sectionBackground,
+        border: `1px solid ${outline}`,
+      }}
+    >
       {/* Section Header */}
       <Box sx={{ mb: 5 }}>
+        <Box
+          sx={{
+            display: "inline-flex",
+            px: 1.75,
+            py: 0.75,
+            borderRadius: 999,
+            background: buttonGradient,
+            color: accentText,
+            fontWeight: 700,
+            fontSize: "0.75rem",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            mb: 2,
+          }}
+        >
+          Experience
+        </Box>
         <Typography
           variant="h3"
           sx={{
             fontWeight: 800,
             fontSize: { xs: "2rem", md: "2.5rem" },
-            color: isDarkMode ? "#ffffff" : "#000000",
+            color: titleColor,
           }}
         >
           Professional Experience
@@ -47,18 +86,15 @@ export default function Experience({ experience }: { experience: Job[] }) {
           <Box key={job.id}>
             <Card
               sx={{
-                background: isDarkMode
-                  ? "linear-gradient(to bottom right, #1e293b, #0f172a)"
-                  : "#ffffff",
-                borderLeft: "4px solid #3b82f6",
+                background: surfaceBackground,
+                border: `1px solid ${outline}`,
+                borderLeft: `4px solid ${primaryAccent}`,
                 borderRadius: "1rem",
                 transition: "all 0.3s ease",
                 "&:hover": {
                   transform: "translateX(8px)",
-                  boxShadow: isDarkMode
-                    ? "0 20px 25px rgba(59, 130, 246, 0.15)"
-                    : "0 20px 25px rgba(59, 130, 246, 0.15)",
-                  borderLeftColor: "#60a5fa",
+                  boxShadow: hoverShadow,
+                  borderLeftColor: primaryAccent,
                 },
               }}
             >
@@ -80,7 +116,7 @@ export default function Experience({ experience }: { experience: Job[] }) {
                       sx={{
                         fontWeight: 700,
                         fontSize: "1.5rem",
-                        color: isDarkMode ? "#ffffff" : "#000000",
+                        color: titleColor,
                         mb: 1,
                       }}
                     >
@@ -91,7 +127,7 @@ export default function Experience({ experience }: { experience: Job[] }) {
                       sx={{
                         fontWeight: 600,
                         fontSize: "1.125rem",
-                        color: "#3b82f6",
+                        color: primaryAccent,
                       }}
                     >
                       {job.company}
@@ -100,10 +136,8 @@ export default function Experience({ experience }: { experience: Job[] }) {
                   <Chip
                     label={job.duration}
                     sx={{
-                      backgroundColor: isDarkMode
-                        ? "rgba(59, 130, 246, 0.2)"
-                        : "rgba(59, 130, 246, 0.1)",
-                      color: "#3b82f6",
+                      backgroundColor: softBackground,
+                      color: primaryAccent,
                       fontWeight: 600,
                       whiteSpace: "nowrap",
                     }}
@@ -115,7 +149,7 @@ export default function Experience({ experience }: { experience: Job[] }) {
                   sx={{
                     fontSize: "1rem",
                     mb: 3,
-                    color: isDarkMode ? "#9ca3af" : "#666666",
+                    color: mutedColor,
                   }}
                 >
                   📍 {job.location}
@@ -136,7 +170,7 @@ export default function Experience({ experience }: { experience: Job[] }) {
                         sx={{
                           minWidth: "24px",
                           mt: 0.5,
-                          color: "#3b82f6",
+                          color: primaryAccent,
                         }}
                       >
                         <FiberManualRecord
@@ -148,7 +182,7 @@ export default function Experience({ experience }: { experience: Job[] }) {
                         primaryTypographyProps={{
                           sx: {
                             fontSize: "1rem",
-                            color: isDarkMode ? "#d1d5db" : "#555555",
+                            color: bodyColor,
                             lineHeight: 1.6,
                           },
                         }}
@@ -163,7 +197,7 @@ export default function Experience({ experience }: { experience: Job[] }) {
               <Box
                 sx={{
                   my: 2,
-                  borderTop: `1px solid ${isDarkMode ? "#334155" : "#e5e7eb"}`,
+                  borderTop: `1px solid ${divider}`,
                 }}
               />
             )}
