@@ -3,6 +3,7 @@
 import { Box, Card, CardContent, Typography, Chip } from "@mui/material";
 import SchoolIcon from "@mui/icons-material/School";
 import { useThemeContext } from "@/context/ThemeContext";
+import { getSectionPalette } from "../../theme/sectionPalette";
 
 interface EducationItem {
   id: number;
@@ -19,17 +20,54 @@ export default function Education({
   education: EducationItem[];
 }) {
   const { isDarkMode } = useThemeContext();
+  const {
+    primaryAccent,
+    titleColor,
+    mutedColor,
+    sectionBackground,
+    surfaceBackground,
+    softBackground,
+    outline,
+    divider,
+    buttonGradient,
+    accentText,
+    hoverShadow,
+  } = getSectionPalette(isDarkMode);
 
   return (
-    <Box>
+    <Box
+      sx={{
+        p: { xs: 3, md: 4.5 },
+        borderRadius: { xs: 4, md: 5 },
+        background: sectionBackground,
+        border: `1px solid ${outline}`,
+      }}
+    >
       {/* Section Header */}
       <Box sx={{ mb: 5 }}>
+        <Box
+          sx={{
+            display: "inline-flex",
+            px: 1.75,
+            py: 0.75,
+            borderRadius: 999,
+            background: buttonGradient,
+            color: accentText,
+            fontWeight: 700,
+            fontSize: "0.75rem",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            mb: 2,
+          }}
+        >
+          Education
+        </Box>
         <Typography
           variant="h3"
           sx={{
             fontWeight: 800,
             fontSize: { xs: "2rem", md: "2.5rem" },
-            color: isDarkMode ? "#ffffff" : "#000000",
+            color: titleColor,
           }}
         >
           Education
@@ -41,18 +79,15 @@ export default function Education({
           <Box key={edu.id}>
             <Card
               sx={{
-                background: isDarkMode
-                  ? "linear-gradient(to bottom right, #1e293b, #0f172a)"
-                  : "#ffffff",
-                borderLeft: "4px solid #3b82f6",
+                background: surfaceBackground,
+                border: `1px solid ${outline}`,
+                borderLeft: `4px solid ${primaryAccent}`,
                 borderRadius: "1rem",
                 transition: "all 0.3s ease",
                 "&:hover": {
                   transform: "translateX(8px)",
-                  boxShadow: isDarkMode
-                    ? "0 20px 25px rgba(59, 130, 246, 0.15)"
-                    : "0 20px 25px rgba(59, 130, 246, 0.15)",
-                  borderLeftColor: "#60a5fa",
+                  boxShadow: hoverShadow,
+                  borderLeftColor: primaryAccent,
                 },
               }}
             >
@@ -74,7 +109,7 @@ export default function Education({
                       sx={{
                         fontWeight: 700,
                         fontSize: "1.5rem",
-                        color: isDarkMode ? "#ffffff" : "#000000",
+                        color: titleColor,
                         mb: 1,
                       }}
                     >
@@ -85,7 +120,7 @@ export default function Education({
                       sx={{
                         fontWeight: 600,
                         fontSize: "1.125rem",
-                        color: "#3b82f6",
+                        color: primaryAccent,
                       }}
                     >
                       {edu.degree} in {edu.field}
@@ -94,10 +129,8 @@ export default function Education({
                   <Chip
                     label={edu.year}
                     sx={{
-                      backgroundColor: isDarkMode
-                        ? "rgba(59, 130, 246, 0.2)"
-                        : "rgba(59, 130, 246, 0.1)",
-                      color: "#3b82f6",
+                      backgroundColor: softBackground,
+                      color: primaryAccent,
                       fontWeight: 600,
                       whiteSpace: "nowrap",
                     }}
@@ -108,7 +141,7 @@ export default function Education({
                 <Typography
                   sx={{
                     fontSize: "1rem",
-                    color: isDarkMode ? "#9ca3af" : "#666666",
+                    color: mutedColor,
                   }}
                 >
                   📍 {edu.location}
@@ -120,7 +153,7 @@ export default function Education({
               <Box
                 sx={{
                   my: 2,
-                  borderTop: `1px solid ${isDarkMode ? "#334155" : "#e5e7eb"}`,
+                  borderTop: `1px solid ${divider}`,
                 }}
               />
             )}

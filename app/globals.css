@@ -1,60 +1,75 @@
-@import "../styles/theme.css";
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  * {
-    @apply transition-colors duration-300 ease-in-out;
-  }
-
-  html {
-    @apply scroll-smooth;
-  }
-
-  body {
-    @apply min-h-screen relative font-sans;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-  }
-
-  a {
-    @apply hover:opacity-80 transition-opacity;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-bold tracking-wide;
-  }
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #1a1a1a;
+  --text-secondary: #404040;
+  --text-tertiary: #666666;
+  --border-primary: #e0e0e0;
+  --border-secondary: #d0d0d0;
+  --accent-primary: #0066cc;
+  --accent-secondary: #0052a3;
+  --accent-tertiary: #003d7a;
+  --gradient-accent: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
 }
 
-@layer components {
-  .card-hover {
-    @apply hover:shadow-2xl hover:scale-105 transition-all duration-300;
-  }
+[data-color-mode="dark"] {
+  --bg-primary: #000000;
+  --bg-secondary: #111111;
+  --bg-tertiary: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+  --text-tertiary: #b0b0b0;
+  --border-primary: #333333;
+  --border-secondary: #444444;
+  --accent-primary: rgb(45, 212, 191);
+  --accent-secondary: rgb(20, 184, 166);
+  --accent-tertiary: #008866;
+  --gradient-accent: linear-gradient(
+    135deg,
+    rgb(45, 212, 191) 0%,
+    rgb(20, 184, 166) 100%
+  );
+}
 
-  .section-title {
-    @apply text-3xl md:text-4xl font-bold;
-    color: var(--text-primary);
-  }
+* {
+  box-sizing: border-box;
+  transition:
+    color 0.3s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
 
-  .section-subtitle {
-    @apply text-lg;
-    color: var(--text-secondary);
-  }
+html {
+  scroll-behavior: smooth;
+}
 
-  .icon-wrapper {
-    @apply p-3 rounded-lg transition-all duration-200;
-  }
+body {
+  min-height: 100vh;
+  position: relative;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
 
-  .tooltip {
-    @apply px-3 py-1 rounded-full text-xs font-semibold;
-  }
+a {
+  transition: opacity 0.2s ease;
+}
+
+a:hover {
+  opacity: 0.9;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0;
 }
 
 ::-webkit-scrollbar {
@@ -82,22 +97,31 @@
 }
 
 /* Dark mode scrollbar */
-.dark ::-webkit-scrollbar-thumb {
+[data-color-mode="dark"] ::-webkit-scrollbar-thumb {
   background: #444444;
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
+[data-color-mode="dark"] ::-webkit-scrollbar-thumb:hover {
   background: #666666;
 }
 
-.dark * {
+[data-color-mode="dark"] * {
   scrollbar-color: #444444 transparent;
 }
 
 ::selection {
-  @apply bg-teal-500 text-white;
+  background: var(--accent-primary);
+  color: #ffffff;
 }
 
-html:not([data-color-mode="dark"]) ::selection {
-  @apply bg-gradient-to-r from-primary-light to-secondary-light text-white;
+@keyframes skillCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

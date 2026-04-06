@@ -1,8 +1,22 @@
 "use client";
 
-import { Linkedin, Download, Facebook, Twitter, Instagram } from "lucide-react";
 import { useThemeContext } from "@/context/ThemeContext";
-import { useState, useEffect, useRef } from "react";
+import { useAnimatedStats } from "@/hook/useAnimated";
+import { getSectionPalette } from "../../theme/sectionPalette";
+import DownloadIcon from "@mui/icons-material/Download";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import TwitterIcon from "@mui/icons-material/Twitter";
+import {
+  Avatar,
+  Box,
+  Button,
+  Container,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
 
 interface PersonalInfo {
   // Basic info
@@ -35,260 +49,282 @@ export default function HeroSection({
   stats?: HeroStats;
 }) {
   const { isDarkMode } = useThemeContext();
-  const [animatedStats, setAnimatedStats] = useState({
-    yearsExperience: 0,
-    projects: 0,
-    clients: 0,
-    awards: 0,
-  });
-  const [hasAnimated, setHasAnimated] = useState(false);
-  const statsRef = useRef<HTMLDivElement>(null);
-
-  // Intersection Observer for stats animation
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated && stats) {
-          setHasAnimated(true);
-
-          // Animate each stat value
-          const animateStat = (
-            key: string,
-            target: number,
-            duration: number,
-          ) => {
-            const startTime = Date.now();
-            const animate = () => {
-              const elapsed = Date.now() - startTime;
-              const progress = Math.min(elapsed / duration, 1);
-              const currentValue = Math.floor(progress * target);
-
-              setAnimatedStats((prev) => ({
-                ...prev,
-                [key]: currentValue,
-              }));
-
-              if (progress < 1) {
-                requestAnimationFrame(animate);
-              } else {
-                setAnimatedStats((prev) => ({
-                  ...prev,
-                  [key]: target,
-                }));
-              }
-            };
-            animate();
-          };
-
-          if (stats.yearsExperience)
-            animateStat("yearsExperience", stats.yearsExperience, 2000);
-          if (stats.projects) animateStat("projects", stats.projects, 2000);
-          if (stats.clients) animateStat("clients", stats.clients, 2000);
-          if (stats.awards) animateStat("awards", stats.awards, 2000);
-        }
-      },
-      { threshold: 0.3 },
-    );
-
-    if (statsRef.current) {
-      observer.observe(statsRef.current);
-    }
-
-    return () => {
-      if (statsRef.current) {
-        observer.unobserve(statsRef.current);
-      }
-    };
-  }, [stats, hasAnimated]);
+  const { animatedStats, statsRef } = useAnimatedStats(stats, 2000);
+  const {
+    primaryAccent,
+    secondaryAccent,
+    accentGlow,
+    accentText,
+    buttonGradient,
+    buttonHoverGradient,
+  } = getSectionPalette(isDarkMode);
 
   const socialLinks = [
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Linkedin, href: personalInfo.linkedin, label: "LinkedIn" },
-    { icon: Instagram, href: "#", label: "Instagram" },
+    { icon: <FacebookIcon />, href: "#", label: "Facebook" },
+    { icon: <TwitterIcon />, href: "#", label: "Twitter" },
+    {
+      icon: <LinkedInIcon />,
+      href: personalInfo.linkedin || "#",
+      label: "LinkedIn",
+    },
+    { icon: <InstagramIcon />, href: "#", label: "Instagram" },
+  ];
+
+  const statItems: Array<{
+    key: keyof HeroStats;
+    label: string;
+    suffix?: string;
+  }> = [
+    { key: "yearsExperience", label: "Years Experience", suffix: "+" },
+    { key: "projects", label: "Completed Projects" },
+    { key: "clients", label: "Happy Clients" },
+    { key: "awards", label: "Honors and Awards", suffix: "+" },
   ];
 
   return (
-    <div className="relative w-full">
-      {/* Hero Background Container */}
-      <div
-        className="relative w-full h-screen md:h-[600px] flex items-center justify-center overflow-hidden"
-        style={{
+    <Box sx={{ position: "relative", width: "100%" }}>
+      <Box
+        sx={{
+          position: "relative",
+          minHeight: { xs: "100vh", md: 640 },
+          display: "flex",
+          alignItems: "center",
+          overflow: "hidden",
           backgroundImage: `url('${personalInfo.backgroundUrl}')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            background: isDarkMode
+              ? "linear-gradient(90deg, rgba(2, 6, 23, 0.92) 0%, rgba(2, 6, 23, 0.72) 45%, rgba(2, 6, 23, 0.28) 100%)"
+              : "linear-gradient(90deg, rgba(15, 23, 42, 0.78) 0%, rgba(30, 41, 59, 0.48) 45%, rgba(30, 64, 175, 0.18) 100%)",
+          },
         }}
       >
-        {/* Overlay Gradient */}
-        <div
-          className={`absolute inset-0 ${
-            isDarkMode
-              ? "bg-gradient-to-r from-black/80 via-black/60 to-transparent"
-              : "bg-gradient-to-r from-black/60 via-black/40 to-transparent"
-          }`}
-        />
-
-        {/* Content Container */}
-        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-16 w-full h-full">
-          {/* Circular Profile Photo */}
-          <div className="mb-8 relative">
-            <div
-              className={`absolute -inset-8 rounded-full blur-3xl opacity-40 ${
-                isDarkMode ? "bg-teal-500/40" : "to-blue-600"
-              }`}
-            />
-            <div
-              className={`relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 transition-transform hover:scale-110 ${
-                isDarkMode
-                  ? "border-teal-400/80 shadow-2xl shadow-teal-500/30"
-                  : "border-blue-600/80 shadow-2xl shadow-blue-400/40"
-              }`}
-            >
-              <img
-                src={personalInfo.photoUrl}
-                alt={personalInfo.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-
-          {/* Name */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-2 tracking-tight">
-            {personalInfo.name}
-          </h1>
-
-          {/* Professional Title */}
-          <p className="text-sm md:text-base lg:text-lg font-semibold text-white/90 mb-8 tracking-widest uppercase">
-            {personalInfo.title}
-          </p>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-12 justify-center">
-            <button
-              className={`inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95 ${
-                isDarkMode
-                  ? "bg-teal-500 hover:bg-teal-400 text-black shadow-lg shadow-teal-500/40"
-                  : "bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/40"
-              }`}
-            >
-              Hire Me
-            </button>
-
-            <button
-              className={`inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-semibold transition-all duration-300 border-2 hover:scale-105 active:scale-95 border-white text-white hover:bg-white/10}`}
-            >
-              <Download className="w-4 h-4" />
-              Download CV
-            </button>
-          </div>
-
-          {/* Social Icons */}
-          <div className="flex gap-4 justify-center">
-            {socialLinks.map(({ icon: Icon, href, label }) => (
-              <a
-                key={label}
-                href={href}
-                aria-label={label}
-                className={`p-3 rounded-full transition-all duration-300 hover:scale-110 active:scale-95 ${
-                  isDarkMode
-                    ? "bg-gray-800 text-white hover:bg-teal-500/40"
-                    : "bg-white/20 text-white hover:bg-white/40 backdrop-blur"
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-              </a>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Section - Optional */}
-      {stats && (
-        <div
-          ref={statsRef}
-          className={`w-full px-4 sm:px-6 lg:px-8 py-16 ${
-            isDarkMode ? "bg-gray-950" : "bg-gray-50"
-          }`}
+        <Container
+          maxWidth="lg"
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            py: { xs: 10, md: 14 },
+          }}
         >
-          <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.yearsExperience && stats.yearsExperience !== 0 && (
-              <div className="text-center">
-                <div
-                  className={`text-3xl md:text-4xl font-bold mb-2 ${
-                    isDarkMode ? "text-teal-400" : "text-blue-600"
-                  }`}
-                >
-                  {animatedStats.yearsExperience}+
-                </div>
-                <p
-                  className={`text-sm md:text-base font-medium ${
-                    isDarkMode ? "text-gray-300" : "text-gray-500"
-                  }`}
-                >
-                  Years Experience
-                </p>
-              </div>
-            )}
+          <Stack spacing={4} alignItems="center" textAlign="center">
+            <Box sx={{ position: "relative", display: "inline-flex" }}>
+              <Box
+                sx={{
+                  position: "absolute",
+                  inset: -24,
+                  borderRadius: "50%",
+                  background: `radial-gradient(circle, ${primaryAccent}66 0%, transparent 70%)`,
+                  filter: "blur(20px)",
+                  opacity: 0.85,
+                }}
+              />
+              <Avatar
+                alt={personalInfo.name}
+                src={personalInfo.photoUrl}
+                sx={{
+                  width: { xs: 160, md: 192 },
+                  height: { xs: 160, md: 192 },
+                  border: "4px solid",
+                  borderColor: primaryAccent,
+                  boxShadow: `0 24px 60px ${accentGlow}`,
+                  transition: "transform 0.35s ease",
+                  position: "relative",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                  },
+                }}
+              />
+            </Box>
 
-            {stats.projects && stats.projects !== 0 && (
-              <div className="text-center">
-                <div
-                  className={`text-3xl md:text-4xl font-bold mb-2 ${
-                    isDarkMode ? "text-teal-400" : "text-blue-600"
-                  }`}
+            <Stack spacing={1.5} alignItems="center">
+              <Typography
+                component="h1"
+                sx={{
+                  color: "common.white",
+                  fontWeight: 800,
+                  letterSpacing: "-0.04em",
+                  fontSize: { xs: "2.75rem", sm: "4rem", md: "5.25rem" },
+                  lineHeight: 0.96,
+                }}
+              >
+                {personalInfo.name}
+              </Typography>
+              <Typography
+                sx={{
+                  color: "rgba(255,255,255,0.84)",
+                  fontWeight: 700,
+                  letterSpacing: "0.24em",
+                  textTransform: "uppercase",
+                  fontSize: { xs: "0.8rem", md: "0.95rem" },
+                }}
+              >
+                {personalInfo.title}
+              </Typography>
+              {personalInfo.summary && (
+                <Typography
+                  sx={{
+                    maxWidth: 760,
+                    color: "rgba(255,255,255,0.82)",
+                    fontSize: { xs: "1rem", md: "1.125rem" },
+                    lineHeight: 1.75,
+                    mt: 1,
+                  }}
                 >
-                  {animatedStats.projects}
-                </div>
-                <p
-                  className={`text-sm md:text-base font-medium ${
-                    isDarkMode ? "text-gray-300" : "text-gray-500"
-                  }`}
-                >
-                  Completed Projects
-                </p>
-              </div>
-            )}
+                  {personalInfo.summary}
+                </Typography>
+              )}
+            </Stack>
 
-            {stats.clients && stats.clients !== 0 && (
-              <div className="text-center">
-                <div
-                  className={`text-3xl md:text-4xl font-bold mb-2 ${
-                    isDarkMode ? "text-teal-400" : "text-blue-600"
-                  }`}
-                >
-                  {animatedStats.clients}
-                </div>
-                <p
-                  className={`text-sm md:text-base font-medium ${
-                    isDarkMode ? "text-gray-300" : "text-gray-500"
-                  }`}
-                >
-                  Happy Clients
-                </p>
-              </div>
-            )}
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <Button
+                variant="contained"
+                component="a"
+                href={
+                  personalInfo.email
+                    ? `mailto:${personalInfo.email}`
+                    : "#contact"
+                }
+                sx={{
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 700,
+                  color: accentText,
+                  background: buttonGradient,
+                  boxShadow: `0 18px 45px ${accentGlow}`,
+                  "&:hover": {
+                    background: buttonHoverGradient,
+                  },
+                }}
+              >
+                Hire Me
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<DownloadIcon />}
+                sx={{
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 700,
+                  color: "common.white",
+                  borderColor: "rgba(255,255,255,0.7)",
+                  backdropFilter: "blur(8px)",
+                  "&:hover": {
+                    borderColor: "common.white",
+                    backgroundColor: "rgba(255,255,255,0.08)",
+                  },
+                }}
+              >
+                Download CV
+              </Button>
+            </Stack>
 
-            {stats.awards && stats.awards !== 0 && (
-              <div className="text-center">
-                <div
-                  className={`text-3xl md:text-4xl font-bold mb-2 ${
-                    isDarkMode ? "text-teal-400" : "text-blue-600"
-                  }`}
+            <Stack direction="row" spacing={1.5}>
+              {socialLinks.map(({ icon, href, label }) => (
+                <IconButton
+                  key={label}
+                  component="a"
+                  href={href}
+                  aria-label={label}
+                  sx={{
+                    width: 52,
+                    height: 52,
+                    color: "common.white",
+                    backgroundColor: isDarkMode
+                      ? "rgba(15, 23, 42, 0.78)"
+                      : "rgba(255, 255, 255, 0.18)",
+                    border: "1px solid rgba(255,255,255,0.16)",
+                    backdropFilter: "blur(12px)",
+                    transition:
+                      "transform 0.25s ease, background-color 0.25s ease",
+                    "&:hover": {
+                      transform: "translateY(-3px)",
+                      backgroundColor: `${primaryAccent}55`,
+                    },
+                  }}
                 >
-                  {animatedStats.awards}+
-                </div>
-                <p
-                  className={`text-sm md:text-base font-medium ${
-                    isDarkMode ? "text-gray-300" : "text-gray-500"
-                  }`}
-                >
-                  Honors and Awards
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+                  {icon}
+                </IconButton>
+              ))}
+            </Stack>
+          </Stack>
+        </Container>
+      </Box>
+
+      {stats && (
+        <Box
+          ref={statsRef}
+          sx={{
+            backgroundColor: isDarkMode ? "#020617" : "#f8fafc",
+            py: { xs: 8, md: 10 },
+            px: { xs: 2, sm: 3, md: 4 },
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                alignItems: "stretch",
+                gap: { xs: 4, md: 6 },
+                maxWidth: 960,
+                mx: "auto",
+              }}
+            >
+              {statItems
+                .filter(({ key }) => Boolean(stats[key] && stats[key] !== 0))
+                .map(({ key, label, suffix }) => (
+                  <Box
+                    key={key}
+                    sx={{
+                      flex: "1 1 180px",
+                      maxWidth: { xs: "100%", sm: 220 },
+                      minWidth: { xs: 130, sm: 160 },
+                      textAlign: "center",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      px: { xs: 1, sm: 2 },
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: { xs: "2rem", md: "2.5rem" },
+                        fontWeight: 800,
+                        color: primaryAccent,
+                        lineHeight: 1,
+                        mb: 1,
+                      }}
+                    >
+                      {(animatedStats[key] ?? 0).toLocaleString()}
+                      {suffix}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: { xs: "0.85rem", md: "1rem" },
+                        fontWeight: 600,
+                        color: isDarkMode ? "#cbd5e1" : "#64748b",
+                        maxWidth: 180,
+                      }}
+                    >
+                      {label}
+                    </Typography>
+                  </Box>
+                ))}
+            </Box>
+          </Container>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }

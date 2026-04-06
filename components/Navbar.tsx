@@ -2,8 +2,21 @@
 
 import React, { useState } from "react";
 import { useThemeContext } from "@/context/ThemeContext";
-import { useThemeClasses } from "@/theme/useThemeClasses";
-import { Menu, X, Moon, Sun } from "lucide-react";
+import CloseIcon from "@mui/icons-material/Close";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import MenuIcon from "@mui/icons-material/Menu";
+import {
+  AppBar,
+  Box,
+  Button,
+  Collapse,
+  Container,
+  IconButton,
+  Stack,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 
 const NAV_ITEMS = [
   { label: "About", href: "#about" },
@@ -16,90 +29,152 @@ const NAV_ITEMS = [
 export default function Navbar({}) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDarkMode, toggleTheme } = useThemeContext();
-  const { cx, text, bg, button } = useThemeClasses();
 
   return (
-    <nav
-      className={`sticky top-0 z-50 backdrop-blur-lg transition-all duration-300 ${cx(
-        "bg-white border-b border-gray-200 shadow-sm",
-        "bg-black/95 border-b border-gray-800",
-      )}`}
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        top: 0,
+        zIndex: 50,
+        backdropFilter: "blur(18px)",
+        backgroundColor: isDarkMode
+          ? "rgba(2, 6, 23, 0.92)"
+          : "rgba(255, 255, 255, 0.9)",
+        borderBottom: "1px solid",
+        borderColor: isDarkMode
+          ? "rgba(51, 65, 85, 0.9)"
+          : "rgba(226, 232, 240, 1)",
+        color: isDarkMode ? "#ffffff" : "#0f172a",
+      }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo/Brand */}
-          <div className="flex-shrink-0">
-            <a
-              href="#"
-              className={`text-xl font-bold tracking-wider ${text.primary}`}
-            >
-              CREATIVE CV
-            </a>
-          </div>
+      <Container maxWidth="xl">
+        <Toolbar
+          disableGutters
+          sx={{ minHeight: 64, justifyContent: "space-between", gap: 2 }}
+        >
+          <Typography
+            component="a"
+            href="#"
+            sx={{
+              textDecoration: "none",
+              fontSize: "1.25rem",
+              fontWeight: 800,
+              letterSpacing: "0.14em",
+              color: "inherit",
+            }}
+          >
+            CREATIVE CV
+          </Typography>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-8">
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}
+          >
             {NAV_ITEMS.map((item) => (
-              <a
+              <Button
                 key={item.label}
                 href={item.href}
-                className={`text-sm font-semibold uppercase tracking-wide transition-colors hover:text-teal-500 ${isDarkMode ? "text-gray-200" : "text-gray-900"}`}
+                color="inherit"
+                sx={{
+                  textTransform: "uppercase",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  fontSize: "0.78rem",
+                  color: isDarkMode ? "#e2e8f0" : "#0f172a",
+                  "&:hover": {
+                    color: isDarkMode ? "rgb(45, 212, 191)" : "#0f766e",
+                    backgroundColor: "transparent",
+                  },
+                }}
               >
                 {item.label}
-              </a>
+              </Button>
             ))}
-          </div>
+          </Stack>
 
-          {/* Right Side - Theme Toggle & Mobile Menu Button */}
-          <div className="flex items-center gap-4">
-            <button
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            <IconButton
               onClick={toggleTheme}
-              className={`p-2 rounded-lg transition-colors ${cx(
-                "bg-gray-100 hover:bg-gray-200 text-gray-900",
-                "bg-gray-900 hover:bg-gray-800 text-teal-400",
-              )}`}
               aria-label="Toggle theme"
+              sx={{
+                borderRadius: 2,
+                backgroundColor: isDarkMode
+                  ? "rgba(15, 23, 42, 0.95)"
+                  : "rgba(241, 245, 249, 1)",
+                color: isDarkMode ? "rgb(45, 212, 191)" : "rgb(37, 99, 235)",
+                "&:hover": {
+                  backgroundColor: isDarkMode
+                    ? "rgba(30, 41, 59, 1)"
+                    : "rgba(226, 232, 240, 1)",
+                },
+              }}
             >
               {isDarkMode ? (
-                <Sun className="w-5 h-5" />
+                <LightModeIcon fontSize="small" />
               ) : (
-                <Moon className="w-5 h-5" />
+                <DarkModeIcon fontSize="small" />
               )}
-            </button>
+            </IconButton>
 
-            {/* Mobile Menu Button */}
-            <button
+            <IconButton
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`md:hidden p-2 rounded-lg ${cx(
-                "hover:bg-gray-200 text-gray-900",
-                "hover:bg-gray-900 text-white",
-              )}`}
+              sx={{
+                display: { md: "none" },
+                borderRadius: 2,
+                color: isDarkMode ? "#ffffff" : "#0f172a",
+                "&:hover": {
+                  backgroundColor: isDarkMode
+                    ? "rgba(30, 41, 59, 1)"
+                    : "rgba(241, 245, 249, 1)",
+                },
+              }}
             >
-              {isMobileMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
-            </button>
-          </div>
-        </div>
+              {isMobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
+            </IconButton>
+          </Stack>
+        </Toolbar>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className={`md:hidden pb-4 space-y-2 ${bg.secondary}`}>
-            {NAV_ITEMS.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`block px-4 py-2 rounded-lg text-sm font-semibold uppercase tracking-wide transition-colors hover:text-teal-500 ${isDarkMode ? "text-gray-200 hover:bg-gray-900" : "text-gray-900 hover:bg-gray-100"}`}
-              >
-                {item.label}
-              </a>
-            ))}
-          </div>
-        )}
-      </div>
-    </nav>
+        <Collapse in={isMobileMenuOpen} timeout="auto" unmountOnExit>
+          <Box
+            sx={{
+              display: { md: "none" },
+              pb: 2,
+            }}
+          >
+            <Stack spacing={1}>
+              {NAV_ITEMS.map((item) => (
+                <Button
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  color="inherit"
+                  sx={{
+                    justifyContent: "flex-start",
+                    px: 2,
+                    py: 1.25,
+                    borderRadius: 2,
+                    textTransform: "uppercase",
+                    fontWeight: 700,
+                    letterSpacing: "0.08em",
+                    fontSize: "0.78rem",
+                    color: isDarkMode ? "#e2e8f0" : "#0f172a",
+                    "&:hover": {
+                      color: isDarkMode ? "rgb(45, 212, 191)" : "#0f766e",
+                      backgroundColor: isDarkMode
+                        ? "rgba(15, 23, 42, 1)"
+                        : "rgba(248, 250, 252, 1)",
+                    },
+                  }}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </Stack>
+          </Box>
+        </Collapse>
+      </Container>
+    </AppBar>
   );
 }

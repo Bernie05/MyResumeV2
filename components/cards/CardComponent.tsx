@@ -1,0 +1,309 @@
+import { useState } from "react";
+import { useThemeContext } from "@/context/ThemeContext";
+import { getSectionPalette } from "../../theme/sectionPalette";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardMedia,
+  Chip,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+} from "@mui/material";
+import { IPortfolioItem } from "@/types/portfolio";
+
+export const CardComponent = (item: IPortfolioItem) => {
+  const { isDarkMode } = useThemeContext();
+  const {
+    primaryAccent,
+    accentText,
+    titleColor,
+    bodyColor,
+    mutedColor,
+    surfaceBackground,
+    softBackground,
+    softerBackground,
+    outline,
+    buttonGradient,
+    buttonHoverGradient,
+    hoverShadow,
+  } = getSectionPalette(isDarkMode);
+  const [selectedId] = useState<number | null>(null);
+
+  return (
+    <Card
+      key={item.id}
+      sx={{
+        background: surfaceBackground,
+        border: `1px solid ${outline}`,
+        borderRadius: "1rem",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        transition: "all 0.5s ease",
+        height: "100%",
+        "&:hover": {
+          transform: "translateY(-8px)",
+          boxShadow: hoverShadow,
+        },
+      }}
+    >
+      <CardMedia
+        component="img"
+        height={selectedId === item.id ? "300" : "256"}
+        image={item.image}
+        alt={item.title || item.name || "Project image"}
+        sx={{
+          objectFit: "cover",
+          transition: "transform 0.5s ease",
+          "&:hover": {
+            transform: "scale(1.1)",
+          },
+        }}
+      />
+
+      <CardContent
+        sx={{
+          p: 4,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          flex: 1,
+        }}
+      >
+        {item.category && (
+          <Box sx={{ mb: 2 }}>
+            <Chip
+              label={item.category}
+              size="small"
+              sx={{
+                backgroundColor: softBackground,
+                color: primaryAccent,
+                fontWeight: 600,
+              }}
+            />
+          </Box>
+        )}
+
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 700,
+            fontSize: { xs: "1.5rem", md: "1.875rem" },
+            mb: 2,
+            color: titleColor,
+            letterSpacing: "-0.02em",
+          }}
+        >
+          {item.title || item.name}
+        </Typography>
+
+        <Typography
+          sx={{
+            fontSize: { xs: "0.875rem", md: "1rem" },
+            mb: 4,
+            lineHeight: 1.6,
+            color: bodyColor,
+            display: "-webkit-box",
+            WebkitLineClamp: selectedId === item.id ? "unset" : 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {item.longDescription || item.caseStudy || item.description}
+        </Typography>
+
+        {item.technologies && item.technologies.length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                color: mutedColor,
+                display: "block",
+                mb: 1.5,
+              }}
+            >
+              Tech Stack
+            </Typography>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+              {item.technologies.map((tech, idx) => (
+                <Chip
+                  key={idx}
+                  label={tech}
+                  size="small"
+                  sx={{
+                    backgroundColor: softBackground,
+                    color: primaryAccent,
+                    fontWeight: 500,
+                    fontSize: "0.75rem",
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {item.results && item.results.length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                color: mutedColor,
+                display: "block",
+                mb: 1.5,
+              }}
+            >
+              Key Results
+            </Typography>
+            <List sx={{ p: 0, m: 0 }}>
+              {item.results.map((result, idx) => (
+                <ListItem
+                  key={idx}
+                  sx={{ p: 0, mb: 1, alignItems: "flex-start" }}
+                >
+                  <ListItemIcon
+                    sx={{ minWidth: "24px", mt: 0.25, color: primaryAccent }}
+                  >
+                    <ChevronRightIcon sx={{ fontSize: "1.25rem" }} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={result}
+                    primaryTypographyProps={{
+                      sx: {
+                        fontSize: "0.875rem",
+                        color: bodyColor,
+                      },
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        )}
+
+        {item.testimonial && (
+          <Box
+            sx={{
+              p: 3,
+              mb: 4,
+              borderLeft: `4px solid ${primaryAccent}`,
+              backgroundColor: softerBackground,
+              borderRadius: "0.5rem",
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: "0.875rem",
+                fontStyle: "italic",
+                mb: 1,
+                color: bodyColor,
+              }}
+            >
+              "{item.testimonial}"
+            </Typography>
+            {item.client && (
+              <Typography
+                sx={{
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  color: primaryAccent,
+                }}
+              >
+                — {item.client}
+              </Typography>
+            )}
+          </Box>
+        )}
+
+        <Box sx={{ display: "flex", gap: 2, pt: 2, flexWrap: "wrap" }}>
+          {item.demoUrl && (
+            <Button
+              variant="contained"
+              startIcon={<OpenInNewIcon />}
+              href={item.demoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                background: buttonGradient,
+                color: accentText,
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "0.875rem",
+                px: 3,
+                py: 1.5,
+                "&:hover": {
+                  background: buttonHoverGradient,
+                  boxShadow: hoverShadow,
+                },
+              }}
+            >
+              View Live
+            </Button>
+          )}
+          {item.githubUrl && (
+            <Button
+              variant="outlined"
+              startIcon={<GitHubIcon />}
+              href={item.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                borderColor: primaryAccent,
+                color: primaryAccent,
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "0.875rem",
+                px: 3,
+                py: 1.5,
+                "&:hover": {
+                  borderColor: primaryAccent,
+                  backgroundColor: softBackground,
+                },
+              }}
+            >
+              GitHub
+            </Button>
+          )}
+          {item.link && (
+            <Button
+              variant="outlined"
+              size="small"
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                borderColor: primaryAccent,
+                color: primaryAccent,
+                textTransform: "none",
+                fontWeight: 600,
+                flex: 1,
+                minWidth: "100px",
+                fontSize: "0.75rem",
+                "&:hover": {
+                  borderColor: primaryAccent,
+                  backgroundColor: softBackground,
+                },
+              }}
+            >
+              Details
+            </Button>
+          )}
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};

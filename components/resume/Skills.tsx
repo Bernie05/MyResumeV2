@@ -2,14 +2,18 @@
 
 import {
   Box,
-  Typography,
   Card,
   CardContent,
   Chip,
   LinearProgress,
+  Typography,
 } from "@mui/material";
-import { Zap, TrendingUp, Award, Trophy } from "lucide-react";
+import BoltIcon from "@mui/icons-material/Bolt";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import { useThemeContext } from "@/context/ThemeContext";
+import { getSectionPalette } from "../../theme/sectionPalette";
 import { useState, useEffect, useRef } from "react";
 
 interface SkillItem {
@@ -24,6 +28,20 @@ interface SkillCategory {
 
 export default function Skills({ skills }: { skills: SkillCategory[] }) {
   const { isDarkMode } = useThemeContext();
+  const {
+    primaryAccent,
+    secondaryAccent,
+    accentText,
+    titleColor,
+    mutedColor,
+    sectionBackground,
+    surfaceBackground,
+    softBackground,
+    outline,
+    divider,
+    buttonGradient,
+    hoverShadow,
+  } = getSectionPalette(isDarkMode);
   const [animatedValues, setAnimatedValues] = useState<Record<string, number>>(
     {},
   );
@@ -104,58 +122,72 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case "Frontend":
-        return <Zap size={24} style={{ color: "#3b82f6" }} />;
+        return <BoltIcon sx={{ color: primaryAccent }} />;
       case "Backend":
-        return <TrendingUp size={24} style={{ color: "#a855f7" }} />;
+        return <TrendingUpIcon sx={{ color: secondaryAccent }} />;
       default:
-        return <Award size={24} style={{ color: "#14b8a6" }} />;
+        return <WorkspacePremiumIcon sx={{ color: primaryAccent }} />;
     }
   };
 
   const getCategoryAccentColor = (category: string) => {
     switch (category) {
       case "Frontend":
-        return "#3b82f6";
+        return primaryAccent;
       case "Backend":
-        return "#a855f7";
+        return secondaryAccent;
       default:
-        return "#14b8a6";
+        return primaryAccent;
     }
   };
 
   const getCategoryLabelColor = (category: string) => {
-    if (isDarkMode) {
-      switch (category) {
-        case "Frontend":
-          return "#60a5fa";
-        case "Backend":
-          return "#c084fc";
-        default:
-          return "#2dd4bf";
-      }
-    } else {
-      switch (category) {
-        case "Frontend":
-          return "#2563eb";
-        case "Backend":
-          return "#9333ea";
-        default:
-          return "#0d9488";
-      }
+    switch (category) {
+      case "Frontend":
+        return primaryAccent;
+      case "Backend":
+        return secondaryAccent;
+      default:
+        return primaryAccent;
     }
   };
 
   return (
     <>
-      <Box ref={sectionRef}>
+      <Box
+        ref={sectionRef}
+        sx={{
+          p: { xs: 3, md: 4.5 },
+          borderRadius: { xs: 4, md: 5 },
+          background: sectionBackground,
+          border: `1px solid ${outline}`,
+        }}
+      >
         {/* Section Header */}
         <Box sx={{ mb: 8 }}>
+          <Box
+            sx={{
+              display: "inline-flex",
+              px: 1.75,
+              py: 0.75,
+              borderRadius: 999,
+              background: buttonGradient,
+              color: accentText,
+              fontWeight: 700,
+              fontSize: "0.75rem",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              mb: 2,
+            }}
+          >
+            Skills
+          </Box>
           <Typography
             variant="h3"
             sx={{
               fontWeight: 800,
               fontSize: { xs: "2rem", md: "2.5rem" },
-              color: isDarkMode ? "#ffffff" : "#000000",
+              color: titleColor,
               mb: 2,
             }}
           >
@@ -164,7 +196,7 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
           <Typography
             variant="h6"
             sx={{
-              color: isDarkMode ? "#a5a5a5" : "#666666",
+              color: mutedColor,
               fontWeight: 400,
               fontSize: "1.125rem",
             }}
@@ -187,9 +219,7 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                     gap: 2,
                     mb: 5,
                     pb: 2,
-                    borderBottom: `2px solid ${
-                      isDarkMode ? "#444444" : "#e5e7eb"
-                    }`,
+                    borderBottom: `2px solid ${divider}`,
                   }}
                 >
                   {getCategoryIcon(skillGroup.category)}
@@ -220,21 +250,17 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                 >
                   {skillGroup.items.map((skill, skillIndex) => (
                     <Card
-                      className="skill-card-animate"
                       sx={{
-                        background: isDarkMode
-                          ? "linear-gradient(to bottom right, #1e293b, #0f172a)"
-                          : "#ffffff",
-                        border: `1px solid ${isDarkMode ? "#334155" : "#e5e7eb"}`,
+                        background: surfaceBackground,
+                        border: `1px solid ${outline}`,
                         borderRadius: "1rem",
                         transition: "all 0.3s ease",
                         cursor: "pointer",
                         height: "100%",
+                        animation: "skillCardFadeIn 0.6s ease-out forwards",
                         "&:hover": {
                           transform: "translateY(-4px) scale(1.02)",
-                          boxShadow: isDarkMode
-                            ? "0 20px 25px rgba(148, 163, 184, 0.1)"
-                            : "0 20px 25px rgba(0, 0, 0, 0.1)",
+                          boxShadow: hoverShadow,
                           borderColor: categoryColor,
                         },
                       }}
@@ -254,25 +280,28 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                               height: "100px",
                             }}
                           >
-                            <svg
+                            <Box
+                              component="svg"
                               viewBox="0 0 100 100"
-                              style={{
+                              sx={{
                                 width: "100%",
                                 height: "100%",
                                 transform: "rotate(-90deg)",
                               }}
                             >
                               {/* Background Circle */}
-                              <circle
+                              <Box
+                                component="circle"
                                 cx="50"
                                 cy="50"
                                 r="45"
                                 fill="none"
-                                stroke={isDarkMode ? "#334155" : "#d1d5db"}
+                                stroke={outline}
                                 strokeWidth="4"
                               />
                               {/* Progress Circle */}
-                              <circle
+                              <Box
+                                component="circle"
                                 cx="50"
                                 cy="50"
                                 r="45"
@@ -288,11 +317,11 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                                   282.7
                                 } 282.7`}
                                 strokeLinecap="round"
-                                style={{
+                                sx={{
                                   transition: "stroke-dasharray 0.8s ease-out",
                                 }}
                               />
-                            </svg>
+                            </Box>
                             {/* Center Percentage */}
                             <Box
                               sx={{
@@ -326,7 +355,7 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                               sx={{
                                 fontWeight: 700,
                                 mb: 2,
-                                color: isDarkMode ? "#ffffff" : "#000000",
+                                color: titleColor,
                                 fontSize: "1rem",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
@@ -347,9 +376,7 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                                 sx={{
                                   height: "6px",
                                   borderRadius: "3px",
-                                  backgroundColor: isDarkMode
-                                    ? "#334155"
-                                    : "#e5e7eb",
+                                  backgroundColor: softBackground,
                                   "& .MuiLinearProgress-bar": {
                                     borderRadius: "3px",
                                     backgroundColor: categoryColor,
@@ -382,12 +409,14 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                               />
                               {skill.proficiency >= 90 && (
                                 <Chip
-                                  icon={<Trophy size={14} />}
+                                  icon={
+                                    <EmojiEventsIcon sx={{ fontSize: 14 }} />
+                                  }
                                   label="Expert"
                                   size="small"
                                   sx={{
                                     background: `linear-gradient(135deg, ${categoryColor}, ${categoryColor}dd)`,
-                                    color: "#ffffff",
+                                    color: accentText,
                                     fontWeight: 600,
                                     fontSize: "0.75rem",
                                   }}
@@ -409,8 +438,8 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                                       Math.ceil((skill.proficiency / 100) * 5)
                                         ? categoryColor
                                         : isDarkMode
-                                          ? "#334155"
-                                          : "#d1d5db",
+                                          ? outline
+                                          : softBackground,
                                     transition: "all 0.3s ease",
                                   }}
                                 />
@@ -425,34 +454,8 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
               </Box>
             );
           })}
-        </Box>{" "}
+        </Box>
       </Box>
-      <style>{`
-        @keyframes skillCardFadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes progressStroke {
-          from {
-            stroke-dasharray: 0 282.7;
-          }
-        }
-
-        .skill-card-animate {
-          animation: skillCardFadeIn 0.6s ease-out forwards;
-        }
-
-        .progress-circle-animate {
-          animation: progressStroke 1.5s ease-out forwards;
-        }
-      `}</style>
     </>
   );
 }
