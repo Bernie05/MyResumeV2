@@ -1,7 +1,8 @@
 "use client";
 
+import { Box, Card, CardContent, Typography, Chip } from "@mui/material";
+import SchoolIcon from "@mui/icons-material/School";
 import { useThemeContext } from "@/context/ThemeContext";
-import { useThemeClasses } from "@/theme/useThemeClasses";
 
 interface EducationItem {
   id: number;
@@ -18,49 +19,114 @@ export default function Education({
   education: EducationItem[];
 }) {
   const { isDarkMode } = useThemeContext();
-  const { cx, sectionHeader, text, badge } = useThemeClasses();
 
   return (
-    <div>
+    <Box>
       {/* Section Header */}
-      <div className="mb-10">
-        <h2 className={`section-title ${sectionHeader.title}`}>Education</h2>
-      </div>
+      <Box sx={{ mb: 5 }}>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 800,
+            fontSize: { xs: "2rem", md: "2.5rem" },
+            color: isDarkMode ? "#ffffff" : "#000000",
+          }}
+        >
+          Education
+        </Typography>
+      </Box>
 
-      <div className="space-y-6">
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         {education.map((edu, index) => (
-          <div key={edu.id}>
-            <div
-              className={cx(
-                "relative p-8 rounded-2xl border-l-4 transition-all duration-300 hover:translate-x-2 hover:shadow-xl overflow-hidden bg-white border-l-blue-500 hover:border-l-blue-400 hover:shadow-blue-500/20",
-                "relative p-8 rounded-2xl border-l-4 transition-all duration-300 hover:translate-x-2 hover:shadow-xl overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 border-l-blue-500 hover:border-l-blue-400 hover:shadow-blue-500/20",
-              )}
+          <Box key={edu.id}>
+            <Card
+              sx={{
+                background: isDarkMode
+                  ? "linear-gradient(to bottom right, #1e293b, #0f172a)"
+                  : "#ffffff",
+                borderLeft: "4px solid #3b82f6",
+                borderRadius: "1rem",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  transform: "translateX(8px)",
+                  boxShadow: isDarkMode
+                    ? "0 20px 25px rgba(59, 130, 246, 0.15)"
+                    : "0 20px 25px rgba(59, 130, 246, 0.15)",
+                  borderLeftColor: "#60a5fa",
+                },
+              }}
             >
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-3">
-                <div>
-                  <h3 className={`text-2xl font-bold mb-2 ${text.primary}`}>
-                    {edu.school}
-                  </h3>
-                  <p className={`text-lg font-semibold ${text.accent}`}>
-                    {edu.degree} in {edu.field}
-                  </p>
-                </div>
-                <div
-                  className={`text-sm font-semibold px-4 py-2 rounded-lg whitespace-nowrap ${badge.primary}`}
+              <CardContent sx={{ p: 4 }}>
+                {/* Header Row */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    justifyContent: { sm: "space-between" },
+                    alignItems: { sm: "flex-start" },
+                    gap: 2,
+                    mb: 2,
+                  }}
                 >
-                  {edu.year}
-                </div>
-              </div>
+                  <Box>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: "1.5rem",
+                        color: isDarkMode ? "#ffffff" : "#000000",
+                        mb: 1,
+                      }}
+                    >
+                      {edu.school}
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: "1.125rem",
+                        color: "#3b82f6",
+                      }}
+                    >
+                      {edu.degree} in {edu.field}
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={edu.year}
+                    sx={{
+                      backgroundColor: isDarkMode
+                        ? "rgba(59, 130, 246, 0.2)"
+                        : "rgba(59, 130, 246, 0.1)",
+                      color: "#3b82f6",
+                      fontWeight: 600,
+                      whiteSpace: "nowrap",
+                    }}
+                  />
+                </Box>
 
-              <p className={`text-base ${text.secondary}`}>📍 {edu.location}</p>
-            </div>
+                {/* Location */}
+                <Typography
+                  sx={{
+                    fontSize: "1rem",
+                    color: isDarkMode ? "#9ca3af" : "#666666",
+                  }}
+                >
+                  📍 {edu.location}
+                </Typography>
+              </CardContent>
+            </Card>
 
             {index !== education.length - 1 && (
-              <div className={`my-4 border-t border-theme-primary`} />
+              <Box
+                sx={{
+                  my: 2,
+                  borderTop: `1px solid ${isDarkMode ? "#334155" : "#e5e7eb"}`,
+                }}
+              />
             )}
-          </div>
+          </Box>
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

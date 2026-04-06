@@ -2,6 +2,7 @@
 
 import { Linkedin, Download, Facebook, Twitter, Instagram } from "lucide-react";
 import { useThemeContext } from "@/context/ThemeContext";
+import { useState, useEffect, useRef } from "react";
 
 interface PersonalInfo {
   // Basic info
@@ -34,6 +35,71 @@ export default function HeroSection({
   stats?: HeroStats;
 }) {
   const { isDarkMode } = useThemeContext();
+  const [animatedStats, setAnimatedStats] = useState({
+    yearsExperience: 0,
+    projects: 0,
+    clients: 0,
+    awards: 0,
+  });
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const statsRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer for stats animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated && stats) {
+          setHasAnimated(true);
+
+          // Animate each stat value
+          const animateStat = (
+            key: string,
+            target: number,
+            duration: number,
+          ) => {
+            const startTime = Date.now();
+            const animate = () => {
+              const elapsed = Date.now() - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const currentValue = Math.floor(progress * target);
+
+              setAnimatedStats((prev) => ({
+                ...prev,
+                [key]: currentValue,
+              }));
+
+              if (progress < 1) {
+                requestAnimationFrame(animate);
+              } else {
+                setAnimatedStats((prev) => ({
+                  ...prev,
+                  [key]: target,
+                }));
+              }
+            };
+            animate();
+          };
+
+          if (stats.yearsExperience)
+            animateStat("yearsExperience", stats.yearsExperience, 2000);
+          if (stats.projects) animateStat("projects", stats.projects, 2000);
+          if (stats.clients) animateStat("clients", stats.clients, 2000);
+          if (stats.awards) animateStat("awards", stats.awards, 2000);
+        }
+      },
+      { threshold: 0.3 },
+    );
+
+    if (statsRef.current) {
+      observer.observe(statsRef.current);
+    }
+
+    return () => {
+      if (statsRef.current) {
+        observer.unobserve(statsRef.current);
+      }
+    };
+  }, [stats, hasAnimated]);
 
   const socialLinks = [
     { icon: Facebook, href: "#", label: "Facebook" },
@@ -139,6 +205,7 @@ export default function HeroSection({
       {/* Stats Section - Optional */}
       {stats && (
         <div
+          ref={statsRef}
           className={`w-full px-4 sm:px-6 lg:px-8 py-16 ${
             isDarkMode ? "bg-gray-950" : "bg-gray-50"
           }`}
@@ -151,7 +218,7 @@ export default function HeroSection({
                     isDarkMode ? "text-teal-400" : "text-blue-600"
                   }`}
                 >
-                  {stats.yearsExperience}+
+                  {animatedStats.yearsExperience}+
                 </div>
                 <p
                   className={`text-sm md:text-base font-medium ${
@@ -170,7 +237,7 @@ export default function HeroSection({
                     isDarkMode ? "text-teal-400" : "text-blue-600"
                   }`}
                 >
-                  {stats.projects}
+                  {animatedStats.projects}
                 </div>
                 <p
                   className={`text-sm md:text-base font-medium ${
@@ -189,7 +256,7 @@ export default function HeroSection({
                     isDarkMode ? "text-teal-400" : "text-blue-600"
                   }`}
                 >
-                  {stats.clients}
+                  {animatedStats.clients}
                 </div>
                 <p
                   className={`text-sm md:text-base font-medium ${
@@ -208,7 +275,7 @@ export default function HeroSection({
                     isDarkMode ? "text-teal-400" : "text-blue-600"
                   }`}
                 >
-                  {stats.awards}+
+                  {animatedStats.awards}+
                 </div>
                 <p
                   className={`text-sm md:text-base font-medium ${

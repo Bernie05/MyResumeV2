@@ -150,7 +150,7 @@ export const resumeData = {
       technologies: ["Salesforce", "Apex", "Visualforce", "LWC"],
       link: "https://example.com",
       image:
-        "https://images.unsplash.com/photo-1460925895917-adf4e7e93032?w=500&h=300&fit=crop",
+        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&h=300&fit=crop",
       demoUrl: "https://example.com",
       caseStudy:
         "Developed custom Salesforce solutions for enterprise clients, integrating with existing systems and improving workflow efficiency by 30%.",
@@ -191,7 +191,7 @@ export const resumeData = {
       category: "Salesforce Development",
       technologies: ["Salesforce", "Apex", "Visualforce", "LWC", "APIs"],
       image:
-        "https://images.unsplash.com/photo-1460925895917-adf4e7e93032?w=800&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop",
       demoUrl: "https://example-salesforce.com",
       githubUrl: "https://github.com/example",
       results: [

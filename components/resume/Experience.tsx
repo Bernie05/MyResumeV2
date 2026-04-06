@@ -1,6 +1,18 @@
 "use client";
 
-import { useThemeClasses } from "@/theme/useThemeClasses";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Chip,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
+import { FiberManualRecord } from "@mui/icons-material";
+import { useThemeContext } from "@/context/ThemeContext";
 
 interface Job {
   id: number;
@@ -12,68 +24,152 @@ interface Job {
 }
 
 export default function Experience({ experience }: { experience: Job[] }) {
-  const { sectionHeader, text, cx, badge, divider } = useThemeClasses();
+  const { isDarkMode } = useThemeContext();
 
   return (
-    <div>
+    <Box>
       {/* Section Header */}
-      <div className="mb-10">
-        <h2 className={`section-title ${sectionHeader.title}`}>
+      <Box sx={{ mb: 5 }}>
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 800,
+            fontSize: { xs: "2rem", md: "2.5rem" },
+            color: isDarkMode ? "#ffffff" : "#000000",
+          }}
+        >
           Professional Experience
-        </h2>
-      </div>
+        </Typography>
+      </Box>
 
-      <div className="space-y-8">
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         {experience.map((job, index) => (
-          <div key={job.id}>
-            <div
-              className={cx(
-                "relative p-8 rounded-2xl border-l-4 transition-all duration-300 hover:translate-x-2 hover:shadow-xl overflow-hidden bg-white border-l-blue-500 hover:border-l-blue-400 hover:shadow-blue-500/20",
-                "relative p-8 rounded-2xl border-l-4 transition-all duration-300 hover:translate-x-2 hover:shadow-xl overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 border-l-blue-500 hover:border-l-blue-400 hover:shadow-blue-500/20",
-              )}
+          <Box key={job.id}>
+            <Card
+              sx={{
+                background: isDarkMode
+                  ? "linear-gradient(to bottom right, #1e293b, #0f172a)"
+                  : "#ffffff",
+                borderLeft: "4px solid #3b82f6",
+                borderRadius: "1rem",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  transform: "translateX(8px)",
+                  boxShadow: isDarkMode
+                    ? "0 20px 25px rgba(59, 130, 246, 0.15)"
+                    : "0 20px 25px rgba(59, 130, 246, 0.15)",
+                  borderLeftColor: "#60a5fa",
+                },
+              }}
             >
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-3">
-                <div>
-                  <h3 className={`text-2xl font-bold mb-2 ${text.primary}`}>
-                    {job.position}
-                  </h3>
-                  <p className={`text-lg font-semibold ${text.accent}`}>
-                    {job.company}
-                  </p>
-                </div>
-                <div
-                  className={`text-sm font-semibold px-4 py-2 rounded-lg whitespace-nowrap ${badge.primary}`}
+              <CardContent sx={{ p: 4 }}>
+                {/* Header Row */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    justifyContent: { sm: "space-between" },
+                    alignItems: { sm: "flex-start" },
+                    gap: 2,
+                    mb: 2,
+                  }}
                 >
-                  {job.duration}
-                </div>
-              </div>
-
-              <p className={`text-base mb-5 ${text.secondary}`}>
-                📍 {job.location}
-              </p>
-
-              <ul className="space-y-3">
-                {job.description.map((desc, idx) => (
-                  <li key={idx} className="flex gap-3">
-                    <span
-                      className={`flex-shrink-0 w-2 h-2 rounded-full mt-2.5 ${text.accent}`}
-                    />
-                    <span
-                      className={`text-base leading-relaxed ${text.secondary}`}
+                  <Box>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: "1.5rem",
+                        color: isDarkMode ? "#ffffff" : "#000000",
+                        mb: 1,
+                      }}
                     >
-                      {desc}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                      {job.position}
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: "1.125rem",
+                        color: "#3b82f6",
+                      }}
+                    >
+                      {job.company}
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={job.duration}
+                    sx={{
+                      backgroundColor: isDarkMode
+                        ? "rgba(59, 130, 246, 0.2)"
+                        : "rgba(59, 130, 246, 0.1)",
+                      color: "#3b82f6",
+                      fontWeight: 600,
+                      whiteSpace: "nowrap",
+                    }}
+                  />
+                </Box>
+
+                {/* Location */}
+                <Typography
+                  sx={{
+                    fontSize: "1rem",
+                    mb: 3,
+                    color: isDarkMode ? "#9ca3af" : "#666666",
+                  }}
+                >
+                  📍 {job.location}
+                </Typography>
+
+                {/* Description List */}
+                <List sx={{ p: 0, m: 0 }}>
+                  {job.description.map((desc, idx) => (
+                    <ListItem
+                      key={idx}
+                      sx={{
+                        p: 0,
+                        mb: 1.5,
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <ListItemIcon
+                        sx={{
+                          minWidth: "24px",
+                          mt: 0.5,
+                          color: "#3b82f6",
+                        }}
+                      >
+                        <FiberManualRecord
+                          sx={{ fontSize: "0.5rem", fill: "currentColor" }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={desc}
+                        primaryTypographyProps={{
+                          sx: {
+                            fontSize: "1rem",
+                            color: isDarkMode ? "#d1d5db" : "#555555",
+                            lineHeight: 1.6,
+                          },
+                        }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </CardContent>
+            </Card>
 
             {index !== experience.length - 1 && (
-              <div className={`my-6 border-t ${divider}`} />
+              <Box
+                sx={{
+                  my: 2,
+                  borderTop: `1px solid ${isDarkMode ? "#334155" : "#e5e7eb"}`,
+                }}
+              />
             )}
-          </div>
+          </Box>
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

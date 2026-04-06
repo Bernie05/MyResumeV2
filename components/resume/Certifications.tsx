@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Chip,
+  useTheme,
+} from "@mui/material";
+import SchoolIcon from "@mui/icons-material/School";
 import { useThemeContext } from "@/context/ThemeContext";
 
 interface Certification {
@@ -15,57 +24,103 @@ export default function Certifications({
   certifications: Certification[];
 }) {
   const { isDarkMode } = useThemeContext();
+  const muiTheme = useTheme();
 
   return (
-    <div>
+    <Box>
       {/* Section Header */}
-      <div className="mb-10">
-        <h2
-          className={`text-3xl md:text-4xl font-bold ${
-            isDarkMode ? "text-white" : "text-gray-900"
-          }`}
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h3"
+          component="h2"
+          sx={{
+            fontWeight: "bold",
+            color: isDarkMode ? "#ffffff" : "#111827",
+            fontSize: { xs: "1.875rem", md: "2.25rem" },
+          }}
         >
           Certifications
-        </h2>
-      </div>
+        </Typography>
+      </Box>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {certifications.map((cert, index) => (
-          <div
+      {/* Certifications Grid */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
+          gap: 3,
+        }}
+      >
+        {certifications.map((cert) => (
+          <Card
             key={cert.id}
-            className={`relative p-8 rounded-2xl border-l-4 transition-all duration-300 hover:shadow-xl ${
-              isDarkMode
-                ? "bg-gradient-to-br from-slate-800 to-slate-900 border-l-emerald-500 hover:border-l-emerald-400 hover:shadow-emerald-500/20"
-                : "bg-white border-l-blue-500 hover:border-l-blue-400 hover:shadow-blue-500/20"
-            }`}
+            sx={{
+              background: isDarkMode
+                ? "linear-gradient(to bottom right, #1e293b, #0f172a)"
+                : "#ffffff",
+              borderLeft: `4px solid ${isDarkMode ? "#10b981" : "#3b82f6"}`,
+              transition: "all 0.3s ease",
+              "&:hover": {
+                borderLeftColor: isDarkMode ? "#34d399" : "#60a5fa",
+                boxShadow: isDarkMode
+                  ? "0 20px 25px -5px rgba(16, 185, 129, 0.2)"
+                  : "0 20px 25px -5px rgba(59, 130, 246, 0.2)",
+              },
+            }}
           >
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 text-4xl">🏆</div>
-              <div className="flex-grow">
-                <p
-                  className={`font-bold text-lg ${isDarkMode ? "text-white" : "text-gray-900"}`}
-                >
-                  {cert.name}
-                </p>
-                <p
-                  className={`text-base ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
-                >
-                  {cert.issuer}
-                </p>
-                <p
-                  className={`text-sm font-semibold mt-2 px-3 py-1 rounded-lg inline-block ${
-                    isDarkMode
-                      ? "bg-teal-500/40 text-teal-400"
-                      : "bg-blue-500 text-blue-700"
-                  }`}
-                >
-                  {cert.year}
-                </p>
-              </div>
-            </div>
-          </div>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: "flex", gap: 2 }}>
+                {/* Icon */}
+                <SchoolIcon
+                  sx={{
+                    fontSize: "2.25rem",
+                    color: isDarkMode ? "#10b981" : "#3b82f6",
+                    flexShrink: 0,
+                  }}
+                />
+
+                {/* Content */}
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: "bold",
+                      color: isDarkMode ? "#ffffff" : "#111827",
+                      mb: 0.5,
+                    }}
+                  >
+                    {cert.name}
+                  </Typography>
+
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: isDarkMode ? "#9ca3af" : "#4b5563",
+                      mb: 1,
+                    }}
+                  >
+                    {cert.issuer}
+                  </Typography>
+
+                  {/* Year Chip */}
+                  <Chip
+                    label={cert.year}
+                    size="small"
+                    sx={{
+                      background: isDarkMode
+                        ? "rgba(16, 185, 129, 0.4)"
+                        : "#3b82f6",
+                      color: isDarkMode ? "#a7f3d0" : "#ffffff",
+                      fontWeight: "600",
+                      fontSize: "0.875rem",
+                    }}
+                  />
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
