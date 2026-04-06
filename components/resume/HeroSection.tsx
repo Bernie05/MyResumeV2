@@ -98,7 +98,7 @@ export default function HeroSection({
             position: "absolute",
             inset: 0,
             background: isDarkMode
-              ? "linear-gradient(90deg, rgba(2, 6, 23, 0.92) 0%, rgba(2, 6, 23, 0.72) 45%, rgba(2, 6, 23, 0.28) 100%)"
+              ? "rgba(2, 6, 23, 0.78)"
               : "linear-gradient(90deg, rgba(15, 23, 42, 0.78) 0%, rgba(30, 41, 59, 0.48) 45%, rgba(30, 64, 175, 0.18) 100%)",
           },
         }}
@@ -118,7 +118,9 @@ export default function HeroSection({
                   position: "absolute",
                   inset: -24,
                   borderRadius: "50%",
-                  background: `radial-gradient(circle, ${primaryAccent}66 0%, transparent 70%)`,
+                  background: isDarkMode
+                    ? "rgba(45, 212, 191, 0.22)"
+                    : `radial-gradient(circle, ${primaryAccent}66 0%, transparent 70%)`,
                   filter: "blur(20px)",
                   opacity: 0.85,
                 }}
