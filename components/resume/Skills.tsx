@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import {
   Box,
   Card,
@@ -14,19 +15,73 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
-import { useState, useEffect, useRef } from "react";
 
 interface SkillItem {
-  name: string;
-  proficiency: number;
+  readonly name: string;
+  readonly proficiency: number;
 }
 
 interface SkillCategory {
-  category: string;
-  items: SkillItem[];
+  readonly category: string;
+  readonly items: readonly SkillItem[];
 }
 
-export default function Skills({ skills }: { skills: SkillCategory[] }) {
+interface SkillsProps {
+  readonly skills: readonly SkillCategory[];
+}
+
+const ANIMATION_DURATION_MS = 1500;
+const INTERSECTION_THRESHOLD = 0.2;
+const CIRCLE_RADIUS = 45;
+const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
+const EXPERT_THRESHOLD = 90;
+
+function createSkillKey(category: string, skillName: string): string {
+  return `${category}-${skillName}`;
+}
+
+function getProficiencyLabel(proficiency: number): string {
+  if (proficiency >= EXPERT_THRESHOLD) return "Expert";
+  if (proficiency >= 80) return "Advanced";
+  if (proficiency >= 70) return "Proficient";
+  return "Intermediate";
+}
+
+function getCategoryColor(
+  category: string,
+  primaryAccent: string,
+  secondaryAccent: string,
+): string {
+  return category === "Backend" ? secondaryAccent : primaryAccent;
+}
+
+function getCategoryIcon(category: string, color: string) {
+  switch (category) {
+    case "Frontend":
+      return <BoltIcon sx={{ color }} />;
+    case "Backend":
+      return <TrendingUpIcon sx={{ color }} />;
+    default:
+      return <WorkspacePremiumIcon sx={{ color }} />;
+  }
+}
+
+function buildAnimatedValues(
+  skills: readonly SkillCategory[],
+  progress: number,
+): Record<string, number> {
+  return skills.reduce<Record<string, number>>((accumulator, category) => {
+    category.items.forEach((item) => {
+      accumulator[createSkillKey(category.category, item.name)] = Math.floor(
+        item.proficiency * progress,
+      );
+    });
+
+    return accumulator;
+  }, {});
+}
+
+export default function Skills({ skills }: SkillsProps) {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -45,211 +100,164 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
   const [animatedValues, setAnimatedValues] = useState<Record<string, number>>(
     {},
   );
-  const [hasTriggered, setHasTriggered] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const hasTriggeredRef = useRef(false);
 
-  // Animate numbers when section comes into view (Intersection Observer)
   useEffect(() => {
+    const sectionElement = sectionRef.current;
+
+    if (hasTriggeredRef.current || !sectionElement) {
+      return undefined;
+    }
+
+    let frameId = 0;
+
+    const runAnimation = () => {
+      const startTime = performance.now();
+
+      const animate = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / ANIMATION_DURATION_MS, 1);
+
+        setAnimatedValues(buildAnimatedValues(skills, progress));
+
+        if (progress < 1) {
+          frameId = requestAnimationFrame(animate);
+        }
+      };
+
+      frameId = requestAnimationFrame(animate);
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasTriggered) {
-          setHasTriggered(true);
-
-          // Start animation when section becomes visible
-          skills.forEach((category) => {
-            category.items.forEach((item) => {
-              const key = `${category.category}-${item.name}`;
-              const startTime = Date.now();
-              const duration = 1500; // 1.5 seconds animation
-
-              const animate = () => {
-                const elapsed = Date.now() - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-                const currentValue = Math.floor(progress * item.proficiency);
-
-                setAnimatedValues((prev) => ({
-                  ...prev,
-                  [key]: currentValue,
-                }));
-
-                if (progress < 1) {
-                  requestAnimationFrame(animate);
-                } else {
-                  setAnimatedValues((prev) => ({
-                    ...prev,
-                    [key]: item.proficiency,
-                  }));
-                }
-              };
-
-              animate();
-            });
-          });
+        if (!entry.isIntersecting) {
+          return;
         }
+
+        hasTriggeredRef.current = true;
+        runAnimation();
+        observer.disconnect();
       },
-      { threshold: 0.2 },
+      { threshold: INTERSECTION_THRESHOLD },
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
+    observer.observe(sectionElement);
 
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
+      observer.disconnect();
+      cancelAnimationFrame(frameId);
     };
-  }, [skills, hasTriggered]);
-
-  const getAnimatedValue = (category: string, name: string): number => {
-    return animatedValues[`${category}-${name}`] ?? 0;
-  };
-
-  const getProficiencyLabel = (proficiency: number) => {
-    if (proficiency >= 90) return "Expert";
-    if (proficiency >= 80) return "Advanced";
-    if (proficiency >= 70) return "Proficient";
-    return "Intermediate";
-  };
-
-  const getProficiencyColor = (proficiency: number) => {
-    if (proficiency >= 90) return "#ef4444";
-    if (proficiency >= 80) return "#f97316";
-    if (proficiency >= 70) return "#eab308";
-    return "#3b82f6";
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case "Frontend":
-        return <BoltIcon sx={{ color: primaryAccent }} />;
-      case "Backend":
-        return <TrendingUpIcon sx={{ color: secondaryAccent }} />;
-      default:
-        return <WorkspacePremiumIcon sx={{ color: primaryAccent }} />;
-    }
-  };
-
-  const getCategoryAccentColor = (category: string) => {
-    switch (category) {
-      case "Frontend":
-        return primaryAccent;
-      case "Backend":
-        return secondaryAccent;
-      default:
-        return primaryAccent;
-    }
-  };
-
-  const getCategoryLabelColor = (category: string) => {
-    switch (category) {
-      case "Frontend":
-        return primaryAccent;
-      case "Backend":
-        return secondaryAccent;
-      default:
-        return primaryAccent;
-    }
-  };
+  }, [skills]);
 
   return (
-    <>
-      <Box
-        ref={sectionRef}
-        sx={{
-          p: { xs: 3, md: 4.5 },
-          borderRadius: { xs: 4, md: 5 },
-          background: sectionBackground,
-          border: `1px solid ${outline}`,
-        }}
-      >
-        {/* Section Header */}
-        <Box sx={{ mb: 8 }}>
-          <Box
-            sx={{
-              display: "inline-flex",
-              px: 1.75,
-              py: 0.75,
-              borderRadius: 999,
-              background: buttonGradient,
-              color: accentText,
-              fontWeight: 700,
-              fontSize: "0.75rem",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              mb: 2,
-            }}
-          >
-            Skills
-          </Box>
-          <Typography
-            variant="h3"
-            sx={{
-              fontWeight: 800,
-              fontSize: { xs: "2rem", md: "2.5rem" },
-              color: titleColor,
-              mb: 2,
-            }}
-          >
-            Professional Skills
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              color: mutedColor,
-              fontWeight: 400,
-              fontSize: "1.125rem",
-            }}
-          >
-            Expertise across technologies and platforms
-          </Typography>
+    <Box
+      ref={sectionRef}
+      sx={{
+        p: { xs: 3, md: 4.5 },
+        borderRadius: { xs: 4, md: 5 },
+        background: sectionBackground,
+        border: `1px solid ${outline}`,
+      }}
+    >
+      <Box sx={{ mb: 8 }}>
+        <Box
+          sx={{
+            display: "inline-flex",
+            px: 1.75,
+            py: 0.75,
+            borderRadius: 999,
+            background: buttonGradient,
+            color: accentText,
+            fontWeight: 700,
+            fontSize: "0.75rem",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            mb: 2,
+          }}
+        >
+          Skills
         </Box>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {skills.map((skillGroup, groupIndex) => {
-            const categoryColor = getCategoryAccentColor(skillGroup.category);
-            const categoryLabel = getCategoryLabelColor(skillGroup.category);
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 800,
+            fontSize: { xs: "2rem", md: "2.5rem" },
+            color: titleColor,
+            mb: 2,
+          }}
+        >
+          Professional Skills
+        </Typography>
+        <Typography
+          variant="h6"
+          sx={{
+            color: mutedColor,
+            fontWeight: 400,
+            fontSize: "1.125rem",
+          }}
+        >
+          Expertise across technologies and platforms
+        </Typography>
+      </Box>
 
-            return (
-              <Box key={groupIndex}>
-                {/* Category Header */}
-                <Box
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {skills.map((skillGroup) => {
+          const categoryColor = getCategoryColor(
+            skillGroup.category,
+            primaryAccent,
+            secondaryAccent,
+          );
+
+          return (
+            <Box key={skillGroup.category}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  mb: 5,
+                  pb: 2,
+                  borderBottom: `2px solid ${divider}`,
+                }}
+              >
+                {getCategoryIcon(skillGroup.category, categoryColor)}
+                <Typography
+                  variant="h5"
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 2,
-                    mb: 5,
-                    pb: 2,
-                    borderBottom: `2px solid ${divider}`,
+                    fontSize: { xs: "1.5rem", md: "1.875rem" },
+                    fontWeight: 700,
+                    color: categoryColor,
+                    flexGrow: 1,
                   }}
                 >
-                  {getCategoryIcon(skillGroup.category)}
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      fontSize: { xs: "1.5rem", md: "1.875rem" },
-                      fontWeight: 700,
-                      color: categoryLabel,
-                      flexGrow: 1,
-                    }}
-                  >
-                    {skillGroup.category} Development
-                  </Typography>
-                </Box>
+                  {skillGroup.category} Development
+                </Typography>
+              </Box>
 
-                {/* Skills Grid */}
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                      xs: "1fr",
-                      sm: "repeat(2, 1fr)",
-                      md: "repeat(3, 1fr)",
-                    },
-                    gap: 3,
-                  }}
-                >
-                  {skillGroup.items.map((skill, skillIndex) => (
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    sm: "repeat(2, 1fr)",
+                    md: "repeat(3, 1fr)",
+                  },
+                  gap: 3,
+                }}
+              >
+                {skillGroup.items.map((skill) => {
+                  const skillKey = createSkillKey(
+                    skillGroup.category,
+                    skill.name,
+                  );
+                  const animatedValue = animatedValues[skillKey] ?? 0;
+                  const progressStroke =
+                    (animatedValue / 100) * CIRCLE_CIRCUMFERENCE;
+
+                  return (
                     <Card
+                      key={skillKey}
                       sx={{
                         background: surfaceBackground,
                         border: `1px solid ${outline}`,
@@ -267,11 +275,9 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                     >
                       <CardContent sx={{ p: 3, height: "100%" }}>
                         <Box sx={{ display: "flex", gap: 3, height: "100%" }}>
-                          {/* Circular Progress */}
                           <Box
                             sx={{
                               display: "flex",
-                              flexDirection: "column",
                               alignItems: "center",
                               justifyContent: "center",
                               flexShrink: 0,
@@ -289,40 +295,30 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                                 transform: "rotate(-90deg)",
                               }}
                             >
-                              {/* Background Circle */}
                               <Box
                                 component="circle"
                                 cx="50"
                                 cy="50"
-                                r="45"
+                                r={CIRCLE_RADIUS}
                                 fill="none"
                                 stroke={outline}
                                 strokeWidth="4"
                               />
-                              {/* Progress Circle */}
                               <Box
                                 component="circle"
                                 cx="50"
                                 cy="50"
-                                r="45"
+                                r={CIRCLE_RADIUS}
                                 fill="none"
                                 stroke={categoryColor}
                                 strokeWidth="4"
-                                strokeDasharray={`${
-                                  (getAnimatedValue(
-                                    skillGroup.category,
-                                    skill.name,
-                                  ) /
-                                    100) *
-                                  282.7
-                                } 282.7`}
+                                strokeDasharray={`${progressStroke} ${CIRCLE_CIRCUMFERENCE}`}
                                 strokeLinecap="round"
                                 sx={{
                                   transition: "stroke-dasharray 0.8s ease-out",
                                 }}
                               />
                             </Box>
-                            {/* Center Percentage */}
                             <Box
                               sx={{
                                 position: "absolute",
@@ -338,18 +334,12 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                                   color: categoryColor,
                                 }}
                               >
-                                {getAnimatedValue(
-                                  skillGroup.category,
-                                  skill.name,
-                                )}
-                                %
+                                {animatedValue}%
                               </Typography>
                             </Box>
                           </Box>
 
-                          {/* Text Content */}
                           <Box sx={{ flex: 1 }}>
-                            {/* Skill Name */}
                             <Typography
                               variant="subtitle1"
                               sx={{
@@ -365,14 +355,10 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                               {skill.name}
                             </Typography>
 
-                            {/* Progress Bar */}
                             <Box sx={{ mb: 2 }}>
                               <LinearProgress
                                 variant="determinate"
-                                value={getAnimatedValue(
-                                  skillGroup.category,
-                                  skill.name,
-                                )}
+                                value={animatedValue}
                                 sx={{
                                   height: "6px",
                                   borderRadius: "3px",
@@ -386,7 +372,6 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                               />
                             </Box>
 
-                            {/* Proficiency Label & Badge */}
                             <Box
                               sx={{
                                 display: "flex",
@@ -407,7 +392,7 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                                   fontSize: "0.75rem",
                                 }}
                               />
-                              {skill.proficiency >= 90 && (
+                              {skill.proficiency >= EXPERT_THRESHOLD && (
                                 <Chip
                                   icon={
                                     <EmojiEventsIcon sx={{ fontSize: 14 }} />
@@ -415,7 +400,9 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                                   label="Expert"
                                   size="small"
                                   sx={{
-                                    background: `linear-gradient(135deg, ${categoryColor}, ${categoryColor}dd)`,
+                                    background: isDarkMode
+                                      ? categoryColor
+                                      : `linear-gradient(135deg, ${categoryColor}, ${categoryColor}dd)`,
                                     color: accentText,
                                     fontWeight: 600,
                                     fontSize: "0.75rem",
@@ -423,39 +410,17 @@ export default function Skills({ skills }: { skills: SkillCategory[] }) {
                                 />
                               )}
                             </Box>
-
-                            {/* Skill Level Dots */}
-                            <Box sx={{ display: "flex", gap: 1 }}>
-                              {[...Array(5)].map((_, i) => (
-                                <Box
-                                  key={i}
-                                  sx={{
-                                    width: "8px",
-                                    height: "8px",
-                                    borderRadius: "50%",
-                                    backgroundColor:
-                                      i <
-                                      Math.ceil((skill.proficiency / 100) * 5)
-                                        ? categoryColor
-                                        : isDarkMode
-                                          ? outline
-                                          : softBackground,
-                                    transition: "all 0.3s ease",
-                                  }}
-                                />
-                              ))}
-                            </Box>
                           </Box>
                         </Box>
                       </CardContent>
                     </Card>
-                  ))}
-                </Box>
+                  );
+                })}
               </Box>
-            );
-          })}
-        </Box>
+            </Box>
+          );
+        })}
       </Box>
-    </>
+    </Box>
   );
 }

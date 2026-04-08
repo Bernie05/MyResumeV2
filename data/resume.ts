@@ -1,4 +1,6 @@
-export const resumeData = {
+import type { ResumeData } from "@/types/resume";
+
+export const resumeData: ResumeData = {
   personalInfo: {
     name: "Bernie A. Baltazar",
     title: "Sr. Software Engineer I",

@@ -1,19 +1,7 @@
-export interface IPortfolioItem {
-  id: number;
-  title?: string;
-  description?: string;
-  longDescription?: string;
-  category?: string;
-  technologies?: string[];
-  image?: string;
-  demoUrl?: string;
-  githubUrl?: string;
-  results?: string[];
-  testimonial?: string;
-  client?: string;
+import type { PortfolioItem, ProjectItem } from "@/types/resume";
 
-  // For Projects
-  name?: string;
-  link?: string;
-  caseStudy?: string;
-}
+export type IPortfolioItem = Partial<
+  Omit<PortfolioItem, "id"> & Omit<ProjectItem, "id">
+> & {
+  id: number;
+};
