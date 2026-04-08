@@ -18,6 +18,10 @@ import {
   Typography,
 } from "@mui/material";
 
+interface NavbarProps {
+  position?: "fixed" | "absolute" | "sticky" | "static" | "relative";
+}
+
 const NAV_ITEMS = [
   { label: "About", href: "#about" },
   { label: "Skills", href: "#skills" },
@@ -26,13 +30,13 @@ const NAV_ITEMS = [
   { label: "Contact", href: "#contact" },
 ];
 
-export default function Navbar({}) {
+export default function Navbar({ position = "sticky" }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDarkMode, toggleTheme } = useThemeContext();
 
   return (
     <AppBar
-      position="sticky"
+      position={position}
       elevation={0}
       sx={{
         top: 0,
