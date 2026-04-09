@@ -1,17 +1,40 @@
-import {
-  isStudioSessionTokenValid,
-  STUDIO_SESSION_COOKIE,
-} from "@/lib/studio-auth";
-import { NextResponse, type NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
+type GetTokenRequest = Parameters<typeof getToken>[0]["req"];
+
+function getAuthSecret(): string {
+  return process.env.AUTH_SECRET?.trim() ?? "";
+}
+
+function getInternalSecretNextPath(pathname: string, search: string) {
+  if (!pathname.startsWith("/secret") || pathname === "/secret/login") {
+    return null;
+  }
+
+  const nextPath = `${pathname}${search}`;
+
+  if (nextPath === "/secret") {
+    return null;
+  }
+
+  return nextPath;
+}
+
+export default async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const sessionToken = request.cookies.get(STUDIO_SESSION_COOKIE)?.value;
-  const isAuthenticated = await isStudioSessionTokenValid(sessionToken);
 
-  if (pathname === "/studio/login") {
+  const token = await getToken({
+    req: request as unknown as GetTokenRequest,
+    secret: getAuthSecret() || undefined,
+  });
+
+  const isAuthenticated = Boolean(token);
+
+  if (pathname === "/secret/login") {
     if (isAuthenticated) {
-      return NextResponse.redirect(new URL("/studio", request.url));
+      return NextResponse.redirect(new URL("/secret", request.url));
     }
 
     return NextResponse.next();
@@ -21,10 +44,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const loginUrl = new URL("/studio/login", request.url);
-  const nextPath = `${pathname}${search}`;
+  const loginUrl = new URL("/secret/login", request.url);
+  const nextPath = getInternalSecretNextPath(pathname, search);
 
-  if (nextPath && nextPath !== "/studio") {
+  if (nextPath) {
     loginUrl.searchParams.set("next", nextPath);
   }
 
@@ -32,5 +55,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/studio/:path*"],
+  matcher: ["/secret/:path*"],
 };

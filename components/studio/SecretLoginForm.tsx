@@ -7,116 +7,72 @@ import {
   Button,
   Card,
   CardContent,
-  CircularProgress,
   Container,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 
-interface StudioLoginFormProps {
-  nextPath?: string;
+interface SecretLoginFormProps {
+  callbackUrl?: string;
 }
 
-export default function StudioLoginForm({ nextPath }: StudioLoginFormProps) {
+function getLoginErrorMessage(error: string | undefined) {
+  if (!error) {
+    return "Unable to sign in to the private editor.";
+  }
+
+  if (error === "CredentialsSignin") {
+    return "Incorrect password. Try again.";
+  }
+
+  return "Unable to sign in to the private editor.";
+}
+
+export default function SecretLoginForm({ callbackUrl }: SecretLoginFormProps) {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const checkSession = async () => {
-      try {
-        const response = await fetch("/api/studio/session", {
-          cache: "no-store",
-        });
-        const data = (await response.json()) as {
-          authenticated?: boolean;
-          configured?: boolean;
-        };
-
-        if (!isMounted) {
-          return;
-        }
-
-        if (data.authenticated) {
-          router.replace("/studio");
-          return;
-        }
-
-        if (data.configured === false) {
-          setError("RESUME_OWNER_PASSWORD is not configured.");
-        }
-      } catch {
-        if (isMounted) {
-          setError("Unable to verify the current studio session.");
-        }
-      } finally {
-        if (isMounted) {
-          setIsCheckingSession(false);
-        }
-      }
-    };
-
-    void checkSession();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [router]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
     setIsSubmitting(true);
 
+    // Fallback to root if callbackUrl is not provided, since the secret editor is at the root of the secret subdomain
+    console.log("Callback URL:", callbackUrl);
+    const nextUrl = callbackUrl || "/secret/login";
+
     try {
-      const response = await fetch("/api/studio/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ password }),
+      const result = await signIn("credentials", {
+        password,
+        callbackUrl: nextUrl,
+        redirect: false,
       });
 
-      const data = (await response.json().catch(() => null)) as {
-        error?: string;
-      } | null;
-
-      if (!response.ok) {
-        setError(data?.error ?? "Unable to sign in to the studio.");
+      if (!result) {
+        setError("Unable to sign in to the private editor.");
         return;
       }
 
-      router.replace(nextPath || "/studio");
+      if (result.error) {
+        setError(getLoginErrorMessage(result.error));
+        return;
+      }
+
+      setPassword("");
+      router.replace(result.url || nextUrl);
       router.refresh();
     } catch {
-      setError("Unable to sign in to the studio.");
+      setError("Unable to sign in to the private editor.");
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  if (isCheckingSession) {
-    return (
-      <Box
-        sx={{
-          minHeight: "100vh",
-          display: "grid",
-          placeItems: "center",
-          background:
-            "radial-gradient(circle at top, rgba(14, 165, 233, 0.2), transparent 35%), #020617",
-        }}
-      >
-        <CircularProgress color="primary" />
-      </Box>
-    );
-  }
 
   return (
     <Box
@@ -156,13 +112,13 @@ export default function StudioLoginForm({ nextPath }: StudioLoginFormProps) {
                   <LockOutlinedIcon />
                 </Box>
                 <Typography variant="overline" sx={{ color: "#67e8f9" }}>
-                  Hidden Owner Studio
+                  Owner-only access
                 </Typography>
                 <Typography
                   variant="h4"
                   sx={{ fontWeight: 800, color: "#f8fafc" }}
                 >
-                  Sign in to edit the resume draft
+                  Sign in to open the private resume editor
                 </Typography>
                 <Typography sx={{ color: "#94a3b8" }}>
                   Phase 1 saves your draft locally in this browser and keeps the
@@ -192,7 +148,7 @@ export default function StudioLoginForm({ nextPath }: StudioLoginFormProps) {
                     disabled={isSubmitting}
                     sx={{ py: 1.5, fontWeight: 700, textTransform: "none" }}
                   >
-                    {isSubmitting ? "Signing in..." : "Enter studio"}
+                    {isSubmitting ? "Signing in..." : "Open private editor"}
                   </Button>
                 </Stack>
               </Box>
