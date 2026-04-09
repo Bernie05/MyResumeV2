@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useThemeContext } from "@/context/ThemeContext";
 import CloseIcon from "@mui/icons-material/Close";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import MenuIcon from "@mui/icons-material/Menu";
+
 import {
   AppBar,
   Box,
@@ -17,6 +19,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
+import { useSession } from "next-auth/react";
 
 interface NavbarProps {
   position?: "fixed" | "absolute" | "sticky" | "static" | "relative";
@@ -33,6 +36,8 @@ const NAV_ITEMS = [
 export default function Navbar({ position = "sticky" }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDarkMode, toggleTheme } = useThemeContext();
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated" && Boolean(session);
 
   return (
     <AppBar
@@ -99,6 +104,34 @@ export default function Navbar({ position = "sticky" }: NavbarProps) {
           </Stack>
 
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            {isAuthenticated ? (
+              <Button
+                component={Link}
+                href="/secret"
+                color="inherit"
+                sx={{
+                  borderRadius: 2,
+                  backgroundColor: isDarkMode
+                    ? "rgba(15, 23, 42, 0.95)"
+                    : "rgba(241, 245, 249, 1)",
+                  color: isDarkMode ? "rgb(45, 212, 191)" : "rgb(37, 99, 235)",
+                  textTransform: "uppercase",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  fontSize: "0.72rem",
+                  px: 1.5,
+                  minWidth: "auto",
+                  "&:hover": {
+                    backgroundColor: isDarkMode
+                      ? "rgba(30, 41, 59, 1)"
+                      : "rgba(226, 232, 240, 1)",
+                  },
+                }}
+              >
+                Editor
+              </Button>
+            ) : null}
+
             <IconButton
               onClick={toggleTheme}
               aria-label="Toggle theme"
