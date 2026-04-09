@@ -24,7 +24,7 @@ interface Job {
   description: string[];
 }
 
-export default function Experience({ experience }: { experience: Job[] }) {
+const Experience = ({ experience }: { experience: Job[] }) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -206,4 +206,6 @@ export default function Experience({ experience }: { experience: Job[] }) {
       </Box>
     </Box>
   );
-}
+};
+
+export default Experience;

@@ -12,11 +12,11 @@ interface Certification {
   year: string;
 }
 
-export default function Certifications({
+const Certifications = ({
   certifications,
 }: {
   certifications: Certification[];
-}) {
+}) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -147,4 +147,6 @@ export default function Certifications({
       </Box>
     </Box>
   );
-}
+};
+
+export default Certifications;

@@ -1,5 +1,7 @@
-import { SecretLoginSkeleton } from "@/components/studio/SecretSkeletons";
+import { SecretLoginSkeleton } from "@/components/secret/SecretSkeletons";
 
-export default function SecretLoginLoading() {
+const SecretLoginLoading = () => {
   return <SecretLoginSkeleton />;
-}
+};
+
+export default SecretLoginLoading;

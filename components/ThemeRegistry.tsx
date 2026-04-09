@@ -9,7 +9,7 @@ export type ThemeRegistry = {
   children: ReactNode;
 };
 
-export default function ThemeRegistry({ children }: ThemeRegistry) {
+const ThemeRegistry = ({ children }: ThemeRegistry) => {
   const [{ cache, flush }] = useState(() => {
     const cache = createCache({ key: "css" });
     cache.compat = true;
@@ -39,4 +39,6 @@ export default function ThemeRegistry({ children }: ThemeRegistry) {
   });
 
   return <CacheProvider value={cache}>{children}</CacheProvider>;
-}
+};
+
+export default ThemeRegistry;

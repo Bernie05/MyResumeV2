@@ -13,7 +13,7 @@ interface SecretEditorSkeletonProps {
   isDarkMode?: boolean;
 }
 
-export function SecretLoginSkeleton() {
+export const SecretLoginSkeleton = () => {
   return (
     <Box
       sx={{
@@ -113,11 +113,11 @@ export function SecretLoginSkeleton() {
       </Container>
     </Box>
   );
-}
+};
 
-export function SecretEditorSkeleton({
+export const SecretEditorSkeleton = ({
   isDarkMode = true,
-}: SecretEditorSkeletonProps) {
+}: SecretEditorSkeletonProps) => {
   const borderColor = isDarkMode
     ? "rgba(51, 65, 85, 0.8)"
     : "rgba(203, 213, 225, 0.9)";
@@ -357,4 +357,4 @@ export function SecretEditorSkeleton({
       </Container>
     </Box>
   );
-}
+};

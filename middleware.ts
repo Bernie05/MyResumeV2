@@ -4,11 +4,11 @@ import { NextResponse } from "next/server";
 
 type GetTokenRequest = Parameters<typeof getToken>[0]["req"];
 
-function getAuthSecret(): string {
+const getAuthSecret = (): string => {
   return process.env.AUTH_SECRET?.trim() ?? "";
-}
+};
 
-function getInternalSecretNextPath(pathname: string, search: string) {
+const getInternalSecretNextPath = (pathname: string, search: string) => {
   if (!pathname.startsWith("/secret") || pathname === "/secret/login") {
     return null;
   }
@@ -20,9 +20,9 @@ function getInternalSecretNextPath(pathname: string, search: string) {
   }
 
   return nextPath;
-}
+};
 
-export default async function middleware(request: NextRequest) {
+const middleware = async (request: NextRequest) => {
   const { pathname, search } = request.nextUrl;
 
   const token = await getToken({
@@ -52,7 +52,9 @@ export default async function middleware(request: NextRequest) {
   }
 
   return NextResponse.redirect(loginUrl);
-}
+};
+
+export default middleware;
 
 export const config = {
   matcher: ["/secret/:path*"],

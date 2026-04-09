@@ -1,4 +1,4 @@
-export function getSectionPalette(isDarkMode: boolean) {
+export const getSectionPalette = (isDarkMode: boolean) => {
   const primaryAccent = isDarkMode ? "rgb(45, 212, 191)" : "#2563eb";
   const secondaryAccent = isDarkMode ? "rgb(20, 184, 166)" : "#1d4ed8";
   const accentGlow = isDarkMode
@@ -41,4 +41,4 @@ export function getSectionPalette(isDarkMode: boolean) {
       ? `0 22px 40px ${accentGlow}`
       : "0 22px 40px rgba(37, 99, 235, 0.18)",
   };
-}
+};

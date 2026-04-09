@@ -33,7 +33,7 @@ const NAV_ITEMS = [
   { label: "Contact", href: "#contact" },
 ];
 
-export default function Navbar({ position = "sticky" }: NavbarProps) {
+const Navbar = ({ position = "sticky" }: NavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isDarkMode, toggleTheme } = useThemeContext();
   const { data: session, status } = useSession();
@@ -214,4 +214,6 @@ export default function Navbar({ position = "sticky" }: NavbarProps) {
       </Container>
     </AppBar>
   );
-}
+};
+
+export default Navbar;

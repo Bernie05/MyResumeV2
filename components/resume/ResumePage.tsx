@@ -21,11 +21,11 @@ interface ResumePageProps {
   navbarPosition?: NavbarPosition;
 }
 
-export default function ResumePage({
+const ResumePage = ({
   resume,
   showNavbar = true,
   navbarPosition = "sticky",
-}: ResumePageProps) {
+}: ResumePageProps) => {
   const { isDarkMode } = useThemeContext();
 
   return (
@@ -87,4 +87,6 @@ export default function ResumePage({
       </Container>
     </Box>
   );
-}
+};
+
+export default ResumePage;

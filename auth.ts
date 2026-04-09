@@ -1,24 +1,24 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-function getAuthSecret(): string {
+const getAuthSecret = (): string => {
   return process.env.AUTH_SECRET?.trim() ?? "";
-}
+};
 
-function getOwnerPassword(): string {
+const getOwnerPassword = (): string => {
   return process.env.RESUME_OWNER_PASSWORD?.trim() ?? "";
-}
+};
 
-async function getSha256Digest(value: string): Promise<Uint8Array> {
+const getSha256Digest = async (value: string): Promise<Uint8Array> => {
   const buffer = await crypto.subtle.digest(
     "SHA-256",
     new TextEncoder().encode(value),
   );
 
   return new Uint8Array(buffer);
-}
+};
 
-function timingSafeEqual(left: Uint8Array, right: Uint8Array): boolean {
+const timingSafeEqual = (left: Uint8Array, right: Uint8Array): boolean => {
   if (left.length !== right.length) {
     return false;
   }
@@ -30,9 +30,9 @@ function timingSafeEqual(left: Uint8Array, right: Uint8Array): boolean {
   }
 
   return difference === 0;
-}
+};
 
-async function passwordsMatch(submittedPassword: string): Promise<boolean> {
+const passwordsMatch = async (submittedPassword: string): Promise<boolean> => {
   const ownerPassword = getOwnerPassword();
 
   if (!submittedPassword || !ownerPassword) {
@@ -45,7 +45,7 @@ async function passwordsMatch(submittedPassword: string): Promise<boolean> {
   ]);
 
   return timingSafeEqual(submittedDigest, ownerDigest);
-}
+};
 
 export const authOptions: NextAuthOptions = {
   secret: getAuthSecret() || undefined,

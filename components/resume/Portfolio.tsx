@@ -6,11 +6,7 @@ import { IPortfolioItem } from "@/types/portfolio";
 import { ProjectCardComponent } from "../cards/ProjectCardComponent";
 import { getSectionPalette } from "../../theme/sectionPalette";
 
-export default function Portfolio({
-  portfolio,
-}: {
-  portfolio: IPortfolioItem[];
-}) {
+const Portfolio = ({ portfolio }: { portfolio: IPortfolioItem[] }) => {
   const { isDarkMode } = useThemeContext();
   const {
     titleColor,
@@ -88,4 +84,6 @@ export default function Portfolio({
       </Box>
     </Box>
   );
-}
+};
+
+export default Portfolio;

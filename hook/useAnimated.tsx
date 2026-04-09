@@ -4,9 +4,9 @@ type AnimatedStats<T extends object> = {
   [K in keyof T]: number;
 };
 
-function getInitialAnimatedStats<T extends object>(
+const getInitialAnimatedStats = <T extends object>(
   stats?: T,
-): AnimatedStats<T> {
+): AnimatedStats<T> => {
   if (!stats) {
     return {} as AnimatedStats<T>;
   }
@@ -15,12 +15,12 @@ function getInitialAnimatedStats<T extends object>(
     accumulator[key as keyof T] = 0;
     return accumulator;
   }, {} as AnimatedStats<T>);
-}
+};
 
-export function useAnimatedStats<T extends object>(
+export const useAnimatedStats = <T extends object>(
   stats?: T,
   duration: number = 2000,
-) {
+) => {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [statsNode, setStatsNode] = useState<HTMLDivElement | null>(null);
   const hasStartedRef = useRef(false);
@@ -111,4 +111,4 @@ export function useAnimatedStats<T extends object>(
   }, [duration, stats, statsNode]);
 
   return { animatedStats, statsRef, hasAnimated };
-}
+};

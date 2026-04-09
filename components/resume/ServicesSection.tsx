@@ -47,20 +47,16 @@ const SKILL_ICONS: Record<string, any> = {
   default: CodeIcon,
 };
 
-function getIconForSkill(skillName: string): any {
+const getIconForSkill = (skillName: string): any => {
   const name = skillName.toLowerCase();
   for (const [key, icon] of Object.entries(SKILL_ICONS)) {
     if (name.includes(key)) return icon;
   }
 
   return SKILL_ICONS.default;
-}
+};
 
-export default function ServicesSection({
-  skills,
-}: {
-  skills: SkillCategory[];
-}) {
+const ServicesSection = ({ skills }: { skills: SkillCategory[] }) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -262,4 +258,6 @@ export default function ServicesSection({
       </Box>
     </Box>
   );
-}
+};
+
+export default ServicesSection;
