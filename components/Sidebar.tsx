@@ -27,7 +27,7 @@ const MENU_ITEMS = [
   { icon: Inventory2Outlined, label: "Products", href: "#products" },
 ];
 
-export default function Sidebar() {
+const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { isDarkMode } = useThemeContext();
 
@@ -115,4 +115,6 @@ export default function Sidebar() {
       </IconButton>
     </Box>
   );
-}
+};
+
+export default Sidebar;

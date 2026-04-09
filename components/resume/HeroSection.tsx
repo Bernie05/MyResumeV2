@@ -41,18 +41,17 @@ interface HeroStats {
   awards?: number;
 }
 
-export default function HeroSection({
+const HeroSection = ({
   personalInfo,
   stats,
 }: {
   personalInfo: PersonalInfo;
   stats?: HeroStats;
-}) {
+}) => {
   const { isDarkMode } = useThemeContext();
   const { animatedStats, statsRef } = useAnimatedStats(stats, 2000);
   const {
     primaryAccent,
-    secondaryAccent,
     accentGlow,
     accentText,
     buttonGradient,
@@ -329,4 +328,6 @@ export default function HeroSection({
       )}
     </Box>
   );
-}
+};
+
+export default HeroSection;

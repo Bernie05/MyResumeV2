@@ -20,7 +20,7 @@ interface SecretLoginFormProps {
   callbackUrl?: string;
 }
 
-function getLoginErrorMessage(error: string | undefined) {
+const getLoginErrorMessage = (error: string | undefined) => {
   if (!error) {
     return "Unable to sign in to the private editor.";
   }
@@ -30,9 +30,9 @@ function getLoginErrorMessage(error: string | undefined) {
   }
 
   return "Unable to sign in to the private editor.";
-}
+};
 
-export default function SecretLoginForm({ callbackUrl }: SecretLoginFormProps) {
+const SecretLoginForm = ({ callbackUrl }: SecretLoginFormProps) => {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -43,9 +43,7 @@ export default function SecretLoginForm({ callbackUrl }: SecretLoginFormProps) {
     setError(null);
     setIsSubmitting(true);
 
-    // Fallback to root if callbackUrl is not provided, since the secret editor is at the root of the secret subdomain
-    console.log("Callback URL:", callbackUrl);
-    const nextUrl = callbackUrl || "/secret/login";
+    const nextUrl = callbackUrl || "/secret";
 
     try {
       const result = await signIn("credentials", {
@@ -158,4 +156,6 @@ export default function SecretLoginForm({ callbackUrl }: SecretLoginFormProps) {
       </Container>
     </Box>
   );
-}
+};
+
+export default SecretLoginForm;

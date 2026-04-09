@@ -1,6 +1,8 @@
-import SecretResumeEditor from "@/components/studio/SecretResumeEditor";
+import SecretResumeEditor from "@/components/secret/SecretResumeEditor";
 import { resumeData } from "@/data/resume";
 
-export default function SecretPage() {
+const SecretPage = () => {
   return <SecretResumeEditor initialResume={resumeData} />;
-}
+};
+
+export default SecretPage;

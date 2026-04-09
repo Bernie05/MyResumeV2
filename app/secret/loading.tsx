@@ -1,5 +1,7 @@
-import { SecretEditorSkeleton } from "@/components/studio/SecretSkeletons";
+import { SecretEditorSkeleton } from "@/components/secret/SecretSkeletons";
 
-export default function SecretLoading() {
+const SecretLoading = () => {
   return <SecretEditorSkeleton />;
-}
+};
+
+export default SecretLoading;

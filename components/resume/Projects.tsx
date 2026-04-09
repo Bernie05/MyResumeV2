@@ -16,7 +16,7 @@ interface Project {
   caseStudy?: string;
 }
 
-export default function Projects({ projects }: { projects: Project[] }) {
+const Projects = ({ projects }: { projects: Project[] }) => {
   const { isDarkMode } = useThemeContext();
   const {
     titleColor,
@@ -96,4 +96,6 @@ export default function Projects({ projects }: { projects: Project[] }) {
       </Box>
     </Box>
   );
-}
+};
+
+export default Projects;

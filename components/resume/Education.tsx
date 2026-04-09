@@ -14,11 +14,7 @@ interface EducationItem {
   location: string;
 }
 
-export default function Education({
-  education,
-}: {
-  education: EducationItem[];
-}) {
+const Education = ({ education }: { education: EducationItem[] }) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -162,4 +158,6 @@ export default function Education({
       </Box>
     </Box>
   );
-}
+};
+
+export default Education;

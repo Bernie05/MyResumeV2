@@ -6,7 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import { store } from "@/store";
 import { ThemeContextProvider } from "@/context/ThemeContext";
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <SessionProvider>
       <Provider store={store}>
@@ -14,4 +14,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       </Provider>
     </SessionProvider>
   );
-}
+};
+
+export default Providers;

@@ -20,7 +20,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeContextProvider({ children }: { children: ReactNode }) {
+export const ThemeContextProvider = ({ children }: { children: ReactNode }) => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -90,9 +90,9 @@ export function ThemeContextProvider({ children }: { children: ReactNode }) {
       <MuiThemeProvider theme={theme}>{children}</MuiThemeProvider>
     </ThemeContext.Provider>
   );
-}
+};
 
-export function useThemeContext() {
+export const useThemeContext = () => {
   const context = useContext(ThemeContext);
   if (context === undefined) {
     // Return default theme context during SSR/build time
@@ -111,4 +111,4 @@ export function useThemeContext() {
     };
   }
   return context;
-}
+};

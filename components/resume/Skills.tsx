@@ -36,26 +36,26 @@ const CIRCLE_RADIUS = 45;
 const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
 const EXPERT_THRESHOLD = 90;
 
-function createSkillKey(category: string, skillName: string): string {
+const createSkillKey = (category: string, skillName: string): string => {
   return `${category}-${skillName}`;
-}
+};
 
-function getProficiencyLabel(proficiency: number): string {
+const getProficiencyLabel = (proficiency: number): string => {
   if (proficiency >= EXPERT_THRESHOLD) return "Expert";
   if (proficiency >= 80) return "Advanced";
   if (proficiency >= 70) return "Proficient";
   return "Intermediate";
-}
+};
 
-function getCategoryColor(
+const getCategoryColor = (
   category: string,
   primaryAccent: string,
   secondaryAccent: string,
-): string {
+): string => {
   return category === "Backend" ? secondaryAccent : primaryAccent;
-}
+};
 
-function getCategoryIcon(category: string, color: string) {
+const getCategoryIcon = (category: string, color: string) => {
   switch (category) {
     case "Frontend":
       return <BoltIcon sx={{ color }} />;
@@ -64,12 +64,12 @@ function getCategoryIcon(category: string, color: string) {
     default:
       return <WorkspacePremiumIcon sx={{ color }} />;
   }
-}
+};
 
-function buildAnimatedValues(
+const buildAnimatedValues = (
   skills: readonly SkillCategory[],
   progress: number,
-): Record<string, number> {
+): Record<string, number> => {
   return skills.reduce<Record<string, number>>((accumulator, category) => {
     category.items.forEach((item) => {
       accumulator[createSkillKey(category.category, item.name)] = Math.floor(
@@ -79,9 +79,9 @@ function buildAnimatedValues(
 
     return accumulator;
   }, {});
-}
+};
 
-export default function Skills({ skills }: SkillsProps) {
+const Skills = ({ skills }: SkillsProps) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -423,4 +423,6 @@ export default function Skills({ skills }: SkillsProps) {
       </Box>
     </Box>
   );
-}
+};
+
+export default Skills;

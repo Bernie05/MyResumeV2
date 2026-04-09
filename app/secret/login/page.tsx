@@ -1,12 +1,11 @@
-import SecretLoginForm from "@/components/studio/SecretLoginForm";
+import SecretLoginForm from "@/components/secret/SecretLoginForm";
 
 type SearchParamValue = string | string[] | undefined;
 
-function getFirstSearchParam(value: SearchParamValue) {
-  return Array.isArray(value) ? value[0] : value;
-}
+const getFirstSearchParam = (value: SearchParamValue) =>
+  Array.isArray(value) ? value[0] : value;
 
-function getInternalCallbackUrl(value: SearchParamValue) {
+const getInternalCallbackUrl = (value: SearchParamValue) => {
   const rawValue = getFirstSearchParam(value)?.trim();
 
   if (!rawValue || !rawValue.startsWith("/") || rawValue.startsWith("//")) {
@@ -19,18 +18,19 @@ function getInternalCallbackUrl(value: SearchParamValue) {
   } catch {
     return undefined;
   }
-}
+};
 
-export default function SecretLoginPage({
+const SecretLoginPage = ({
   searchParams,
 }: {
   searchParams?: { callbackUrl?: SearchParamValue; next?: SearchParamValue };
-}) {
-  console.log("Search params:", searchParams);
+}) => {
   const callbackUrl =
     getInternalCallbackUrl(searchParams?.callbackUrl) ||
     getInternalCallbackUrl(searchParams?.next) ||
-    "/";
+    "/secret";
 
   return <SecretLoginForm callbackUrl={callbackUrl} />;
-}
+};
+
+export default SecretLoginPage;
