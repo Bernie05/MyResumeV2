@@ -1,5 +1,6 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { signIn } from "next-auth/react";
 
 const getAuthSecret = (): string => {
   return process.env.AUTH_SECRET?.trim() ?? "";
@@ -79,4 +80,8 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+};
+
+export const signInUp = async (props: any) => {
+  return await signIn("credentials", { ...props, redirect: false });
 };

@@ -1662,7 +1662,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
           <Box
             sx={{ maxHeight: { xl: "calc(100vh - 190px)" }, overflowY: "auto" }}
           >
-            <ResumePage resume={draft} navbarPosition="static" />
+            <ResumePage resume={draft} position="static" />
           </Box>
         </Card>
       </Box>

@@ -20,10 +20,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useSession } from "next-auth/react";
-
-interface NavbarProps {
-  position?: "fixed" | "absolute" | "sticky" | "static" | "relative";
-}
+import { IThemePalette } from "@/theme/sectionPalette";
+import { NavbarPosition } from "./resume/ResumePage";
 
 const NAV_ITEMS = [
   { label: "About", href: "#about" },
@@ -33,11 +31,30 @@ const NAV_ITEMS = [
   { label: "Contact", href: "#contact" },
 ];
 
-const Navbar = ({ position = "sticky" }: NavbarProps) => {
+export interface INavbarProps extends IThemePalette {
+  isAuthenticated: boolean;
+  position: NavbarPosition;
+}
+
+const Navbar = ({
+  isAuthenticated,
+  isDarkMode,
+  theme,
+  position,
+}: INavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isDarkMode, toggleTheme } = useThemeContext();
-  const { data: session, status } = useSession();
-  const isAuthenticated = status === "authenticated" && Boolean(session);
+  const { toggleTheme } = useThemeContext();
+
+  const {
+    navbarBackgroundColor,
+    navbarBorderColor,
+    titleColor,
+    primaryAccent,
+    navbarTextHoverBackground,
+    secondaryAccent,
+    navbarIconButtonBackgroundColor,
+    navbarIconButtonHoverBackground,
+  } = theme;
 
   return (
     <AppBar
@@ -47,14 +64,10 @@ const Navbar = ({ position = "sticky" }: NavbarProps) => {
         top: 0,
         zIndex: 50,
         backdropFilter: "blur(18px)",
-        backgroundColor: isDarkMode
-          ? "rgba(2, 6, 23, 0.92)"
-          : "rgba(255, 255, 255, 0.9)",
+        backgroundColor: navbarBackgroundColor,
         borderBottom: "1px solid",
-        borderColor: isDarkMode
-          ? "rgba(51, 65, 85, 0.9)"
-          : "rgba(226, 232, 240, 1)",
-        color: isDarkMode ? "#ffffff" : "#0f172a",
+        borderColor: navbarBorderColor,
+        color: titleColor,
       }}
     >
       <Container maxWidth="xl">
@@ -73,7 +86,7 @@ const Navbar = ({ position = "sticky" }: NavbarProps) => {
               color: "inherit",
             }}
           >
-            CREATIVE CV
+            My Resume
           </Typography>
 
           <Stack
@@ -91,10 +104,13 @@ const Navbar = ({ position = "sticky" }: NavbarProps) => {
                   fontWeight: 700,
                   letterSpacing: "0.08em",
                   fontSize: "0.78rem",
-                  color: isDarkMode ? "#e2e8f0" : "#0f172a",
+                  color: titleColor,
                   "&:hover": {
-                    color: isDarkMode ? "rgb(45, 212, 191)" : "#0f766e",
+                    color: secondaryAccent,
                     backgroundColor: "transparent",
+                  },
+                  "&:active": {
+                    color: secondaryAccent,
                   },
                 }}
               >
@@ -111,10 +127,8 @@ const Navbar = ({ position = "sticky" }: NavbarProps) => {
                 color="inherit"
                 sx={{
                   borderRadius: 2,
-                  backgroundColor: isDarkMode
-                    ? "rgba(15, 23, 42, 0.95)"
-                    : "rgba(241, 245, 249, 1)",
-                  color: isDarkMode ? "rgb(45, 212, 191)" : "rgb(37, 99, 235)",
+                  backgroundColor: navbarIconButtonBackgroundColor,
+                  color: titleColor,
                   textTransform: "uppercase",
                   fontWeight: 700,
                   letterSpacing: "0.08em",
@@ -122,9 +136,8 @@ const Navbar = ({ position = "sticky" }: NavbarProps) => {
                   px: 1.5,
                   minWidth: "auto",
                   "&:hover": {
-                    backgroundColor: isDarkMode
-                      ? "rgba(30, 41, 59, 1)"
-                      : "rgba(226, 232, 240, 1)",
+                    color: secondaryAccent,
+                    backgroundColor: navbarIconButtonHoverBackground,
                   },
                 }}
               >
@@ -137,14 +150,10 @@ const Navbar = ({ position = "sticky" }: NavbarProps) => {
               aria-label="Toggle theme"
               sx={{
                 borderRadius: 2,
-                backgroundColor: isDarkMode
-                  ? "rgba(15, 23, 42, 0.95)"
-                  : "rgba(241, 245, 249, 1)",
-                color: isDarkMode ? "rgb(45, 212, 191)" : "rgb(37, 99, 235)",
+                backgroundColor: navbarIconButtonBackgroundColor,
+                color: secondaryAccent,
                 "&:hover": {
-                  backgroundColor: isDarkMode
-                    ? "rgba(30, 41, 59, 1)"
-                    : "rgba(226, 232, 240, 1)",
+                  backgroundColor: navbarIconButtonHoverBackground,
                 },
               }}
             >
@@ -160,11 +169,9 @@ const Navbar = ({ position = "sticky" }: NavbarProps) => {
               sx={{
                 display: { md: "none" },
                 borderRadius: 2,
-                color: isDarkMode ? "#ffffff" : "#0f172a",
+                color: secondaryAccent,
                 "&:hover": {
-                  backgroundColor: isDarkMode
-                    ? "rgba(30, 41, 59, 1)"
-                    : "rgba(241, 245, 249, 1)",
+                  backgroundColor: navbarIconButtonHoverBackground,
                 },
               }}
             >
@@ -173,6 +180,8 @@ const Navbar = ({ position = "sticky" }: NavbarProps) => {
           </Stack>
         </Toolbar>
 
+        {/*  */}
+        {/* Burger menu for mobile */}
         <Collapse in={isMobileMenuOpen} timeout="auto" unmountOnExit>
           <Box
             sx={{
@@ -196,12 +205,12 @@ const Navbar = ({ position = "sticky" }: NavbarProps) => {
                     fontWeight: 700,
                     letterSpacing: "0.08em",
                     fontSize: "0.78rem",
-                    color: isDarkMode ? "#e2e8f0" : "#0f172a",
+                    color: titleColor,
                     "&:hover": {
-                      color: isDarkMode ? "rgb(45, 212, 191)" : "#0f766e",
-                      backgroundColor: isDarkMode
-                        ? "rgba(15, 23, 42, 1)"
-                        : "rgba(248, 250, 252, 1)",
+                      color: navbarTextHoverBackground,
+                    },
+                    "&:active": {
+                      color: primaryAccent,
                     },
                   }}
                 >
