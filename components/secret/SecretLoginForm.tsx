@@ -2,6 +2,13 @@
 
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import {
+  clearAuthState,
+  signInFailed,
+  signInStarted,
+  signInSucceeded,
+} from "@/store/slices/authSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
   Alert,
   Box,
   Button,
@@ -15,6 +22,7 @@ import {
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { signInUp } from "@/auth";
 
 interface SecretLoginFormProps {
   callbackUrl?: string;
@@ -34,41 +42,43 @@ const getLoginErrorMessage = (error: string | undefined) => {
 
 const SecretLoginForm = ({ callbackUrl }: SecretLoginFormProps) => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { error, status } = useAppSelector((state) => state.auth);
+  const isSubmitting = status === "submitting";
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+    dispatch(clearAuthState());
+    dispatch(signInStarted());
 
     const nextUrl = callbackUrl || "/secret";
 
     try {
-      const result = await signIn("credentials", {
+      const result = await signInUp({
         password,
         callbackUrl: nextUrl,
         redirect: false,
       });
 
       if (!result) {
-        setError("Unable to sign in to the private editor.");
+        dispatch(signInFailed("Unable to sign in to the private editor."));
         return;
       }
 
       if (result.error) {
-        setError(getLoginErrorMessage(result.error));
+        dispatch(signInFailed(getLoginErrorMessage(result.error)));
         return;
       }
 
+      dispatch(signInSucceeded());
       setPassword("");
+
+      // Use replace to avoid keeping the login page in the history stack
       router.replace(result.url || nextUrl);
       router.refresh();
     } catch {
-      setError("Unable to sign in to the private editor.");
-    } finally {
-      setIsSubmitting(false);
+      dispatch(signInFailed("Unable to sign in to the private editor."));
     }
   };
 

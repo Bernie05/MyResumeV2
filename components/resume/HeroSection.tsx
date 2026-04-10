@@ -41,6 +41,18 @@ interface HeroStats {
   awards?: number;
 }
 
+// create a mapping of social media platforms to their icons and colors
+export const socialLinks = [
+  { icon: <FacebookIcon />, href: "#", label: "Facebook" },
+  { icon: <TwitterIcon />, href: "#", label: "Twitter" },
+  {
+    icon: <LinkedInIcon />,
+    href: "#",
+    label: "LinkedIn",
+  },
+  { icon: <InstagramIcon />, href: "#", label: "Instagram" },
+];
+
 const HeroSection = ({
   personalInfo,
   stats,
@@ -57,17 +69,6 @@ const HeroSection = ({
     buttonGradient,
     buttonHoverGradient,
   } = getSectionPalette(isDarkMode);
-
-  const socialLinks = [
-    { icon: <FacebookIcon />, href: "#", label: "Facebook" },
-    { icon: <TwitterIcon />, href: "#", label: "Twitter" },
-    {
-      icon: <LinkedInIcon />,
-      href: personalInfo.linkedin || "#",
-      label: "LinkedIn",
-    },
-    { icon: <InstagramIcon />, href: "#", label: "Instagram" },
-  ];
 
   const statItems: Array<{
     key: keyof HeroStats;

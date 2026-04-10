@@ -69,6 +69,15 @@ export const SecretLoginSkeleton = () => {
                   variant="text"
                   animation="wave"
                   sx={{
+                    width: "46%",
+                    fontSize: "1rem",
+                    bgcolor: "rgba(103, 232, 249, 0.14)",
+                  }}
+                />
+                <Skeleton
+                  variant="text"
+                  animation="wave"
+                  sx={{
                     width: "100%",
                     fontSize: "1rem",
                     bgcolor: "rgba(148, 163, 184, 0.16)",
@@ -94,6 +103,15 @@ export const SecretLoginSkeleton = () => {
                     height: 56,
                     borderRadius: 2.5,
                     bgcolor: "rgba(148, 163, 184, 0.12)",
+                  }}
+                />
+                <Skeleton
+                  variant="text"
+                  animation="wave"
+                  sx={{
+                    width: "34%",
+                    fontSize: "0.85rem",
+                    bgcolor: "rgba(148, 163, 184, 0.14)",
                   }}
                 />
                 <Skeleton
@@ -282,6 +300,21 @@ export const SecretEditorSkeleton = ({
                     animation="wave"
                     sx={{ width: 180, fontSize: "1.4rem", bgcolor: mutedBg }}
                   />
+                  <Stack direction="row" spacing={1}>
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <Skeleton
+                        key={index}
+                        variant="rounded"
+                        animation="wave"
+                        sx={{
+                          width: 88,
+                          height: 28,
+                          borderRadius: 999,
+                          bgcolor: accentBg,
+                        }}
+                      />
+                    ))}
+                  </Stack>
                   {Array.from({ length: 7 }).map((_, index) => (
                     <Stack key={index} spacing={1}>
                       <Skeleton
@@ -324,6 +357,11 @@ export const SecretEditorSkeleton = ({
                     variant="text"
                     animation="wave"
                     sx={{ width: 160, fontSize: "1.4rem", bgcolor: accentBg }}
+                  />
+                  <Skeleton
+                    variant="text"
+                    animation="wave"
+                    sx={{ width: 220, fontSize: "0.95rem", bgcolor: mutedBg }}
                   />
                   <Skeleton
                     variant="rounded"

@@ -1,5 +1,36 @@
-export const getSectionPalette = (isDarkMode: boolean) => {
-  const primaryAccent = isDarkMode ? "rgb(45, 212, 191)" : "#2563eb";
+export interface ISectionPalette {
+  primaryAccent: string;
+  secondaryAccent: string;
+  accentGlow: string;
+  accentText: string;
+  titleColor: string;
+  bodyColor: string;
+  mutedColor: string;
+  sectionBackground: string;
+  surfaceBackground: string;
+  softBackground: string;
+  softerBackground: string;
+  outline: string;
+  divider: string;
+  buttonGradient: string;
+  buttonHoverGradient: string;
+  hoverShadow: string;
+  navbarBackgroundColor: string;
+  navbarBorderColor: string;
+  navbarTextColor: string;
+  navbarTextHoverColor: string;
+  navbarTextHoverBackground: string;
+  navbarIconButtonHoverBackground: string;
+  navbarIconButtonBackgroundColor: string;
+}
+
+export interface IThemePalette {
+  theme: ISectionPalette;
+  isDarkMode: boolean;
+}
+
+export const getSectionPalette = (isDarkMode: boolean): ISectionPalette => {
+  const primaryAccent = isDarkMode ? "rgb(20, 184, 166)" : "#1d4ed8";
   const secondaryAccent = isDarkMode ? "rgb(20, 184, 166)" : "#1d4ed8";
   const accentGlow = isDarkMode
     ? "rgba(45, 212, 191, 0.35)"
@@ -40,5 +71,20 @@ export const getSectionPalette = (isDarkMode: boolean) => {
     hoverShadow: isDarkMode
       ? `0 22px 40px ${accentGlow}`
       : "0 22px 40px rgba(37, 99, 235, 0.18)",
+    navbarBackgroundColor: isDarkMode
+      ? "rgba(2, 6, 23, 0.92)"
+      : "rgba(255, 255, 255, 0.9)",
+    navbarBorderColor: isDarkMode
+      ? "rgba(51, 65, 85, 0.9)"
+      : "rgba(226, 232, 240, 1)",
+    navbarTextColor: isDarkMode ? "#e2e8f0" : "#0f172a", //
+    navbarTextHoverColor: isDarkMode ? "rgb(45, 212, 191)" : "#1d4ed8",
+    navbarTextHoverBackground: isDarkMode ? "#1d4ed8" : "#0f766e",
+    navbarIconButtonBackgroundColor: isDarkMode
+      ? "rgba(15, 23, 42, 0.95)"
+      : "rgba(241, 245, 249, 1)",
+    navbarIconButtonHoverBackground: isDarkMode
+      ? "rgba(30, 41, 59, 1)"
+      : "rgba(226, 232, 240, 1)",
   };
 };
