@@ -4,6 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { ProjectCardComponent } from "../cards/ProjectCardComponent";
 import { getSectionPalette } from "../../theme/sectionPalette";
+import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 
 interface Project {
   id: number;
@@ -16,7 +17,21 @@ interface Project {
   caseStudy?: string;
 }
 
-const Projects = ({ projects }: { projects: Project[] }) => {
+const Projects = ({
+  projects,
+  onInlineFieldClick,
+  activeInlineFieldId,
+  onAddAction,
+}: {
+  projects: Project[];
+  onInlineFieldClick?: (
+    section: ResumeEditableSection,
+    fieldId: string,
+    anchor?: HTMLElement,
+  ) => void;
+  activeInlineFieldId?: string | null;
+  onAddAction?: (action: string, anchor: HTMLElement) => void;
+}) => {
   const { isDarkMode } = useThemeContext();
   const {
     titleColor,
@@ -90,10 +105,50 @@ const Projects = ({ projects }: { projects: Project[] }) => {
           gap: 3,
         }}
       >
-        {projects.map((project) => (
-          <ProjectCardComponent key={project.id} {...project} />
+        {projects.map((project, index) => (
+          <ProjectCardComponent
+            key={project.id}
+            {...project}
+            inlineSection="projects"
+            itemIndex={index}
+            activeInlineFieldId={activeInlineFieldId}
+            onInlineFieldClick={onInlineFieldClick}
+            onAddAction={onAddAction}
+          />
         ))}
       </Box>
+
+      {/* Add Project Button */}
+      {onAddAction && (
+        <Box
+          sx={{
+            mt: 4,
+            p: 4,
+            border: `2px dashed ${accentText}40`,
+            borderRadius: "1rem",
+            textAlign: "center",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            "&:hover": {
+              borderColor: accentText,
+              background: `${mutedColor}10`,
+            },
+          }}
+          onClick={(event) =>
+            onAddAction("projects", event.currentTarget as HTMLElement)
+          }
+        >
+          <Typography
+            sx={{
+              color: accentText,
+              fontWeight: 700,
+              fontSize: "1.1rem",
+            }}
+          >
+            + Add Project
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };

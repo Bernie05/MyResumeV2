@@ -1,6 +1,7 @@
 "use client";
 
 import type { PersonalInfo } from "@/types/resume";
+import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
@@ -20,12 +21,20 @@ import { IThemePalette } from "@/theme/sectionPalette";
 
 interface ContactSectionProps extends IThemePalette {
   personalInfo: PersonalInfo;
+  onInlineFieldClick?: (
+    section: ResumeEditableSection,
+    fieldId: string,
+    anchor?: HTMLElement,
+  ) => void;
+  activeInlineFieldId?: string | null;
 }
 
 export const ContactSection = ({
   theme,
   isDarkMode,
   personalInfo,
+  onInlineFieldClick,
+  activeInlineFieldId,
 }: ContactSectionProps) => {
   const {
     sectionBackground,
@@ -48,18 +57,30 @@ export const ContactSection = ({
           icon: <LinkedInIcon />,
           href: personalInfo.linkedin,
           label: "LinkedIn",
+          fieldId: "personalInfo.linkedin",
         }
       : null,
     personalInfo.github
-      ? { icon: <GitHubIcon />, href: personalInfo.github, label: "GitHub" }
+      ? {
+          icon: <GitHubIcon />,
+          href: personalInfo.github,
+          label: "GitHub",
+          fieldId: "personalInfo.github",
+        }
       : null,
     personalInfo.website
-      ? { icon: <LanguageIcon />, href: personalInfo.website, label: "Website" }
+      ? {
+          icon: <LanguageIcon />,
+          href: personalInfo.website,
+          label: "Website",
+          fieldId: "personalInfo.website",
+        }
       : null,
   ].filter(Boolean) as Array<{
     icon: JSX.Element;
     href: string;
     label: string;
+    fieldId: string;
   }>;
 
   const contactItems = [
@@ -68,19 +89,62 @@ export const ContactSection = ({
       label: "Email",
       value: personalInfo.email,
       href: `mailto:${personalInfo.email}`,
+      fieldId: "personalInfo.email",
     },
     {
       icon: <PhoneOutlinedIcon fontSize="small" />,
       label: "Phone",
       value: personalInfo.phone,
       href: `tel:${personalInfo.phone}`,
+      fieldId: "personalInfo.phone",
     },
     {
       icon: <LocationOnOutlinedIcon fontSize="small" />,
       label: "Location",
       value: personalInfo.location,
+      fieldId: "personalInfo.location",
     },
   ];
+
+  const getInlineFieldSx = (fieldId: string) => ({
+    outline:
+      activeInlineFieldId === fieldId
+        ? "2px solid rgba(20, 184, 166, 0.9)"
+        : "2px solid transparent",
+    outlineOffset: 2,
+    cursor: onInlineFieldClick ? "pointer" : "inherit",
+  });
+
+  const createInlineFieldProps = (fieldId: string) => {
+    if (!onInlineFieldClick) {
+      return {};
+    }
+
+    return {
+      onClick: (event: React.MouseEvent) => {
+        event.stopPropagation();
+        onInlineFieldClick(
+          "contact",
+          fieldId,
+          event.currentTarget as HTMLElement,
+        );
+      },
+      onKeyDown: (event: React.KeyboardEvent) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.stopPropagation();
+          onInlineFieldClick(
+            "contact",
+            fieldId,
+            event.currentTarget as HTMLElement,
+          );
+        }
+      },
+      role: "button",
+      tabIndex: 0,
+      "aria-label": `Edit ${fieldId}`,
+    };
+  };
 
   return (
     <Box
@@ -171,7 +235,7 @@ export const ContactSection = ({
           </Stack>
 
           <Stack spacing={1.5}>
-            {contactItems.map(({ icon, label, value, href }) => (
+            {contactItems.map(({ icon, label, value, href, fieldId }) => (
               <Box
                 key={label}
                 sx={{
@@ -181,7 +245,9 @@ export const ContactSection = ({
                   p: 1.5,
                   borderRadius: 3,
                   backgroundColor: softBackground,
+                  ...getInlineFieldSx(fieldId),
                 }}
+                {...createInlineFieldProps(fieldId)}
               >
                 <Box
                   sx={{
@@ -243,7 +309,7 @@ export const ContactSection = ({
                 Social Media
               </Typography>
               <Stack direction="row" spacing={1.5} flexWrap="wrap">
-                {socialLinks.map(({ icon, href, label }) => (
+                {socialLinks.map(({ icon, href, label, fieldId }) => (
                   <IconButton
                     key={label}
                     component="a"
@@ -266,6 +332,18 @@ export const ContactSection = ({
                         transform: "translateY(-3px)",
                         backgroundColor: `${primaryAccent}33`,
                       },
+                      ...getInlineFieldSx(fieldId),
+                    }}
+                    onClick={(event) => {
+                      if (onInlineFieldClick) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        onInlineFieldClick(
+                          "contact",
+                          fieldId,
+                          event.currentTarget as HTMLElement,
+                        );
+                      }
                     }}
                   >
                     {icon}

@@ -4,6 +4,7 @@ import { Box, Card, CardContent, Typography, Chip } from "@mui/material";
 import SchoolIcon from "@mui/icons-material/School";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
+import type { ResumeEditableSection } from "./ResumePage";
 
 interface Certification {
   id: number;
@@ -12,11 +13,23 @@ interface Certification {
   year: string;
 }
 
+interface CertificationsProps {
+  certifications: Certification[];
+  onInlineFieldClick?: (
+    section: ResumeEditableSection,
+    fieldId: string,
+    anchor?: HTMLElement,
+  ) => void;
+  activeInlineFieldId?: string | null;
+  onAddAction?: (action: string, anchor: HTMLElement) => void;
+}
+
 const Certifications = ({
   certifications,
-}: {
-  certifications: Certification[];
-}) => {
+  onInlineFieldClick,
+  activeInlineFieldId,
+  onAddAction,
+}: CertificationsProps) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -30,6 +43,54 @@ const Certifications = ({
     accentText,
     hoverShadow,
   } = getSectionPalette(isDarkMode);
+
+  const getInlineFieldSx = (fieldId: string) => ({
+    borderRadius: 1,
+    outline:
+      activeInlineFieldId === fieldId
+        ? "2px solid rgba(20, 184, 166, 0.9)"
+        : "2px solid transparent",
+    outlineOffset: 2,
+    cursor: onInlineFieldClick ? "pointer" : "inherit",
+    transition: "outline-color 160ms ease, box-shadow 160ms ease",
+    "&:hover": onInlineFieldClick
+      ? {
+          outlineColor: "rgba(20, 184, 166, 0.55)",
+          boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
+        }
+      : undefined,
+  });
+
+  const createInlineFieldProps = (fieldId: string) => {
+    if (!onInlineFieldClick) {
+      return {};
+    }
+
+    return {
+      onClick: (event: React.MouseEvent) => {
+        event.stopPropagation();
+        onInlineFieldClick(
+          "certifications",
+          fieldId,
+          event.currentTarget as HTMLElement,
+        );
+      },
+      onKeyDown: (event: React.KeyboardEvent) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.stopPropagation();
+          onInlineFieldClick(
+            "certifications",
+            fieldId,
+            event.currentTarget as HTMLElement,
+          );
+        }
+      },
+      role: "button",
+      tabIndex: 0,
+      "aria-label": `Edit ${fieldId}`,
+    };
+  };
 
   return (
     <Box
@@ -80,7 +141,7 @@ const Certifications = ({
           gap: 3,
         }}
       >
-        {certifications.map((cert) => (
+        {certifications.map((cert, index) => (
           <Card
             key={cert.id}
             sx={{
@@ -113,7 +174,9 @@ const Certifications = ({
                       fontWeight: "bold",
                       color: titleColor,
                       mb: 0.5,
+                      ...getInlineFieldSx(`certifications.${index}.name`),
                     }}
+                    {...createInlineFieldProps(`certifications.${index}.name`)}
                   >
                     {cert.name}
                   </Typography>
@@ -123,7 +186,11 @@ const Certifications = ({
                     sx={{
                       color: mutedColor,
                       mb: 1,
+                      ...getInlineFieldSx(`certifications.${index}.issuer`),
                     }}
+                    {...createInlineFieldProps(
+                      `certifications.${index}.issuer`,
+                    )}
                   >
                     {cert.issuer}
                   </Typography>
@@ -137,7 +204,9 @@ const Certifications = ({
                       color: primaryAccent,
                       fontWeight: "600",
                       fontSize: "0.875rem",
+                      ...getInlineFieldSx(`certifications.${index}.year`),
                     }}
+                    {...createInlineFieldProps(`certifications.${index}.year`)}
                   />
                 </Box>
               </Box>
@@ -145,6 +214,34 @@ const Certifications = ({
           </Card>
         ))}
       </Box>
+
+      {/* Add Certification Button */}
+      {onAddAction && (
+        <Box
+          sx={{
+            mt: 3,
+            p: 3,
+            border: `2px dashed ${primaryAccent}50`,
+            borderRadius: "1rem",
+            textAlign: "center",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            "&:hover": {
+              borderColor: primaryAccent,
+              background: softBackground,
+            },
+          }}
+          onClick={(event) =>
+            onAddAction("certifications", event.currentTarget as HTMLElement)
+          }
+        >
+          <Typography
+            sx={{ color: primaryAccent, fontWeight: 600, fontSize: "1rem" }}
+          >
+            + Add Certification
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };

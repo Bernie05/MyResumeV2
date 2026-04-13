@@ -20,6 +20,7 @@ const getInitialAnimatedStats = <T extends object>(
 export const useAnimatedStats = <T extends object>(
   stats?: T,
   duration: number = 2000,
+  animate: boolean = true,
 ) => {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [statsNode, setStatsNode] = useState<HTMLDivElement | null>(null);

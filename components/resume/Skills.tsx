@@ -28,6 +28,12 @@ interface SkillCategory {
 
 interface SkillsProps {
   readonly skills: readonly SkillCategory[];
+  readonly onInlineFieldClick?: (
+    section: "skills",
+    fieldId: string,
+    anchor?: HTMLElement,
+  ) => void;
+  readonly activeInlineFieldId?: string | null;
 }
 
 const ANIMATION_DURATION_MS = 1500;
@@ -81,7 +87,11 @@ const buildAnimatedValues = (
   }, {});
 };
 
-const Skills = ({ skills }: SkillsProps) => {
+const Skills = ({
+  skills,
+  onInlineFieldClick,
+  activeInlineFieldId,
+}: SkillsProps) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -102,6 +112,54 @@ const Skills = ({ skills }: SkillsProps) => {
   );
   const sectionRef = useRef<HTMLDivElement>(null);
   const hasTriggeredRef = useRef(false);
+
+  const getInlineFieldSx = (fieldId: string) => ({
+    borderRadius: 1,
+    outline:
+      activeInlineFieldId === fieldId
+        ? "2px solid rgba(20, 184, 166, 0.9)"
+        : "2px solid transparent",
+    outlineOffset: 2,
+    cursor: onInlineFieldClick ? "pointer" : "inherit",
+    transition: "outline-color 160ms ease, box-shadow 160ms ease",
+    "&:hover": onInlineFieldClick
+      ? {
+          outlineColor: "rgba(20, 184, 166, 0.55)",
+          boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
+        }
+      : undefined,
+  });
+
+  const createInlineFieldProps = (fieldId: string) => {
+    if (!onInlineFieldClick) {
+      return {};
+    }
+
+    return {
+      onClick: (event: React.MouseEvent) => {
+        event.stopPropagation();
+        onInlineFieldClick(
+          "skills",
+          fieldId,
+          event.currentTarget as HTMLElement,
+        );
+      },
+      onKeyDown: (event: React.KeyboardEvent) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.stopPropagation();
+          onInlineFieldClick(
+            "skills",
+            fieldId,
+            event.currentTarget as HTMLElement,
+          );
+        }
+      },
+      role: "button",
+      tabIndex: 0,
+      "aria-label": `Edit ${fieldId}`,
+    };
+  };
 
   useEffect(() => {
     const sectionElement = sectionRef.current;
@@ -202,7 +260,7 @@ const Skills = ({ skills }: SkillsProps) => {
       </Box>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {skills.map((skillGroup) => {
+        {skills.map((skillGroup, categoryIndex) => {
           const categoryColor = getCategoryColor(
             skillGroup.category,
             primaryAccent,
@@ -229,7 +287,11 @@ const Skills = ({ skills }: SkillsProps) => {
                     fontWeight: 700,
                     color: categoryColor,
                     flexGrow: 1,
+                    ...getInlineFieldSx(`skills.${categoryIndex}.category`),
                   }}
+                  {...createInlineFieldProps(
+                    `skills.${categoryIndex}.category`,
+                  )}
                 >
                   {skillGroup.category} Development
                 </Typography>
@@ -246,7 +308,7 @@ const Skills = ({ skills }: SkillsProps) => {
                   gap: 3,
                 }}
               >
-                {skillGroup.items.map((skill) => {
+                {skillGroup.items.map((skill, itemIndex) => {
                   const skillKey = createSkillKey(
                     skillGroup.category,
                     skill.name,
@@ -350,7 +412,13 @@ const Skills = ({ skills }: SkillsProps) => {
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
+                                ...getInlineFieldSx(
+                                  `skills.${categoryIndex}.${itemIndex}.name`,
+                                ),
                               }}
+                              {...createInlineFieldProps(
+                                `skills.${categoryIndex}.${itemIndex}.name`,
+                              )}
                             >
                               {skill.name}
                             </Typography>

@@ -5,8 +5,23 @@ import { useThemeContext } from "@/context/ThemeContext";
 import { IPortfolioItem } from "@/types/portfolio";
 import { ProjectCardComponent } from "../cards/ProjectCardComponent";
 import { getSectionPalette } from "../../theme/sectionPalette";
+import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 
-const Portfolio = ({ portfolio }: { portfolio: IPortfolioItem[] }) => {
+const Portfolio = ({
+  portfolio,
+  onInlineFieldClick,
+  activeInlineFieldId,
+  onAddAction,
+}: {
+  portfolio: IPortfolioItem[];
+  onInlineFieldClick?: (
+    section: ResumeEditableSection,
+    fieldId: string,
+    anchor?: HTMLElement,
+  ) => void;
+  activeInlineFieldId?: string | null;
+  onAddAction?: (action: string, anchor: HTMLElement) => void;
+}) => {
   const { isDarkMode } = useThemeContext();
   const {
     titleColor,
@@ -78,10 +93,50 @@ const Portfolio = ({ portfolio }: { portfolio: IPortfolioItem[] }) => {
           gap: 4,
         }}
       >
-        {portfolio.map((item) => (
-          <ProjectCardComponent key={item.id} {...item} />
+        {portfolio.map((item, index) => (
+          <ProjectCardComponent
+            key={item.id}
+            {...item}
+            inlineSection="portfolio"
+            itemIndex={index}
+            activeInlineFieldId={activeInlineFieldId}
+            onInlineFieldClick={onInlineFieldClick}
+            onAddAction={onAddAction}
+          />
         ))}
       </Box>
+
+      {/* Add Portfolio Item Button */}
+      {onAddAction && (
+        <Box
+          sx={{
+            mt: 4,
+            p: 4,
+            border: `2px dashed ${accentText}40`,
+            borderRadius: "1rem",
+            textAlign: "center",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            "&:hover": {
+              borderColor: accentText,
+              background: `${mutedColor}10`,
+            },
+          }}
+          onClick={(event) =>
+            onAddAction("portfolio", event.currentTarget as HTMLElement)
+          }
+        >
+          <Typography
+            sx={{
+              color: accentText,
+              fontWeight: 700,
+              fontSize: "1.1rem",
+            }}
+          >
+            + Add Portfolio Item
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };

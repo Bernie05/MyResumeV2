@@ -14,6 +14,7 @@ import {
 import { FiberManualRecord } from "@mui/icons-material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
+import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 
 interface Job {
   id: number;
@@ -24,7 +25,21 @@ interface Job {
   description: string[];
 }
 
-const Experience = ({ experience }: { experience: Job[] }) => {
+const Experience = ({
+  experience,
+  onInlineFieldClick,
+  activeInlineFieldId,
+  onAddAction,
+}: {
+  experience: Job[];
+  onInlineFieldClick?: (
+    section: ResumeEditableSection,
+    fieldId: string,
+    anchor?: HTMLElement,
+  ) => void;
+  activeInlineFieldId?: string | null;
+  onAddAction?: (action: string, anchor: HTMLElement) => void;
+}) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -40,6 +55,54 @@ const Experience = ({ experience }: { experience: Job[] }) => {
     accentText,
     hoverShadow,
   } = getSectionPalette(isDarkMode);
+
+  const getInlineFieldSx = (fieldId: string) => ({
+    borderRadius: 1,
+    outline:
+      activeInlineFieldId === fieldId
+        ? "2px solid rgba(20, 184, 166, 0.9)"
+        : "2px solid transparent",
+    outlineOffset: 2,
+    cursor: onInlineFieldClick ? "pointer" : "inherit",
+    transition: "outline-color 160ms ease, box-shadow 160ms ease",
+    "&:hover": onInlineFieldClick
+      ? {
+          outlineColor: "rgba(20, 184, 166, 0.55)",
+          boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
+        }
+      : undefined,
+  });
+
+  const createInlineFieldProps = (fieldId: string) => {
+    if (!onInlineFieldClick) {
+      return {};
+    }
+
+    return {
+      onClick: (event: React.MouseEvent) => {
+        event.stopPropagation();
+        onInlineFieldClick(
+          "experience",
+          fieldId,
+          event.currentTarget as HTMLElement,
+        );
+      },
+      onKeyDown: (event: React.KeyboardEvent) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.stopPropagation();
+          onInlineFieldClick(
+            "experience",
+            fieldId,
+            event.currentTarget as HTMLElement,
+          );
+        }
+      },
+      role: "button",
+      tabIndex: 0,
+      "aria-label": `Edit ${fieldId}`,
+    };
+  };
 
   return (
     <Box
@@ -118,7 +181,11 @@ const Experience = ({ experience }: { experience: Job[] }) => {
                         fontSize: "1.5rem",
                         color: titleColor,
                         mb: 1,
+                        ...getInlineFieldSx(`experience.${index}.position`),
                       }}
+                      {...createInlineFieldProps(
+                        `experience.${index}.position`,
+                      )}
                     >
                       {job.position}
                     </Typography>
@@ -128,7 +195,9 @@ const Experience = ({ experience }: { experience: Job[] }) => {
                         fontWeight: 600,
                         fontSize: "1.125rem",
                         color: primaryAccent,
+                        ...getInlineFieldSx(`experience.${index}.company`),
                       }}
+                      {...createInlineFieldProps(`experience.${index}.company`)}
                     >
                       {job.company}
                     </Typography>
@@ -140,7 +209,9 @@ const Experience = ({ experience }: { experience: Job[] }) => {
                       color: primaryAccent,
                       fontWeight: 600,
                       whiteSpace: "nowrap",
+                      ...getInlineFieldSx(`experience.${index}.duration`),
                     }}
+                    {...createInlineFieldProps(`experience.${index}.duration`)}
                   />
                 </Box>
 
@@ -150,21 +221,29 @@ const Experience = ({ experience }: { experience: Job[] }) => {
                     fontSize: "1rem",
                     mb: 3,
                     color: mutedColor,
+                    ...getInlineFieldSx(`experience.${index}.location`),
                   }}
+                  {...createInlineFieldProps(`experience.${index}.location`)}
                 >
                   📍 {job.location}
                 </Typography>
 
                 {/* Description List */}
                 <List sx={{ p: 0, m: 0 }}>
-                  {job.description.map((desc, idx) => (
+                  {job.description.map((desc, bulletIndex) => (
                     <ListItem
-                      key={idx}
+                      key={bulletIndex}
                       sx={{
                         p: 0,
                         mb: 1.5,
                         alignItems: "flex-start",
+                        ...getInlineFieldSx(
+                          `experience.${index}.description.${bulletIndex}`,
+                        ),
                       }}
+                      {...createInlineFieldProps(
+                        `experience.${index}.description.${bulletIndex}`,
+                      )}
                     >
                       <ListItemIcon
                         sx={{
@@ -190,6 +269,33 @@ const Experience = ({ experience }: { experience: Job[] }) => {
                     </ListItem>
                   ))}
                 </List>
+
+                {/* Add Bullet Button */}
+                {onAddAction && (
+                  <Box
+                    sx={{
+                      mt: 1,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      cursor: "pointer",
+                      color: primaryAccent,
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      opacity: 0.7,
+                      transition: "opacity 0.2s",
+                      "&:hover": { opacity: 1 },
+                    }}
+                    onClick={(event) =>
+                      onAddAction(
+                        `experience.${index}.bullet`,
+                        event.currentTarget as HTMLElement,
+                      )
+                    }
+                  >
+                    + Add bullet point
+                  </Box>
+                )}
               </CardContent>
             </Card>
 
@@ -203,6 +309,34 @@ const Experience = ({ experience }: { experience: Job[] }) => {
             )}
           </Box>
         ))}
+
+        {/* Add Experience Button */}
+        {onAddAction && (
+          <Box
+            sx={{
+              mt: 3,
+              p: 3,
+              border: `2px dashed ${primaryAccent}50`,
+              borderRadius: "1rem",
+              textAlign: "center",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                borderColor: primaryAccent,
+                background: softBackground,
+              },
+            }}
+            onClick={(event) =>
+              onAddAction("experience", event.currentTarget as HTMLElement)
+            }
+          >
+            <Typography
+              sx={{ color: primaryAccent, fontWeight: 600, fontSize: "1rem" }}
+            >
+              + Add Experience
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Box>
   );
