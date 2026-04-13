@@ -23,18 +23,92 @@ export type NavbarPosition =
   | "static"
   | "relative";
 
+export type ResumeEditableSection =
+  | "about"
+  | "services"
+  | "experience"
+  | "portfolio"
+  | "projects"
+  | "education"
+  | "skills"
+  | "certifications"
+  | "contact";
+
 interface ResumePageProps {
   resume: ResumeData;
   position?: NavbarPosition;
+  interactiveSections?: boolean;
+  activeSectionId?: ResumeEditableSection | null;
+  onSectionClick?: (section: ResumeEditableSection) => void;
+  activeInlineFieldId?: string | null;
+  onInlineFieldClick?: (
+    section: ResumeEditableSection,
+    fieldId: string,
+    anchor?: HTMLElement,
+  ) => void;
+  onAddAction?: (action: string, anchor: HTMLElement) => void;
 }
 
-const ResumePage = ({ resume, position = "sticky" }: ResumePageProps) => {
+const ResumePage = ({
+  resume,
+  position = "sticky",
+  // This is used in SecretResumeEditor to enable click interactions on sections and fields
+  interactiveSections = false,
+  activeSectionId = null,
+  activeInlineFieldId = null,
+  onSectionClick,
+  onInlineFieldClick,
+  onAddAction,
+}: ResumePageProps) => {
   const { isDarkMode } = useThemeContext();
   const theme = getSectionPalette(isDarkMode);
 
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated" && Boolean(session);
-  console.log("theme", theme);
+
+  const getSectionSx = (sectionId: ResumeEditableSection) => {
+    if (!interactiveSections) {
+      return undefined;
+    }
+
+    const isActive = activeSectionId === sectionId;
+
+    return {
+      position: "relative",
+      cursor: "pointer",
+      borderRadius: 2,
+      transition: "outline-color 180ms ease, box-shadow 180ms ease",
+      outline: isActive ? "2px solid #14b8a6" : "1px dashed transparent",
+      outlineOffset: 4,
+      "&:hover": {
+        outlineColor: isActive ? "#14b8a6" : "rgba(20, 184, 166, 0.5)",
+        boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.14)",
+      },
+    };
+  };
+
+  const handleSectionClick = (sectionId: ResumeEditableSection) => {
+    onSectionClick?.(sectionId);
+  };
+
+  const createSectionProps = (sectionId: ResumeEditableSection) => {
+    if (!interactiveSections) {
+      return {};
+    }
+
+    return {
+      role: "button",
+      tabIndex: 0,
+      "aria-label": `Edit ${sectionId} section`,
+      onClick: () => handleSectionClick(sectionId),
+      onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handleSectionClick(sectionId);
+        }
+      },
+    };
+  };
 
   return (
     <Box component="main" sx={{ width: "100%", minHeight: "100vh" }}>
@@ -47,8 +121,19 @@ const ResumePage = ({ resume, position = "sticky" }: ResumePageProps) => {
       />
 
       {/* Hero Section */}
-      <Box component="section" id="about">
-        <HeroSection personalInfo={resume.personalInfo} stats={resume.stats} />
+      <Box
+        component="section"
+        id="about"
+        sx={getSectionSx("about")}
+        {...createSectionProps("about")}
+      >
+        <HeroSection
+          personalInfo={resume.personalInfo}
+          stats={resume.stats}
+          onInlineFieldClick={onInlineFieldClick}
+          activeInlineFieldId={activeInlineFieldId}
+          onAddAction={onAddAction}
+        />
       </Box>
 
       {/* Main Content */}
@@ -58,36 +143,114 @@ const ResumePage = ({ resume, position = "sticky" }: ResumePageProps) => {
       >
         <Stack spacing={{ xs: 10, md: 14 }}>
           {/* Services Section */}
-          <ServicesSection skills={resume.skills} />
+          <Box
+            sx={getSectionSx("services")}
+            {...createSectionProps("services")}
+          >
+            <ServicesSection
+              skills={resume.skills}
+              servicesTitle={resume.servicesTitle}
+              servicesSubtitle={resume.servicesSubtitle}
+              onInlineFieldClick={onInlineFieldClick}
+              activeInlineFieldId={activeInlineFieldId}
+              onAddAction={onAddAction}
+            />
+          </Box>
 
           {/* Experience Section */}
-          <Box component="section" id="experience">
-            <Experience experience={resume.experience} />
+          <Box
+            component="section"
+            id="experience"
+            sx={getSectionSx("experience")}
+            {...createSectionProps("experience")}
+          >
+            <Experience
+              experience={resume.experience}
+              onInlineFieldClick={onInlineFieldClick}
+              activeInlineFieldId={activeInlineFieldId}
+              onAddAction={onAddAction}
+            />
           </Box>
 
           {/* Portfolio Section */}
-          <Box component="section" id="portfolio">
-            <Portfolio portfolio={resume.portfolio} />
+          <Box
+            component="section"
+            id="portfolio"
+            sx={getSectionSx("portfolio")}
+            {...createSectionProps("portfolio")}
+          >
+            <Portfolio
+              portfolio={resume.portfolio}
+              onInlineFieldClick={onInlineFieldClick}
+              activeInlineFieldId={activeInlineFieldId}
+              onAddAction={onAddAction}
+            />
           </Box>
 
           {/* Projects Section */}
-          <Projects projects={resume.projects} />
-          <Education education={resume.education} />
+          <Box
+            sx={getSectionSx("projects")}
+            {...createSectionProps("projects")}
+          >
+            <Projects
+              projects={resume.projects}
+              onInlineFieldClick={onInlineFieldClick}
+              activeInlineFieldId={activeInlineFieldId}
+              onAddAction={onAddAction}
+            />
+          </Box>
+          <Box
+            sx={getSectionSx("education")}
+            {...createSectionProps("education")}
+          >
+            <Education
+              education={resume.education}
+              onInlineFieldClick={onInlineFieldClick}
+              activeInlineFieldId={activeInlineFieldId}
+              onAddAction={onAddAction}
+            />
+          </Box>
 
           {/* Skills Section */}
-          <Box component="section" id="skills">
-            <Skills skills={resume.skills} />
+          <Box
+            component="section"
+            id="skills"
+            sx={getSectionSx("skills")}
+            {...createSectionProps("skills")}
+          >
+            <Skills
+              skills={resume.skills}
+              onInlineFieldClick={onInlineFieldClick}
+              activeInlineFieldId={activeInlineFieldId}
+            />
           </Box>
 
           {/* Certifications Section */}
-          <Certifications certifications={resume.certifications} />
+          <Box
+            sx={getSectionSx("certifications")}
+            {...createSectionProps("certifications")}
+          >
+            <Certifications
+              certifications={resume.certifications}
+              onInlineFieldClick={onInlineFieldClick}
+              activeInlineFieldId={activeInlineFieldId}
+              onAddAction={onAddAction}
+            />
+          </Box>
 
           {/* Contact Section */}
-          <Box component="section" id="contact">
+          <Box
+            component="section"
+            id="contact"
+            sx={getSectionSx("contact")}
+            {...createSectionProps("contact")}
+          >
             <ContactSection
               theme={theme}
               isDarkMode={isDarkMode}
               personalInfo={resume.personalInfo}
+              onInlineFieldClick={onInlineFieldClick}
+              activeInlineFieldId={activeInlineFieldId}
             />
           </Box>
 

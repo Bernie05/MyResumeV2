@@ -4,6 +4,7 @@ import { Box, Card, CardContent, Typography, Chip } from "@mui/material";
 import SchoolIcon from "@mui/icons-material/School";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
+import type { ResumeEditableSection } from "./ResumePage";
 
 interface EducationItem {
   id: number;
@@ -14,7 +15,23 @@ interface EducationItem {
   location: string;
 }
 
-const Education = ({ education }: { education: EducationItem[] }) => {
+interface EducationProps {
+  education: EducationItem[];
+  onInlineFieldClick?: (
+    section: ResumeEditableSection,
+    fieldId: string,
+    anchor?: HTMLElement,
+  ) => void;
+  activeInlineFieldId?: string | null;
+  onAddAction?: (action: string, anchor: HTMLElement) => void;
+}
+
+const Education = ({
+  education,
+  onInlineFieldClick,
+  activeInlineFieldId,
+  onAddAction,
+}: EducationProps) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -29,6 +46,54 @@ const Education = ({ education }: { education: EducationItem[] }) => {
     accentText,
     hoverShadow,
   } = getSectionPalette(isDarkMode);
+
+  const getInlineFieldSx = (fieldId: string) => ({
+    borderRadius: 1,
+    outline:
+      activeInlineFieldId === fieldId
+        ? "2px solid rgba(20, 184, 166, 0.9)"
+        : "2px solid transparent",
+    outlineOffset: 2,
+    cursor: onInlineFieldClick ? "pointer" : "inherit",
+    transition: "outline-color 160ms ease, box-shadow 160ms ease",
+    "&:hover": onInlineFieldClick
+      ? {
+          outlineColor: "rgba(20, 184, 166, 0.55)",
+          boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
+        }
+      : undefined,
+  });
+
+  const createInlineFieldProps = (fieldId: string) => {
+    if (!onInlineFieldClick) {
+      return {};
+    }
+
+    return {
+      onClick: (event: React.MouseEvent) => {
+        event.stopPropagation();
+        onInlineFieldClick(
+          "education",
+          fieldId,
+          event.currentTarget as HTMLElement,
+        );
+      },
+      onKeyDown: (event: React.KeyboardEvent) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.stopPropagation();
+          onInlineFieldClick(
+            "education",
+            fieldId,
+            event.currentTarget as HTMLElement,
+          );
+        }
+      },
+      role: "button",
+      tabIndex: 0,
+      "aria-label": `Edit ${fieldId}`,
+    };
+  };
 
   return (
     <Box
@@ -107,7 +172,9 @@ const Education = ({ education }: { education: EducationItem[] }) => {
                         fontSize: "1.5rem",
                         color: titleColor,
                         mb: 1,
+                        ...getInlineFieldSx(`education.${index}.school`),
                       }}
+                      {...createInlineFieldProps(`education.${index}.school`)}
                     >
                       {edu.school}
                     </Typography>
@@ -117,7 +184,9 @@ const Education = ({ education }: { education: EducationItem[] }) => {
                         fontWeight: 600,
                         fontSize: "1.125rem",
                         color: primaryAccent,
+                        ...getInlineFieldSx(`education.${index}.degree`),
                       }}
+                      {...createInlineFieldProps(`education.${index}.degree`)}
                     >
                       {edu.degree} in {edu.field}
                     </Typography>
@@ -129,7 +198,9 @@ const Education = ({ education }: { education: EducationItem[] }) => {
                       color: primaryAccent,
                       fontWeight: 600,
                       whiteSpace: "nowrap",
+                      ...getInlineFieldSx(`education.${index}.year`),
                     }}
+                    {...createInlineFieldProps(`education.${index}.year`)}
                   />
                 </Box>
 
@@ -138,7 +209,9 @@ const Education = ({ education }: { education: EducationItem[] }) => {
                   sx={{
                     fontSize: "1rem",
                     color: mutedColor,
+                    ...getInlineFieldSx(`education.${index}.location`),
                   }}
+                  {...createInlineFieldProps(`education.${index}.location`)}
                 >
                   📍 {edu.location}
                 </Typography>
@@ -155,6 +228,34 @@ const Education = ({ education }: { education: EducationItem[] }) => {
             )}
           </Box>
         ))}
+
+        {/* Add Education Button */}
+        {onAddAction && (
+          <Box
+            sx={{
+              mt: 3,
+              p: 3,
+              border: `2px dashed ${primaryAccent}50`,
+              borderRadius: "1rem",
+              textAlign: "center",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                borderColor: primaryAccent,
+                background: softBackground,
+              },
+            }}
+            onClick={(event) =>
+              onAddAction("education", event.currentTarget as HTMLElement)
+            }
+          >
+            <Typography
+              sx={{ color: primaryAccent, fontWeight: 600, fontSize: "1rem" }}
+            >
+              + Add Education
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Box>
   );

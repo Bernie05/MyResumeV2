@@ -10,6 +10,9 @@ export interface PersonalInfo {
   photoUrl: string;
   backgroundUrl: string;
   summary: string;
+  hireButtonText?: string;
+  downloadButtonText?: string;
+  social?: Array<{ label: string; url: string; icon?: string }>;
 }
 
 export interface ResumeStats {
@@ -17,6 +20,7 @@ export interface ResumeStats {
   projects: number;
   clients: number;
   awards: number;
+  custom?: Array<{ label: string; value: number; suffix?: string }>;
 }
 
 export interface ExperienceItem {
@@ -40,11 +44,14 @@ export interface EducationItem {
 export interface SkillItem {
   name: string;
   proficiency: number;
+  icon?: string;
 }
 
 export interface SkillCategory {
   category: string;
   items: SkillItem[];
+  icon?: string;
+  subtitle?: string;
 }
 
 export interface CertificationItem {
@@ -89,4 +96,6 @@ export interface ResumeData {
   certifications: CertificationItem[];
   projects: ProjectItem[];
   portfolio: PortfolioItem[];
+  servicesTitle?: string;
+  servicesSubtitle?: string;
 }
