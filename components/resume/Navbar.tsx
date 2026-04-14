@@ -19,17 +19,15 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import { useSession } from "next-auth/react";
 import { IThemePalette } from "@/theme/sectionPalette";
-import { NavbarPosition } from "./resume/ResumePage";
-
-const NAV_ITEMS = [
-  { label: "About", href: "#about" },
-  { label: "Skills", href: "#skills" },
-  { label: "Portfolio", href: "#portfolio" },
-  { label: "Experience", href: "#experience" },
-  { label: "Contact", href: "#contact" },
-];
+import { NavbarPosition } from "./ResumePage";
+import {
+  editorBtn,
+  NAV_ITEMS,
+  navbarId,
+  secretEditor,
+  websiteTitle,
+} from "./constants/constant";
 
 export interface INavbarProps extends IThemePalette {
   isAuthenticated: boolean;
@@ -57,7 +55,9 @@ const Navbar = ({
   } = theme;
 
   return (
+    // Navbar
     <AppBar
+      id={`${navbarId}-main-container`}
       position={position}
       elevation={0}
       sx={{
@@ -70,8 +70,11 @@ const Navbar = ({
         color: titleColor,
       }}
     >
-      <Container maxWidth="xl">
+      {/* Navbar container */}
+      <Container maxWidth="xl" id={`${navbarId}-sub-container`}>
+        {/* My Resume Typography */}
         <Toolbar
+          id={`${navbarId}-my-resume`}
           disableGutters
           sx={{ minHeight: 64, justifyContent: "space-between", gap: 2 }}
         >
@@ -86,18 +89,21 @@ const Navbar = ({
               color: "inherit",
             }}
           >
-            My Resume
+            {websiteTitle}
           </Typography>
 
+          {/* Navbar buttons */}
           <Stack
+            id={`${navbarId}-buttons`}
             direction="row"
             spacing={1}
             sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}
           >
-            {NAV_ITEMS.map((item) => (
+            {NAV_ITEMS.map(({ label, href }) => (
               <Button
-                key={item.label}
-                href={item.href}
+                id={`${navbarId}-${label.toLowerCase()}-btn`}
+                key={`${navbarId}-${label.toLowerCase()}-btn`}
+                href={href}
                 color="inherit"
                 sx={{
                   textTransform: "uppercase",
@@ -114,16 +120,18 @@ const Navbar = ({
                   },
                 }}
               >
-                {item.label}
+                {label}
               </Button>
             ))}
           </Stack>
 
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            {isAuthenticated ? (
+            {/* Editor button */}
+            {isAuthenticated && (
               <Button
+                id="secret-editor-btn"
                 component={Link}
-                href="/secret"
+                href={secretEditor}
                 color="inherit"
                 sx={{
                   borderRadius: 2,
@@ -141,11 +149,13 @@ const Navbar = ({
                   },
                 }}
               >
-                Editor
+                {editorBtn}
               </Button>
-            ) : null}
+            )}
 
+            {/* Dark and Light Theme */}
             <IconButton
+              id="theme-btn"
               onClick={toggleTheme}
               aria-label="Toggle theme"
               sx={{
@@ -164,6 +174,7 @@ const Navbar = ({
               )}
             </IconButton>
 
+            {/* Burger Menu */}
             <IconButton
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               sx={{
@@ -180,7 +191,6 @@ const Navbar = ({
           </Stack>
         </Toolbar>
 
-        {/*  */}
         {/* Burger menu for mobile */}
         <Collapse in={isMobileMenuOpen} timeout="auto" unmountOnExit>
           <Box
@@ -189,11 +199,13 @@ const Navbar = ({
               pb: 2,
             }}
           >
+            {/* Buttons Links */}
             <Stack spacing={1}>
-              {NAV_ITEMS.map((item) => (
+              {NAV_ITEMS.map(({ label, href }) => (
                 <Button
-                  key={item.label}
-                  href={item.href}
+                  id={`${navbarId}-${label.toLowerCase()}-btn`}
+                  key={`${navbarId}-${label.toLowerCase()}-btn`}
+                  href={href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   color="inherit"
                   sx={{
@@ -214,7 +226,7 @@ const Navbar = ({
                     },
                   }}
                 >
-                  {item.label}
+                  {label}
                 </Button>
               ))}
             </Stack>

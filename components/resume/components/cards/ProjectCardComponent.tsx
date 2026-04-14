@@ -1,5 +1,5 @@
 import { IPortfolioItem } from "@/types/portfolio";
-import { CardComponent } from "@/components/cards/CardComponent";
+import { CardComponent } from "@/components/resume/components/cards/CardComponent";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 
 interface ProjectCardComponentProps extends IPortfolioItem {

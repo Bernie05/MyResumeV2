@@ -1,6 +1,6 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/resume/Navbar";
 import HeroSection from "@/components/resume/HeroSection";
 import ServicesSection from "@/components/resume/ServicesSection";
 import Experience from "@/components/resume/Experience";

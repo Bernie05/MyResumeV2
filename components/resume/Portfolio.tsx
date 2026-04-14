@@ -3,7 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { IPortfolioItem } from "@/types/portfolio";
-import { ProjectCardComponent } from "../cards/ProjectCardComponent";
+import { ProjectCardComponent } from "./components/cards/ProjectCardComponent";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 
