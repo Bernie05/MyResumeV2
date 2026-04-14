@@ -5,11 +5,7 @@ import { useThemeContext } from "@/context/ThemeContext";
 import { useAnimatedStats } from "@/hook/useAnimated";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import DownloadIcon from "@mui/icons-material/Download";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import LinkIcon from "@mui/icons-material/Link";
-import TwitterIcon from "@mui/icons-material/Twitter";
 import { ICON_MAP } from "@/components/resume/ServicesSection";
 import { type ResumeEditableSection } from "@/components/resume/ResumePage";
 import {
@@ -21,8 +17,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { heroSectionId, socialLinks, statItems } from "./constants/constant";
+import { getInlineFieldSx } from "../secret/utils/componentUtil";
 
-interface PersonalInfo {
+export interface PersonalInfo {
   // Basic info
   name: string;
   title: string;
@@ -45,7 +43,7 @@ interface PersonalInfo {
   social?: Array<{ label: string; url: string; icon?: string }>;
 }
 
-interface HeroStats {
+export interface HeroStats {
   yearsExperience?: number;
   projects?: number;
   clients?: number;
@@ -53,25 +51,13 @@ interface HeroStats {
   custom?: Array<{ label: string; value: number; suffix?: string }>;
 }
 
-// create a mapping of social media platforms to their icons and colors
-export const socialLinks = [
-  { icon: <FacebookIcon />, href: "#", label: "Facebook" },
-  { icon: <TwitterIcon />, href: "#", label: "Twitter" },
-  {
-    icon: <LinkedInIcon />,
-    href: "#",
-    label: "LinkedIn",
-  },
-  { icon: <InstagramIcon />, href: "#", label: "Instagram" },
-];
+export interface StatsItems {
+  key: keyof HeroStats;
+  label: string;
+  suffix?: string;
+}
 
-const HeroSection = ({
-  personalInfo,
-  stats,
-  onInlineFieldClick,
-  activeInlineFieldId,
-  onAddAction,
-}: {
+export interface HeroSectionProps {
   personalInfo: PersonalInfo;
   stats?: HeroStats;
   onInlineFieldClick?: (
@@ -81,7 +67,14 @@ const HeroSection = ({
   ) => void;
   activeInlineFieldId?: string | null;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
-}) => {
+}
+const HeroSection = ({
+  personalInfo,
+  stats,
+  onInlineFieldClick,
+  activeInlineFieldId,
+  onAddAction,
+}: HeroSectionProps) => {
   const { isDarkMode } = useThemeContext();
   const { animatedStats, statsRef } = useAnimatedStats(stats, 2000);
   const {
@@ -91,34 +84,6 @@ const HeroSection = ({
     buttonGradient,
     buttonHoverGradient,
   } = getSectionPalette(isDarkMode);
-
-  const statItems: Array<{
-    key: keyof HeroStats;
-    label: string;
-    suffix?: string;
-  }> = [
-    { key: "yearsExperience", label: "Years Experience", suffix: "+" },
-    { key: "projects", label: "Completed Projects" },
-    { key: "clients", label: "Happy Clients" },
-    { key: "awards", label: "Honors and Awards", suffix: "+" },
-  ];
-
-  const getInlineFieldSx = (fieldId: string) => ({
-    borderRadius: 1,
-    outline:
-      activeInlineFieldId === fieldId
-        ? "2px solid rgba(20, 184, 166, 0.9)"
-        : "2px solid transparent",
-    outlineOffset: 2,
-    cursor: onInlineFieldClick ? "pointer" : "inherit",
-    transition: "outline-color 160ms ease, box-shadow 160ms ease",
-    "&:hover": onInlineFieldClick
-      ? {
-          outlineColor: "rgba(20, 184, 166, 0.55)",
-          boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-        }
-      : undefined,
-  });
 
   const createInlineFieldProps = (fieldId: string) => {
     if (!onInlineFieldClick) {
@@ -152,8 +117,12 @@ const HeroSection = ({
   };
 
   return (
-    <Box sx={{ position: "relative", width: "100%" }}>
+    <Box
+      id={`${heroSectionId}-main-container`}
+      sx={{ position: "relative", width: "100%" }}
+    >
       <Box
+        id={`${heroSectionId}-background-img`}
         sx={{
           position: "relative",
           minHeight: { xs: "100vh", md: 640 },
@@ -171,9 +140,25 @@ const HeroSection = ({
               ? "rgba(2, 6, 23, 0.78)"
               : "linear-gradient(90deg, rgba(15, 23, 42, 0.78) 0%, rgba(30, 41, 59, 0.48) 45%, rgba(30, 64, 175, 0.18) 100%)",
           },
+          // TODO: the background image should also have an outline when in edit mode, but we need to make sure the outline doesn't get cut off by the container's overflow:hidden
+          outline:
+            activeInlineFieldId === "personalInfo.backgroundUrl"
+              ? "2px solid rgba(20, 184, 166, 0.9)"
+              : "2px solid transparent",
+          cursor: onInlineFieldClick ? "pointer" : "inherit",
+          "&:hover": {
+            ...(onInlineFieldClick
+              ? {
+                  outlineColor: "rgba(20, 184, 166, 0.55)",
+                  boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
+                }
+              : undefined),
+          },
         }}
       >
+        {/* Content Container */}
         <Container
+          id={`${heroSectionId}-content-container`}
           maxWidth="lg"
           sx={{
             position: "relative",
@@ -181,9 +166,20 @@ const HeroSection = ({
             py: { xs: 10, md: 14 },
           }}
         >
-          <Stack spacing={4} alignItems="center" textAlign="center">
-            <Box sx={{ position: "relative", display: "inline-flex" }}>
+          {/* Content Stack */}
+          <Stack
+            id={`${heroSectionId}-content-stack`}
+            spacing={4}
+            alignItems="center"
+            textAlign="center"
+          >
+            <Box
+              id={`${heroSectionId}-avatar-container`}
+              sx={{ position: "relative", display: "inline-flex" }}
+            >
+              {/* Avatar Glow */}
               <Box
+                id={`${heroSectionId}-avatar-glow`}
                 sx={{
                   position: "absolute",
                   inset: -24,
@@ -195,7 +191,9 @@ const HeroSection = ({
                   opacity: 0.85,
                 }}
               />
+              {/* Avatar */}
               <Avatar
+                id={`${heroSectionId}-avatar`}
                 alt={personalInfo.name}
                 src={personalInfo.photoUrl}
                 sx={{
@@ -228,7 +226,12 @@ const HeroSection = ({
               />
             </Box>
 
-            <Stack spacing={1.5} alignItems="center">
+            {/* Text Content */}
+            <Stack
+              id={`${heroSectionId}-text-content`}
+              spacing={1.5}
+              alignItems="center"
+            >
               <Typography
                 component="h1"
                 sx={{
@@ -237,34 +240,52 @@ const HeroSection = ({
                   letterSpacing: "-0.04em",
                   fontSize: { xs: "2.75rem", sm: "4rem", md: "5.25rem" },
                   lineHeight: 0.96,
-                  ...getInlineFieldSx("personalInfo.name"),
+                  ...getInlineFieldSx({
+                    fieldId: "personalInfo.name",
+                    activeInlineFieldId,
+                    onInlineFieldClick,
+                  }),
                 }}
                 {...createInlineFieldProps("personalInfo.name")}
               >
                 {personalInfo.name}
               </Typography>
+
+              {/* Subtitle */}
               <Typography
+                id={`${heroSectionId}-subtitle`}
                 sx={{
                   color: "rgba(255,255,255,0.84)",
                   fontWeight: 700,
                   letterSpacing: "0.24em",
                   textTransform: "uppercase",
                   fontSize: { xs: "0.8rem", md: "0.95rem" },
-                  ...getInlineFieldSx("personalInfo.title"),
+                  ...getInlineFieldSx({
+                    fieldId: "personalInfo.title",
+                    activeInlineFieldId,
+                    onInlineFieldClick,
+                  }),
                 }}
                 {...createInlineFieldProps("personalInfo.title")}
               >
                 {personalInfo.title}
               </Typography>
+
+              {/* Summary */}
               {personalInfo.summary && (
                 <Typography
+                  id={`${heroSectionId}-summary`}
                   sx={{
                     maxWidth: 760,
                     color: "rgba(255,255,255,0.82)",
                     fontSize: { xs: "1rem", md: "1.125rem" },
                     lineHeight: 1.75,
                     mt: 1,
-                    ...getInlineFieldSx("personalInfo.summary"),
+                    ...getInlineFieldSx({
+                      fieldId: "personalInfo.summary",
+                      activeInlineFieldId,
+                      onInlineFieldClick,
+                    }),
                   }}
                   {...createInlineFieldProps("personalInfo.summary")}
                 >
@@ -273,7 +294,12 @@ const HeroSection = ({
               )}
             </Stack>
 
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+            {/* Buttons Hire & Download */}
+            <Stack
+              id={`${heroSectionId}-action-buttons`}
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+            >
               <Button
                 variant="contained"
                 component="a"
@@ -300,29 +326,25 @@ const HeroSection = ({
                   transition: "outline-color 160ms ease, box-shadow 160ms ease",
                   "&:hover": {
                     background: buttonHoverGradient,
-                    ...(onInlineFieldClick
-                      ? {
-                          outlineColor: "rgba(20, 184, 166, 0.55)",
-                          boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-                        }
-                      : undefined),
+                    ...(onInlineFieldClick && {
+                      outlineColor: "rgba(20, 184, 166, 0.55)",
+                      boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
+                    }),
                   },
                 }}
-                {...(onInlineFieldClick
-                  ? {
-                      onClick: (event: React.MouseEvent) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        onInlineFieldClick(
-                          "about",
-                          "personalInfo.hireButtonText",
-                          event.currentTarget as HTMLElement,
-                        );
-                      },
-                      role: "button",
-                      tabIndex: 0,
-                    }
-                  : {})}
+                {...(onInlineFieldClick && {
+                  onClick: (event: React.MouseEvent) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onInlineFieldClick(
+                      "about",
+                      "personalInfo.hireButtonText",
+                      event.currentTarget as HTMLElement,
+                    );
+                  },
+                  role: "button",
+                  tabIndex: 0,
+                })}
               >
                 {personalInfo.hireButtonText || "Hire Me"}
               </Button>
@@ -356,26 +378,25 @@ const HeroSection = ({
                       : undefined),
                   },
                 }}
-                {...(onInlineFieldClick
-                  ? {
-                      onClick: (event: React.MouseEvent) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        onInlineFieldClick(
-                          "about",
-                          "personalInfo.downloadButtonText",
-                          event.currentTarget as HTMLElement,
-                        );
-                      },
-                      role: "button",
-                      tabIndex: 0,
-                    }
-                  : {})}
+                {...(onInlineFieldClick && {
+                  onClick: (event: React.MouseEvent) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onInlineFieldClick(
+                      "about",
+                      "personalInfo.downloadButtonText",
+                      event.currentTarget as HTMLElement,
+                    );
+                  },
+                  role: "button",
+                  tabIndex: 0,
+                })}
               >
                 {personalInfo.downloadButtonText || "Download CV"}
               </Button>
             </Stack>
 
+            {/* Social Links */}
             <Stack direction="row" spacing={1.5} flexWrap="wrap">
               {socialLinks.map(({ icon, href, label }) => (
                 <IconButton
@@ -392,7 +413,11 @@ const HeroSection = ({
                       : "rgba(255, 255, 255, 0.18)",
                     border: "1px solid rgba(255,255,255,0.16)",
                     backdropFilter: "blur(12px)",
-                    ...getInlineFieldSx(`personalInfo.social.${label}`),
+                    ...getInlineFieldSx({
+                      fieldId: `personalInfo.social.${label}`,
+                      activeInlineFieldId,
+                      onInlineFieldClick,
+                    }),
                     transition:
                       "transform 0.25s ease, background-color 0.25s ease, outline-color 160ms ease, box-shadow 160ms ease",
                     "&:hover": {
@@ -423,6 +448,8 @@ const HeroSection = ({
                   {icon}
                 </IconButton>
               ))}
+
+              {/* Custom Social Links */}
               {(personalInfo.social ?? []).map((s, idx) => (
                 <IconButton
                   key={`custom-social-${idx}`}
@@ -440,7 +467,11 @@ const HeroSection = ({
                       : "rgba(255, 255, 255, 0.18)",
                     border: "1px solid rgba(255,255,255,0.16)",
                     backdropFilter: "blur(12px)",
-                    ...getInlineFieldSx(`personalInfo.social.custom.${idx}`),
+                    ...getInlineFieldSx({
+                      fieldId: `personalInfo.social.custom.${idx}`,
+                      activeInlineFieldId,
+                      onInlineFieldClick,
+                    }),
                     transition:
                       "transform 0.25s ease, background-color 0.25s ease, outline-color 160ms ease, box-shadow 160ms ease",
                     "&:hover": {
@@ -475,6 +506,7 @@ const HeroSection = ({
                   )}
                 </IconButton>
               ))}
+              {/* Add Social Link */}
               {onAddAction && (
                 <IconButton
                   aria-label="Add social link"
@@ -545,7 +577,11 @@ const HeroSection = ({
                         color: primaryAccent,
                         lineHeight: 1,
                         mb: 1,
-                        ...getInlineFieldSx(`stats.${key}`),
+                        ...getInlineFieldSx({
+                          fieldId: `stats.${key}`,
+                          activeInlineFieldId,
+                          onInlineFieldClick,
+                        }),
                       }}
                       {...createInlineFieldProps(`stats.${key}`)}
                     >
@@ -586,7 +622,11 @@ const HeroSection = ({
                       color: primaryAccent,
                       lineHeight: 1,
                       mb: 1,
-                      ...getInlineFieldSx(`stats.custom.${idx}`),
+                      ...getInlineFieldSx({
+                        fieldId: `stats.custom.${idx}`,
+                        activeInlineFieldId,
+                        onInlineFieldClick,
+                      }),
                     }}
                     {...createInlineFieldProps(`stats.custom.${idx}`)}
                   >

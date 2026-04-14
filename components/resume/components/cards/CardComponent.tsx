@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useThemeContext } from "@/context/ThemeContext";
-import { getSectionPalette } from "../../theme/sectionPalette";
+import { getSectionPalette } from "../../../../theme/sectionPalette";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";

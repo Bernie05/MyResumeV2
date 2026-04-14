@@ -56,292 +56,33 @@ import {
   textToCsv,
   textToLines,
 } from "./utils/util";
+import { getInlineFieldLabel } from "./utils/componentUtil";
+import { EDITOR_SECTIONS, InlineEditableFieldId } from "./constants/constant";
 
 const STORAGE_KEY = "resume-secret-draft";
 const LEGACY_DRAFT_STORAGE_KEY = "resume-studio-draft";
 
-const EDITOR_SECTIONS = [
-  { value: "personalInfo", label: "Personal Info" },
-  { value: "stats", label: "Stats" },
-  { value: "experience", label: "Experience" },
-  { value: "education", label: "Education" },
-  { value: "skills", label: "Skills" },
-  { value: "projects", label: "Projects" },
-  { value: "portfolio", label: "Portfolio" },
-  { value: "certifications", label: "Certifications" },
-] as const;
-
-type EditorSection = (typeof EDITOR_SECTIONS)[number]["value"];
+export type EditorSection = (typeof EDITOR_SECTIONS)[number]["value"];
 
 interface SecretResumeEditorProps {
   initialResume: ResumeData;
 }
 
-const PREVIEW_SECTION_TO_EDITOR_SECTION: Record<
-  ResumeEditableSection,
-  EditorSection
-> = {
-  about: "personalInfo",
-  services: "skills",
-  experience: "experience",
-  portfolio: "portfolio",
-  projects: "projects",
-  education: "education",
-  skills: "skills",
-  certifications: "certifications",
-  contact: "personalInfo",
-};
+export interface IEditorInterface {
+  activeSectionId: ResumeEditableSection | null;
+  onInlineFieldClick?: (
+    section: ResumeEditableSection,
+    fieldId: InlineEditableFieldId | string,
+    anchor?: HTMLElement,
+  ) => void;
+  activeInlineFieldId?: InlineEditableFieldId | string | null;
+}
 
-type InlineEditableFieldId =
-  | `personalInfo.${keyof ResumeData["personalInfo"]}`
-  | `personalInfo.hireButtonText`
-  | `personalInfo.downloadButtonText`
-  | `personalInfo.social.${string}`
-  | `stats.${keyof ResumeData["stats"]}`
-  | `stats.custom.${number}`
-  | `experience.${number}.company`
-  | `experience.${number}.position`
-  | `experience.${number}.duration`
-  | `experience.${number}.location`
-  | `experience.${number}.description.${number}`
-  | `projects.${number}.name`
-  | `projects.${number}.description`
-  | `projects.${number}.image`
-  | `projects.${number}.technologies`
-  | `projects.${number}.link`
-  | `projects.${number}.demoUrl`
-  | `projects.${number}.caseStudy`
-  | `portfolio.${number}.name`
-  | `portfolio.${number}.description`
-  | `portfolio.${number}.image`
-  | `portfolio.${number}.longDescription`
-  | `portfolio.${number}.category`
-  | `portfolio.${number}.technologies`
-  | `portfolio.${number}.demoUrl`
-  | `portfolio.${number}.githubUrl`
-  | `portfolio.${number}.testimonial`
-  | `portfolio.${number}.client`
-  | `portfolio.${number}.result.${number}`
-  | `education.${number}.school`
-  | `education.${number}.degree`
-  | `education.${number}.year`
-  | `education.${number}.location`
-  | `skills.${number}.category`
-  | `skills.${number}.icon`
-  | `skills.${number}.subtitle`
-  | `skills.${number}.${number}.name`
-  | `skills.${number}.${number}.icon`
-  | `skills.${number}.${number}.proficiency`
-  | `certifications.${number}.name`
-  | `certifications.${number}.issuer`
-  | `certifications.${number}.year`
-  | "servicesTitle"
-  | "servicesSubtitle";
-
-const INLINE_FIELD_LABELS: Partial<Record<InlineEditableFieldId, string>> = {
-  "personalInfo.name": "Name",
-  "personalInfo.title": "Title",
-  "personalInfo.summary": "Summary",
-  "personalInfo.email": "Email",
-  "personalInfo.phone": "Phone",
-  "personalInfo.location": "Location",
-  "personalInfo.website": "Website",
-  "personalInfo.linkedin": "LinkedIn",
-  "personalInfo.github": "GitHub",
-  "personalInfo.photoUrl": "Photo URL",
-  "personalInfo.backgroundUrl": "Background Image URL",
-  "personalInfo.hireButtonText": "Hire Button Text",
-  "personalInfo.downloadButtonText": "Download Button Text",
-  "stats.yearsExperience": "Years of experience",
-  "stats.projects": "Completed projects",
-  "stats.clients": "Clients",
-  "stats.awards": "Awards",
-  servicesTitle: "Services Title",
-  servicesSubtitle: "Services Subtitle",
-};
-
-// Label generator for inline editable fields, with special handling for dynamic fields like experience items, project items, etc.
-const getInlineFieldLabel = (fieldId: InlineEditableFieldId): string => {
-  console.log("Getting label for fieldId:", fieldId);
-  const directLabel = INLINE_FIELD_LABELS[fieldId];
-
-  if (directLabel) {
-    return directLabel;
-  }
-
-  //
-  const experienceMatch = fieldId.match(
-    /^experience\.(\d+)\.(company|position|duration|location)$/,
-  );
-
-  if (experienceMatch) {
-    const index = Number(experienceMatch[1]) + 1;
-    const key = experienceMatch[2];
-    const keyLabelMap: Record<string, string> = {
-      company: "Company",
-      position: "Position",
-      duration: "Duration",
-      location: "Location",
-    };
-
-    return `Experience #${index} ${keyLabelMap[key] ?? key}`;
-  }
-
-  const experienceBulletMatch = fieldId.match(
-    /^experience\.(\d+)\.description\.(\d+)$/,
-  );
-
-  if (experienceBulletMatch) {
-    const expIndex = Number(experienceBulletMatch[1]) + 1;
-    const bulletIndex = Number(experienceBulletMatch[2]) + 1;
-    return `Experience #${expIndex} Bullet #${bulletIndex}`;
-  }
-
-  const socialMatch = fieldId.match(/^personalInfo\.social\.(.+)$/);
-
-  if (socialMatch) {
-    const customSocialMatch = socialMatch[1].match(/^custom\.(\d+)$/);
-    if (customSocialMatch) {
-      return `Custom Social Link #${Number(customSocialMatch[1]) + 1}`;
-    }
-    return `Social: ${socialMatch[1]}`;
-  }
-
-  const customStatMatch = fieldId.match(/^stats\.custom\.(\d+)$/);
-  if (customStatMatch) {
-    return `Custom Stat #${Number(customStatMatch[1]) + 1}`;
-  }
-
-  const projectMatch = fieldId.match(
-    /^projects\.(\d+)\.(name|description|image|technologies|link|demoUrl|caseStudy)$/,
-  );
-
-  if (projectMatch) {
-    const index = Number(projectMatch[1]) + 1;
-    const key = projectMatch[2];
-    const keyLabelMap: Record<string, string> = {
-      name: "Name",
-      description: "Description",
-      image: "Image URL",
-      technologies: "Technologies",
-      link: "Link",
-      demoUrl: "Demo URL",
-      caseStudy: "Case Study",
-    };
-    return `Project #${index} ${keyLabelMap[key] ?? key}`;
-  }
-
-  const portfolioExtendedMatch = fieldId.match(
-    /^portfolio\.(\d+)\.(name|description|image|longDescription|category|technologies|demoUrl|githubUrl|testimonial|client)$/,
-  );
-
-  if (portfolioExtendedMatch) {
-    const index = Number(portfolioExtendedMatch[1]) + 1;
-    const key = portfolioExtendedMatch[2];
-    const keyLabelMap: Record<string, string> = {
-      name: "Title",
-      description: "Description",
-      image: "Image URL",
-      longDescription: "Long Description",
-      category: "Category",
-      technologies: "Technologies",
-      demoUrl: "Demo URL",
-      githubUrl: "GitHub URL",
-      testimonial: "Testimonial",
-      client: "Client",
-    };
-    return `Portfolio #${index} ${keyLabelMap[key] ?? key}`;
-  }
-
-  const portfolioResultMatch = fieldId.match(
-    /^portfolio\.(\d+)\.result\.(\d+)$/,
-  );
-
-  if (portfolioResultMatch) {
-    const portIndex = Number(portfolioResultMatch[1]) + 1;
-    const resultIndex = Number(portfolioResultMatch[2]) + 1;
-    return `Portfolio #${portIndex} Result #${resultIndex}`;
-  }
-
-  const educationMatch = fieldId.match(
-    /^education\.(\d+)\.(school|degree|year|location)$/,
-  );
-
-  if (educationMatch) {
-    const index = Number(educationMatch[1]) + 1;
-    const key = educationMatch[2];
-    const keyLabelMap: Record<string, string> = {
-      school: "School",
-      degree: "Degree & Field",
-      year: "Year",
-      location: "Location",
-    };
-
-    return `Education #${index} ${keyLabelMap[key] ?? key}`;
-  }
-
-  const skillsCategoryMatch = fieldId.match(/^skills\.(\d+)\.category$/);
-
-  if (skillsCategoryMatch) {
-    const index = Number(skillsCategoryMatch[1]) + 1;
-    return `Skill Category #${index}`;
-  }
-
-  const skillsCategoryIconMatch = fieldId.match(/^skills\.(\d+)\.icon$/);
-  if (skillsCategoryIconMatch) {
-    const index = Number(skillsCategoryIconMatch[1]) + 1;
-    return `Skill Category #${index} Icon`;
-  }
-
-  const skillsCategorySubtitleMatch = fieldId.match(
-    /^skills\.(\d+)\.subtitle$/,
-  );
-  if (skillsCategorySubtitleMatch) {
-    const index = Number(skillsCategorySubtitleMatch[1]) + 1;
-    return `Skill Category #${index} Subtitle`;
-  }
-
-  const skillsItemMatch = fieldId.match(/^skills\.(\d+)\.(\d+)\.name$/);
-
-  if (skillsItemMatch) {
-    const catIndex = Number(skillsItemMatch[1]) + 1;
-    const itemIndex = Number(skillsItemMatch[2]) + 1;
-    return `Skill Category #${catIndex} Item #${itemIndex}`;
-  }
-
-  const skillsItemIconMatch = fieldId.match(/^skills\.(\d+)\.(\d+)\.icon$/);
-  if (skillsItemIconMatch) {
-    const catIndex = Number(skillsItemIconMatch[1]) + 1;
-    const itemIndex = Number(skillsItemIconMatch[2]) + 1;
-    return `Skill Category #${catIndex} Item #${itemIndex} Icon`;
-  }
-
-  const skillsItemProficiencyMatch = fieldId.match(
-    /^skills\.(\d+)\.(\d+)\.proficiency$/,
-  );
-  if (skillsItemProficiencyMatch) {
-    const catIndex = Number(skillsItemProficiencyMatch[1]) + 1;
-    const itemIndex = Number(skillsItemProficiencyMatch[2]) + 1;
-    return `Skill Category #${catIndex} Item #${itemIndex} Proficiency`;
-  }
-
-  const certificationMatch = fieldId.match(
-    /^certifications\.(\d+)\.(name|issuer|year)$/,
-  );
-
-  if (certificationMatch) {
-    const index = Number(certificationMatch[1]) + 1;
-    const key = certificationMatch[2];
-    const keyLabelMap: Record<string, string> = {
-      name: "Name",
-      issuer: "Issuer",
-      year: "Year",
-    };
-
-    return `Certification #${index} ${keyLabelMap[key] ?? key}`;
-  }
-
-  return fieldId;
+export type IEditorInlineFieldSxProps = Omit<
+  IEditorInterface,
+  "activeSectionId"
+> & {
+  fieldId: InlineEditableFieldId;
 };
 
 const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
