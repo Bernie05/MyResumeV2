@@ -1,8 +1,13 @@
+import { ResumeEditableSection } from "@/components/resume/ResumePage";
 import {
   INLINE_FIELD_LABELS,
   InlineEditableFieldId,
 } from "../constants/constant";
-import { IEditorInlineFieldSxProps } from "../SecretResumeEditor";
+import {
+  IEditorCreateInlineFieldProps,
+  IEditorFieldAndSectionProps,
+  IEditorInlineFieldSxProps,
+} from "../SecretResumeEditor";
 
 /**
  *  Utility function to generate sx styles for inline editable fields, applying special styles when the field is active or hovered, and ensuring consistent styling across different types of fields (text, icons, etc.) based on the fieldId.
@@ -217,4 +222,89 @@ export const getInlineFieldLabel = (fieldId: InlineEditableFieldId): string => {
   }
 
   return fieldId;
+};
+
+// Other utility functions related to sections and fields can be added here, such as createSectionProps for making sections interactive in the SecretResumeEditor, etc.
+const handleSectionClick = (
+  sectionId: ResumeEditableSection,
+  onSectionClick: ((sectionId: ResumeEditableSection) => void) | undefined,
+) => {
+  onSectionClick?.(sectionId);
+};
+
+/**
+ * Utility function to generate props for resume sections that can be edited in the SecretResumeEditor, enabling click interactions and keyboard accessibility when an onSectionClick handler is provided. This function helps to keep the ResumePage component cleaner by abstracting the logic for making sections interactive based on the presence of the onSectionClick handler and the active section state.
+ * @param interactiveSections - A boolean indicating whether sections should be interactive (clickable).
+ * @param sectionId - The unique identifier for the resume section, used to determine which section was clicked and to apply specific styles if needed.
+ * @param onSectionClick - Optional click handler that, if provided, enables click interactions and keyboard accessibility for the section.
+ */
+export const createSectionProps = (
+  interactiveSections: boolean,
+  sectionId: ResumeEditableSection,
+  onSectionClick: ((sectionId: ResumeEditableSection) => void) | undefined,
+) => {
+  if (!interactiveSections) {
+    return {};
+  }
+
+  return {
+    role: "button",
+    tabIndex: 0,
+    "aria-label": `Edit ${sectionId} section`,
+    onClick: () => handleSectionClick(sectionId, onSectionClick),
+    onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        handleSectionClick(sectionId, onSectionClick);
+      }
+    },
+  };
+};
+
+/**
+ * Utility function to generate props for inline editable fields in the SecretResumeEditor, enabling click interactions and keyboard accessibility when an onInlineFieldClick handler is provided. This function abstracts the logic for making fields interactive based on the presence of the onInlineFieldClick handler and the active field state, and it can be used across different types of fields (text, icons, etc.) by simply passing the appropriate fieldId and sectionId.
+ * @param sectionId - The unique identifier for the resume section that the field belongs to, used to provide context for the onInlineFieldClick handler.
+ * @param fieldId - The unique identifier for the inline editable field, used to determine which field was clicked and to apply specific styles if needed.
+ * @param onInlineFieldClick - Optional click handler that, if provided, enables click interactions and keyboard accessibility for the field.
+ * @returns An object containing the necessary props to make the field interactive in the SecretResumeEditor.
+ */
+export const createInlineFieldProps = (
+  sectionId: ResumeEditableSection,
+  fieldId: string,
+  onInlineFieldClick:
+    | ((
+        section: ResumeEditableSection,
+        fieldId: string,
+        anchor?: HTMLElement,
+      ) => void)
+    | undefined,
+) => {
+  if (!onInlineFieldClick) {
+    return {};
+  }
+
+  return {
+    onClick: (event: React.MouseEvent) => {
+      event.stopPropagation();
+      onInlineFieldClick(
+        sectionId,
+        fieldId,
+        event.currentTarget as HTMLElement,
+      );
+    },
+    onKeyDown: (event: React.KeyboardEvent) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        event.stopPropagation();
+        onInlineFieldClick(
+          sectionId,
+          fieldId,
+          event.currentTarget as HTMLElement,
+        );
+      }
+    },
+    role: "button",
+    tabIndex: 0,
+    "aria-label": `Edit ${fieldId}`,
+  };
 };

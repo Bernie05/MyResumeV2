@@ -19,7 +19,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import { IThemePalette } from "@/theme/sectionPalette";
+import { getSectionPalette, IThemePalette } from "@/theme/sectionPalette";
 import { NavbarPosition } from "./ResumePage";
 import {
   editorBtn,
@@ -28,20 +28,18 @@ import {
   secretEditor,
   websiteTitle,
 } from "./constants/constant";
+import { NavbarBtn } from "./components/buttons/NavbarBtn";
 
-export interface INavbarProps extends IThemePalette {
+export interface INavbarProps {
   isAuthenticated: boolean;
   position: NavbarPosition;
 }
 
-const Navbar = ({
-  isAuthenticated,
-  isDarkMode,
-  theme,
-  position,
-}: INavbarProps) => {
+const Navbar = ({ isAuthenticated, position }: INavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { toggleTheme } = useThemeContext();
+  const { isDarkMode } = useThemeContext();
+  const theme = getSectionPalette(isDarkMode);
 
   const {
     navbarBackgroundColor,
@@ -94,18 +92,19 @@ const Navbar = ({
 
           {/* Navbar buttons */}
           <Stack
-            id={`${navbarId}-buttons`}
+            id={`${navbarId}-buttons-row`}
             direction="row"
             spacing={1}
-            sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}
+            sx={{
+              display: { xs: "none", md: "flex" },
+              alignItems: "center",
+            }}
           >
-            {NAV_ITEMS.map(({ label, href }) => (
-              <Button
-                id={`${navbarId}-${label.toLowerCase()}-btn`}
-                key={`${navbarId}-${label.toLowerCase()}-btn`}
-                href={href}
-                color="inherit"
-                sx={{
+            <NavbarBtn
+              id={navbarId}
+              navbarBtns={NAV_ITEMS}
+              cssProps={{
+                buttonCss: {
                   textTransform: "uppercase",
                   fontWeight: 700,
                   letterSpacing: "0.08em",
@@ -118,11 +117,9 @@ const Navbar = ({
                   "&:active": {
                     color: secondaryAccent,
                   },
-                }}
-              >
-                {label}
-              </Button>
-            ))}
+                },
+              }}
+            />
           </Stack>
 
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
@@ -200,35 +197,35 @@ const Navbar = ({
             }}
           >
             {/* Buttons Links */}
-            <Stack spacing={1}>
-              {NAV_ITEMS.map(({ label, href }) => (
-                <Button
-                  id={`${navbarId}-${label.toLowerCase()}-btn`}
-                  key={`${navbarId}-${label.toLowerCase()}-btn`}
-                  href={href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  color="inherit"
-                  sx={{
-                    justifyContent: "flex-start",
-                    px: 2,
-                    py: 1.25,
-                    borderRadius: 2,
-                    textTransform: "uppercase",
-                    fontWeight: 700,
-                    letterSpacing: "0.08em",
-                    fontSize: "0.78rem",
-                    color: titleColor,
-                    "&:hover": {
-                      color: navbarTextHoverBackground,
-                    },
-                    "&:active": {
-                      color: primaryAccent,
+            <Stack id={`${navbarId}-buttons-column`} spacing={1}>
+              {
+                <NavbarBtn
+                  id={navbarId}
+                  navbarBtns={NAV_ITEMS}
+                  handler={{
+                    onClick: () => setIsMobileMenuOpen(false),
+                  }}
+                  cssProps={{
+                    buttonCss: {
+                      justifyContent: "flex-start",
+                      px: 2,
+                      py: 1.25,
+                      borderRadius: 2,
+                      textTransform: "uppercase",
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      fontSize: "0.78rem",
+                      color: titleColor,
+                      "&:hover": {
+                        color: navbarTextHoverBackground,
+                      },
+                      "&:active": {
+                        color: primaryAccent,
+                      },
                     },
                   }}
-                >
-                  {label}
-                </Button>
-              ))}
+                />
+              }
             </Stack>
           </Box>
         </Collapse>
