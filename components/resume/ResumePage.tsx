@@ -32,7 +32,8 @@ export type ResumeEditableSection =
   | "education"
   | "skills"
   | "certifications"
-  | "contact";
+  | "contact"
+  | "stats";
 
 interface ResumePageProps {
   resume: ResumeData;
@@ -60,6 +61,7 @@ const ResumePage = ({
   onInlineFieldClick,
   onAddAction,
 }: ResumePageProps) => {
+  console.log("MAIN RESUME");
   const { isDarkMode } = useThemeContext();
   const theme = getSectionPalette(isDarkMode);
 
@@ -113,12 +115,7 @@ const ResumePage = ({
   return (
     <Box component="main" sx={{ width: "100%", minHeight: "100vh" }}>
       {/* Navbar */}
-      <Navbar
-        theme={theme}
-        isDarkMode={isDarkMode}
-        isAuthenticated={isAuthenticated}
-        position={position}
-      />
+      <Navbar isAuthenticated={isAuthenticated} position={position} />
 
       {/* Hero Section */}
       <Box

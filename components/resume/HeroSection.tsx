@@ -3,7 +3,7 @@
 import React from "react";
 import { useThemeContext } from "@/context/ThemeContext";
 import { useAnimatedStats } from "@/hook/useAnimated";
-import { getSectionPalette } from "../../theme/sectionPalette";
+import { getSectionPalette, IThemePalette } from "../../theme/sectionPalette";
 import DownloadIcon from "@mui/icons-material/Download";
 import LinkIcon from "@mui/icons-material/Link";
 import { ICON_MAP } from "@/components/resume/ServicesSection";
@@ -18,7 +18,11 @@ import {
   Typography,
 } from "@mui/material";
 import { heroSectionId, socialLinks, statItems } from "./constants/constant";
-import { getInlineFieldSx } from "../secret/utils/componentUtil";
+import {
+  createInlineFieldProps,
+  getInlineFieldSx,
+} from "../secret/utils/componentUtil";
+import { SocialMediaBtn } from "./components/buttons/SocialMediaBtn";
 
 export interface PersonalInfo {
   // Basic info
@@ -68,6 +72,7 @@ export interface HeroSectionProps {
   activeInlineFieldId?: string | null;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
 }
+
 const HeroSection = ({
   personalInfo,
   stats,
@@ -75,44 +80,58 @@ const HeroSection = ({
   activeInlineFieldId,
   onAddAction,
 }: HeroSectionProps) => {
-  const { isDarkMode } = useThemeContext();
   const { animatedStats, statsRef } = useAnimatedStats(stats, 2000);
+  const { isDarkMode } = useThemeContext();
+  const theme = getSectionPalette(isDarkMode);
+  const cursor = onInlineFieldClick ? "pointer" : "inherit";
+  const sectionId = "about";
+
   const {
     primaryAccent,
     accentGlow,
     accentText,
     buttonGradient,
     buttonHoverGradient,
-  } = getSectionPalette(isDarkMode);
+  } = theme;
 
-  const createInlineFieldProps = (fieldId: string) => {
-    if (!onInlineFieldClick) {
-      return {};
-    }
-
+  // For Inline Editing - get props for avatar field
+  const getInlineFieldForAvatar = () => {
     return {
-      onClick: (event: React.MouseEvent) => {
-        event.stopPropagation();
-        onInlineFieldClick(
-          "about",
-          fieldId,
-          event.currentTarget as HTMLElement,
-        );
-      },
-      onKeyDown: (event: React.KeyboardEvent) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          event.stopPropagation();
-          onInlineFieldClick(
-            "about",
-            fieldId,
-            event.currentTarget as HTMLElement,
-          );
-        }
-      },
-      role: "button",
-      tabIndex: 0,
-      "aria-label": `Edit ${fieldId}`,
+      ...createInlineFieldProps(
+        sectionId,
+        "personalInfo.photoUrl",
+        onInlineFieldClick,
+      ),
+    };
+  };
+
+  const getInlineFieldForName = () => {
+    return {
+      ...createInlineFieldProps(
+        sectionId,
+        "personalInfo.name",
+        onInlineFieldClick,
+      ),
+    };
+  };
+
+  const getInlineFieldForTitle = () => {
+    return {
+      ...createInlineFieldProps(
+        sectionId,
+        "personalInfo.title",
+        onInlineFieldClick,
+      ),
+    };
+  };
+
+  const getInlineFieldForSummary = () => {
+    return {
+      ...createInlineFieldProps(
+        sectionId,
+        "personalInfo.summary",
+        onInlineFieldClick,
+      ),
     };
   };
 
@@ -145,7 +164,7 @@ const HeroSection = ({
             activeInlineFieldId === "personalInfo.backgroundUrl"
               ? "2px solid rgba(20, 184, 166, 0.9)"
               : "2px solid transparent",
-          cursor: onInlineFieldClick ? "pointer" : "inherit",
+          cursor,
           "&:hover": {
             ...(onInlineFieldClick
               ? {
@@ -191,6 +210,7 @@ const HeroSection = ({
                   opacity: 0.85,
                 }}
               />
+
               {/* Avatar */}
               <Avatar
                 id={`${heroSectionId}-avatar`}
@@ -209,7 +229,7 @@ const HeroSection = ({
                       ? "2px solid rgba(20, 184, 166, 0.9)"
                       : "2px solid transparent",
                   outlineOffset: 2,
-                  cursor: onInlineFieldClick ? "pointer" : "inherit",
+                  cursor,
                   transition:
                     "transform 0.35s ease, outline-color 160ms ease, box-shadow 160ms ease",
                   "&:hover": {
@@ -222,7 +242,7 @@ const HeroSection = ({
                       : undefined),
                   },
                 }}
-                {...createInlineFieldProps("personalInfo.photoUrl")}
+                {...getInlineFieldForAvatar()}
               />
             </Box>
 
@@ -246,7 +266,7 @@ const HeroSection = ({
                     onInlineFieldClick,
                   }),
                 }}
-                {...createInlineFieldProps("personalInfo.name")}
+                {...getInlineFieldForName()}
               >
                 {personalInfo.name}
               </Typography>
@@ -266,7 +286,7 @@ const HeroSection = ({
                     onInlineFieldClick,
                   }),
                 }}
-                {...createInlineFieldProps("personalInfo.title")}
+                {...getInlineFieldForTitle()}
               >
                 {personalInfo.title}
               </Typography>
@@ -287,7 +307,7 @@ const HeroSection = ({
                       onInlineFieldClick,
                     }),
                   }}
-                  {...createInlineFieldProps("personalInfo.summary")}
+                  {...getInlineFieldForSummary()}
                 >
                   {personalInfo.summary}
                 </Typography>
@@ -322,7 +342,7 @@ const HeroSection = ({
                       ? "2px solid rgba(20, 184, 166, 0.9)"
                       : "2px solid transparent",
                   outlineOffset: 2,
-                  cursor: onInlineFieldClick ? "pointer" : "inherit",
+                  cursor,
                   transition: "outline-color 160ms ease, box-shadow 160ms ease",
                   "&:hover": {
                     background: buttonHoverGradient,
@@ -365,7 +385,7 @@ const HeroSection = ({
                       ? "2px solid rgba(20, 184, 166, 0.9)"
                       : "2px solid transparent",
                   outlineOffset: 2,
-                  cursor: onInlineFieldClick ? "pointer" : "inherit",
+                  cursor,
                   transition: "outline-color 160ms ease, box-shadow 160ms ease",
                   "&:hover": {
                     borderColor: "common.white",
@@ -398,56 +418,13 @@ const HeroSection = ({
 
             {/* Social Links */}
             <Stack direction="row" spacing={1.5} flexWrap="wrap">
-              {socialLinks.map(({ icon, href, label }) => (
-                <IconButton
-                  key={label}
-                  component="a"
-                  href={onInlineFieldClick ? undefined : href}
-                  aria-label={label}
-                  sx={{
-                    width: 52,
-                    height: 52,
-                    color: "common.white",
-                    backgroundColor: isDarkMode
-                      ? "rgba(15, 23, 42, 0.78)"
-                      : "rgba(255, 255, 255, 0.18)",
-                    border: "1px solid rgba(255,255,255,0.16)",
-                    backdropFilter: "blur(12px)",
-                    ...getInlineFieldSx({
-                      fieldId: `personalInfo.social.${label}`,
-                      activeInlineFieldId,
-                      onInlineFieldClick,
-                    }),
-                    transition:
-                      "transform 0.25s ease, background-color 0.25s ease, outline-color 160ms ease, box-shadow 160ms ease",
-                    "&:hover": {
-                      transform: "translateY(-3px)",
-                      backgroundColor: `${primaryAccent}55`,
-                      ...(onInlineFieldClick
-                        ? {
-                            outlineColor: "rgba(20, 184, 166, 0.55)",
-                            boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-                          }
-                        : undefined),
-                    },
-                  }}
-                  {...(onInlineFieldClick
-                    ? {
-                        onClick: (event: React.MouseEvent) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          onInlineFieldClick(
-                            "about",
-                            `personalInfo.social.${label}`,
-                            event.currentTarget as HTMLElement,
-                          );
-                        },
-                      }
-                    : {})}
-                >
-                  {icon}
-                </IconButton>
-              ))}
+              <SocialMediaBtn
+                socialLinks={socialLinks}
+                theme={theme}
+                isDarkMode={isDarkMode}
+                onInlineFieldClick={onInlineFieldClick}
+                onAddAction={onAddAction}
+              />
 
               {/* Custom Social Links */}
               {(personalInfo.social ?? []).map((s, idx) => (
@@ -532,6 +509,7 @@ const HeroSection = ({
         </Container>
       </Box>
 
+      {/* Stats transfer to other section */}
       {stats && (
         <Box
           ref={statsRef}
@@ -583,7 +561,11 @@ const HeroSection = ({
                           onInlineFieldClick,
                         }),
                       }}
-                      {...createInlineFieldProps(`stats.${key}`)}
+                      {...createInlineFieldProps(
+                        "stats",
+                        `stats.${key}`,
+                        onInlineFieldClick,
+                      )}
                     >
                       {(animatedStats[key] ?? 0).toLocaleString()}
                       {suffix}
@@ -628,7 +610,11 @@ const HeroSection = ({
                         onInlineFieldClick,
                       }),
                     }}
-                    {...createInlineFieldProps(`stats.custom.${idx}`)}
+                    {...createInlineFieldProps(
+                      "stats",
+                      `stats.custom.${idx}`,
+                      onInlineFieldClick,
+                    )}
                   >
                     {customStat.value.toLocaleString()}
                     {customStat.suffix}

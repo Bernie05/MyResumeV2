@@ -57,7 +57,11 @@ import {
   textToLines,
 } from "./utils/util";
 import { getInlineFieldLabel } from "./utils/componentUtil";
-import { EDITOR_SECTIONS, InlineEditableFieldId } from "./constants/constant";
+import {
+  EDITOR_SECTIONS,
+  InlineEditableFieldId,
+  PREVIEW_SECTION_TO_EDITOR_SECTION,
+} from "./constants/constant";
 
 const STORAGE_KEY = "resume-secret-draft";
 const LEGACY_DRAFT_STORAGE_KEY = "resume-studio-draft";
@@ -69,13 +73,14 @@ interface SecretResumeEditorProps {
 }
 
 export interface IEditorInterface {
-  activeSectionId: ResumeEditableSection | null;
+  activeSectionId?: ResumeEditableSection | null;
   onInlineFieldClick?: (
     section: ResumeEditableSection,
     fieldId: InlineEditableFieldId | string,
     anchor?: HTMLElement,
   ) => void;
   activeInlineFieldId?: InlineEditableFieldId | string | null;
+  onAddAction?: (action: string, anchor: HTMLElement) => void;
 }
 
 export type IEditorInlineFieldSxProps = Omit<
@@ -84,6 +89,24 @@ export type IEditorInlineFieldSxProps = Omit<
 > & {
   fieldId: InlineEditableFieldId;
 };
+
+export type IEditorFieldAndSectionProps = Omit<
+  IEditorInlineFieldSxProps,
+  "activeInlineFieldId" | "onAddAction"
+> & {
+  sectionId: ResumeEditableSection;
+  fieldId: InlineEditableFieldId;
+};
+
+export interface IEditorCreateInlineFieldProps {
+  sectionId: ResumeEditableSection;
+  fieldId: InlineEditableFieldId;
+  onInlineFieldClick?: (
+    section: ResumeEditableSection,
+    fieldId: InlineEditableFieldId,
+    anchor?: HTMLElement,
+  ) => void;
+}
 
 const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
   const router = useRouter();
@@ -202,8 +225,6 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     setSelectedPreviewSection(null);
     setSelectedInlineFieldId(null);
 
-    // Todo:
-    // We need to handle this as a state
     router.replace("/cv");
     router.refresh();
   };
