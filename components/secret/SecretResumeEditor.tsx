@@ -409,6 +409,30 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     }
   };
 
+  const handleDeleteAction = (action: string) => {
+    const projectMatch = action.match(/^projects\.(\d+)$/);
+    if (projectMatch) {
+      const index = Number(projectMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        projects: removeItemAtIndex(current.projects, index),
+      }));
+      setNotice("Project removed.");
+      return;
+    }
+
+    const portfolioMatch = action.match(/^portfolio\.(\d+)$/);
+    if (portfolioMatch) {
+      const index = Number(portfolioMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        portfolio: removeItemAtIndex(current.portfolio, index),
+      }));
+      setNotice("Portfolio item removed.");
+      return;
+    }
+  };
+
   const renderInlineFieldToolbox = () => {
     if (!selectedInlineFieldId) {
       return null;
@@ -3621,6 +3645,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
           activeInlineFieldId={selectedInlineFieldId}
           onInlineFieldClick={handleInlineFieldClick}
           onAddAction={handleAddAction}
+          onDeleteAction={handleDeleteAction}
         />
       </Box>
 

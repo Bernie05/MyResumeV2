@@ -4,6 +4,7 @@ import { getSectionPalette } from "../../../../theme/sectionPalette";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
   Box,
   Button,
@@ -11,6 +12,7 @@ import {
   CardContent,
   CardMedia,
   Chip,
+  IconButton,
   List,
   ListItem,
   ListItemIcon,
@@ -30,6 +32,7 @@ interface CardComponentProps extends IPortfolioItem {
     anchor?: HTMLElement,
   ) => void;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
+  onDelete?: () => void;
 }
 
 export const CardComponent = ({
@@ -38,6 +41,7 @@ export const CardComponent = ({
   activeInlineFieldId,
   onInlineFieldClick,
   onAddAction,
+  onDelete,
   ...item
 }: CardComponentProps) => {
   const { isDarkMode } = useThemeContext();
@@ -125,6 +129,7 @@ export const CardComponent = ({
     <Card
       key={item.id}
       sx={{
+        position: "relative",
         background: surfaceBackground,
         border: `1px solid ${outline}`,
         borderRadius: "1rem",
@@ -139,6 +144,34 @@ export const CardComponent = ({
         },
       }}
     >
+      {onDelete && (
+        <IconButton
+          aria-label="Delete card"
+          onClick={(event) => {
+            event.stopPropagation();
+            onDelete();
+          }}
+          sx={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            zIndex: 2,
+            backgroundColor: "rgba(0,0,0,0.55)",
+            color: "common.white",
+            width: 38,
+            height: 38,
+            boxShadow: "0 10px 24px rgba(0, 0, 0, 0.16)",
+            transition: "transform 0.2s ease, opacity 0.2s ease",
+            opacity: 0.9,
+            "&:hover": {
+              transform: "scale(1.05)",
+              backgroundColor: "rgba(0,0,0,0.75)",
+            },
+          }}
+        >
+          <DeleteOutlineIcon fontSize="small" />
+        </IconButton>
+      )}
       <CardMedia
         component="img"
         height={selectedId === item.id ? "300" : "256"}

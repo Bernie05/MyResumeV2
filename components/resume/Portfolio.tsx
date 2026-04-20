@@ -12,6 +12,7 @@ const Portfolio = ({
   onInlineFieldClick,
   activeInlineFieldId,
   onAddAction,
+  onDeleteAction,
 }: {
   portfolio: IPortfolioItem[];
   onInlineFieldClick?: (
@@ -21,6 +22,7 @@ const Portfolio = ({
   ) => void;
   activeInlineFieldId?: string | null;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
+  onDeleteAction?: (action: string) => void;
 }) => {
   const { isDarkMode } = useThemeContext();
   const {
@@ -102,6 +104,7 @@ const Portfolio = ({
             activeInlineFieldId={activeInlineFieldId}
             onInlineFieldClick={onInlineFieldClick}
             onAddAction={onAddAction}
+            onDelete={() => onDeleteAction?.(`portfolio.${index}`)}
           />
         ))}
       </Box>
