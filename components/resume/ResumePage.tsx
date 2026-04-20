@@ -48,6 +48,7 @@ interface ResumePageProps {
     anchor?: HTMLElement,
   ) => void;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
+  onDeleteAction?: (action: string) => void;
 }
 
 const ResumePage = ({
@@ -60,6 +61,7 @@ const ResumePage = ({
   onSectionClick,
   onInlineFieldClick,
   onAddAction,
+  onDeleteAction,
 }: ResumePageProps) => {
   console.log("MAIN RESUME");
   const { isDarkMode } = useThemeContext();
@@ -181,6 +183,7 @@ const ResumePage = ({
               onInlineFieldClick={onInlineFieldClick}
               activeInlineFieldId={activeInlineFieldId}
               onAddAction={onAddAction}
+              onDeleteAction={onDeleteAction}
             />
           </Box>
 
@@ -194,6 +197,7 @@ const ResumePage = ({
               onInlineFieldClick={onInlineFieldClick}
               activeInlineFieldId={activeInlineFieldId}
               onAddAction={onAddAction}
+              onDeleteAction={onDeleteAction}
             />
           </Box>
           <Box

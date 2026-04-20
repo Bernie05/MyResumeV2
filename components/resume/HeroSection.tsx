@@ -125,6 +125,16 @@ const HeroSection = ({
     };
   };
 
+  const getInlineFieldForBackground = () => {
+    return {
+      ...createInlineFieldProps(
+        sectionId,
+        "personalInfo.backgroundUrl",
+        onInlineFieldClick,
+      ),
+    };
+  };
+
   const getInlineFieldForSummary = () => {
     return {
       ...createInlineFieldProps(
@@ -142,6 +152,7 @@ const HeroSection = ({
     >
       <Box
         id={`${heroSectionId}-background-img`}
+        {...getInlineFieldForBackground()}
         sx={{
           position: "relative",
           minHeight: { xs: "100vh", md: 640 },

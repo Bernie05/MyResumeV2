@@ -12,6 +12,7 @@ interface ProjectCardComponentProps extends IPortfolioItem {
     anchor?: HTMLElement,
   ) => void;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
+  onDelete?: () => void;
 }
 
 export const ProjectCardComponent = (item: ProjectCardComponentProps) => {

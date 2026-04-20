@@ -22,6 +22,7 @@ const Projects = ({
   onInlineFieldClick,
   activeInlineFieldId,
   onAddAction,
+  onDeleteAction,
 }: {
   projects: Project[];
   onInlineFieldClick?: (
@@ -31,6 +32,7 @@ const Projects = ({
   ) => void;
   activeInlineFieldId?: string | null;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
+  onDeleteAction?: (action: string) => void;
 }) => {
   const { isDarkMode } = useThemeContext();
   const {
@@ -114,6 +116,7 @@ const Projects = ({
             activeInlineFieldId={activeInlineFieldId}
             onInlineFieldClick={onInlineFieldClick}
             onAddAction={onAddAction}
+            onDelete={() => onDeleteAction?.(`projects.${index}`)}
           />
         ))}
       </Box>
