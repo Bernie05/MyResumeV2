@@ -97,4 +97,5 @@ export const PREVIEW_SECTION_TO_EDITOR_SECTION: Record<
   skills: "skills",
   certifications: "certifications",
   contact: "personalInfo",
+  stats: "stats",
 };

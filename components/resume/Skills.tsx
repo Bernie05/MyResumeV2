@@ -8,11 +8,13 @@ import {
   Chip,
   LinearProgress,
   Typography,
+  IconButton,
 } from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import { DeleteOutline as DeleteOutlineIcon } from "@mui/icons-material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 
@@ -34,6 +36,7 @@ interface SkillsProps {
     anchor?: HTMLElement,
   ) => void;
   readonly activeInlineFieldId?: string | null;
+  readonly onDeleteAction?: (action: string) => void;
 }
 
 const ANIMATION_DURATION_MS = 1500;
@@ -91,6 +94,7 @@ const Skills = ({
   skills,
   onInlineFieldClick,
   activeInlineFieldId,
+  onDeleteAction,
 }: SkillsProps) => {
   const { isDarkMode } = useThemeContext();
   const {
@@ -165,7 +169,7 @@ const Skills = ({
     const sectionElement = sectionRef.current;
 
     if (hasTriggeredRef.current || !sectionElement) {
-      return undefined;
+      return;
     }
 
     let frameId = 0;
@@ -327,6 +331,7 @@ const Skills = ({
                         transition: "all 0.3s ease",
                         cursor: "pointer",
                         height: "100%",
+                        position: "relative",
                         animation: "skillCardFadeIn 0.6s ease-out forwards",
                         "&:hover": {
                           transform: "translateY(-4px) scale(1.02)",
@@ -335,6 +340,37 @@ const Skills = ({
                         },
                       }}
                     >
+                      {onDeleteAction && (
+                        <IconButton
+                          aria-label="Delete skill"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onDeleteAction(
+                              `skills.${categoryIndex}.${itemIndex}`,
+                            );
+                          }}
+                          sx={{
+                            position: "absolute",
+                            top: 12,
+                            right: 12,
+                            zIndex: 2,
+                            backgroundColor: "rgba(0,0,0,0.55)",
+                            color: "common.white",
+                            width: 32,
+                            height: 32,
+                            boxShadow: "0 10px 24px rgba(0, 0, 0, 0.16)",
+                            transition:
+                              "transform 0.2s ease, opacity 0.2s ease",
+                            opacity: 0.9,
+                            "&:hover": {
+                              transform: "scale(1.05)",
+                              backgroundColor: "rgba(0,0,0,0.75)",
+                            },
+                          }}
+                        >
+                          <DeleteOutlineIcon fontSize="small" />
+                        </IconButton>
+                      )}
                       <CardContent sx={{ p: 3, height: "100%" }}>
                         <Box sx={{ display: "flex", gap: 3, height: "100%" }}>
                           <Box
@@ -348,48 +384,47 @@ const Skills = ({
                               height: "100px",
                             }}
                           >
-                            <Box
-                              component="svg"
+                            <svg
+                              width="100"
+                              height="100"
                               viewBox="0 0 100 100"
-                              sx={{
-                                width: "100%",
-                                height: "100%",
-                                transform: "rotate(-90deg)",
-                              }}
+                              style={{ transform: "rotate(-90deg)" }}
                             >
-                              <Box
-                                component="circle"
+                              <circle
                                 cx="50"
                                 cy="50"
                                 r={CIRCLE_RADIUS}
+                                stroke={softBackground}
+                                strokeWidth="6"
                                 fill="none"
-                                stroke={outline}
-                                strokeWidth="4"
                               />
-                              <Box
-                                component="circle"
+                              <circle
                                 cx="50"
                                 cy="50"
                                 r={CIRCLE_RADIUS}
-                                fill="none"
                                 stroke={categoryColor}
-                                strokeWidth="4"
-                                strokeDasharray={`${progressStroke} ${CIRCLE_CIRCUMFERENCE}`}
-                                strokeLinecap="round"
-                                sx={{
-                                  transition: "stroke-dasharray 0.8s ease-out",
+                                strokeWidth="6"
+                                fill="none"
+                                strokeDasharray={CIRCLE_CIRCUMFERENCE}
+                                strokeDashoffset={
+                                  CIRCLE_CIRCUMFERENCE - progressStroke
+                                }
+                                style={{
+                                  transition: "stroke-dashoffset 0.05s linear",
                                 }}
                               />
-                            </Box>
+                            </svg>
                             <Box
                               sx={{
                                 position: "absolute",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
+                                top: "50%",
+                                left: "50%",
+                                transform: "translate(-50%, -50%)",
+                                textAlign: "center",
                               }}
                             >
                               <Typography
+                                variant="h4"
                                 sx={{
                                   fontSize: "1.25rem",
                                   fontWeight: 900,

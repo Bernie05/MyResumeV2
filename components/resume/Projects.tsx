@@ -5,6 +5,7 @@ import { useThemeContext } from "@/context/ThemeContext";
 import { ProjectCardComponent } from "./components/cards/ProjectCardComponent";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
+import { IEditorProps } from "../secret/SecretResumeEditor";
 
 interface Project {
   id: number;
@@ -17,23 +18,18 @@ interface Project {
   caseStudy?: string;
 }
 
+export interface IProjectsSection extends IEditorProps {
+  projects: Project[];
+}
+
 const Projects = ({
   projects,
   onInlineFieldClick,
   activeInlineFieldId,
   onAddAction,
   onDeleteAction,
-}: {
-  projects: Project[];
-  onInlineFieldClick?: (
-    section: ResumeEditableSection,
-    fieldId: string,
-    anchor?: HTMLElement,
-  ) => void;
-  activeInlineFieldId?: string | null;
-  onAddAction?: (action: string, anchor: HTMLElement) => void;
-  onDeleteAction?: (action: string) => void;
-}) => {
+  isEditMode,
+}: IProjectsSection) => {
   const { isDarkMode } = useThemeContext();
   const {
     titleColor,
@@ -117,6 +113,7 @@ const Projects = ({
             onInlineFieldClick={onInlineFieldClick}
             onAddAction={onAddAction}
             onDelete={() => onDeleteAction?.(`projects.${index}`)}
+            isEditMode={isEditMode}
           />
         ))}
       </Box>

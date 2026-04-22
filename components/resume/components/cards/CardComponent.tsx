@@ -33,6 +33,7 @@ interface CardComponentProps extends IPortfolioItem {
   ) => void;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
   onDelete?: () => void;
+  isEditMode?: boolean;
 }
 
 export const CardComponent = ({
@@ -42,6 +43,7 @@ export const CardComponent = ({
   onInlineFieldClick,
   onAddAction,
   onDelete,
+  isEditMode,
   ...item
 }: CardComponentProps) => {
   const { isDarkMode } = useThemeContext();
@@ -144,7 +146,7 @@ export const CardComponent = ({
         },
       }}
     >
-      {onDelete && (
+      {isEditMode && onDelete && (
         <IconButton
           aria-label="Delete card"
           onClick={(event) => {

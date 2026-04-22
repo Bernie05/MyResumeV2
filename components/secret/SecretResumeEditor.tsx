@@ -108,6 +108,18 @@ export interface IEditorCreateInlineFieldProps {
   ) => void;
 }
 
+export interface IEditorProps {
+  onInlineFieldClick: (
+    section: ResumeEditableSection,
+    fieldId: InlineEditableFieldId,
+    anchor?: HTMLElement,
+  ) => void;
+  activeInlineFieldId: InlineEditableFieldId | null;
+  onAddAction: (action: string, anchor: HTMLElement) => void;
+  onDeleteAction: (action: string) => void;
+  isEditMode: boolean;
+}
+
 const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
   const router = useRouter();
   const { isDarkMode } = useThemeContext();
