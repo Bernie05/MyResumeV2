@@ -10,8 +10,12 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  IconButton,
 } from "@mui/material";
-import { FiberManualRecord } from "@mui/icons-material";
+import {
+  FiberManualRecord,
+  DeleteOutline as DeleteOutlineIcon,
+} from "@mui/icons-material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
@@ -30,6 +34,7 @@ const Experience = ({
   onInlineFieldClick,
   activeInlineFieldId,
   onAddAction,
+  onDeleteAction,
 }: {
   experience: Job[];
   onInlineFieldClick?: (
@@ -39,6 +44,7 @@ const Experience = ({
   ) => void;
   activeInlineFieldId?: string | null;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
+  onDeleteAction?: (action: string) => void;
 }) => {
   const { isDarkMode } = useThemeContext();
   const {
@@ -154,6 +160,8 @@ const Experience = ({
                 borderLeft: `4px solid ${primaryAccent}`,
                 borderRadius: "1rem",
                 transition: "all 0.3s ease",
+                position: "relative",
+                p: 2,
                 "&:hover": {
                   transform: "translateX(8px)",
                   boxShadow: hoverShadow,
@@ -161,6 +169,34 @@ const Experience = ({
                 },
               }}
             >
+              {onDeleteAction && (
+                <IconButton
+                  aria-label="Delete experience"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDeleteAction(`experience.${index}`);
+                  }}
+                  sx={{
+                    position: "absolute",
+                    top: 12,
+                    right: 12,
+                    zIndex: 2,
+                    backgroundColor: "rgba(0,0,0,0.55)",
+                    color: "common.white",
+                    width: 38,
+                    height: 38,
+                    boxShadow: "0 10px 24px rgba(0, 0, 0, 0.16)",
+                    transition: "transform 0.2s ease, opacity 0.2s ease",
+                    opacity: 0.9,
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                      backgroundColor: "rgba(0,0,0,0.75)",
+                    },
+                  }}
+                >
+                  <DeleteOutlineIcon fontSize="small" />
+                </IconButton>
+              )}
               <CardContent sx={{ p: 4 }}>
                 {/* Header Row */}
                 <Box
@@ -170,7 +206,6 @@ const Experience = ({
                     justifyContent: { sm: "space-between" },
                     alignItems: { sm: "flex-start" },
                     gap: 2,
-                    mb: 2,
                   }}
                 >
                   <Box>
@@ -202,6 +237,8 @@ const Experience = ({
                       {job.company}
                     </Typography>
                   </Box>
+
+                  {/*  */}
                   <Chip
                     label={job.duration}
                     sx={{

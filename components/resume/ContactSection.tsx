@@ -17,9 +17,10 @@ import {
   Typography,
 } from "@mui/material";
 import Box from "@mui/material/Box/Box";
-import { IThemePalette } from "@/theme/sectionPalette";
+import { getSectionPalette, IThemePalette } from "@/theme/sectionPalette";
+import { useThemeContext } from "@/context/ThemeContext";
 
-interface ContactSectionProps extends IThemePalette {
+interface ContactSectionProps {
   personalInfo: PersonalInfo;
   onInlineFieldClick?: (
     section: ResumeEditableSection,
@@ -30,12 +31,11 @@ interface ContactSectionProps extends IThemePalette {
 }
 
 export const ContactSection = ({
-  theme,
-  isDarkMode,
   personalInfo,
   onInlineFieldClick,
   activeInlineFieldId,
 }: ContactSectionProps) => {
+  const { isDarkMode } = useThemeContext();
   const {
     sectionBackground,
     outline,
@@ -48,7 +48,7 @@ export const ContactSection = ({
     mutedColor,
     surfaceBackground,
     softBackground,
-  } = theme;
+  } = getSectionPalette(isDarkMode);
 
   // change this and use the herosection funvc
   const socialLinks = [

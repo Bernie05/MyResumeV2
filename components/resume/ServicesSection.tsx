@@ -11,6 +11,7 @@ import {
   ListItemIcon,
   ListItemText,
   Chip,
+  IconButton,
 } from "@mui/material";
 import {
   Code as CodeIcon,
@@ -33,6 +34,7 @@ import {
   DesignServices as DesignServicesIcon,
   Language as LanguageIcon,
   Dns as DnsIcon,
+  DeleteOutline as DeleteOutlineIcon,
 } from "@mui/icons-material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
@@ -127,6 +129,7 @@ const ServicesSection = ({
   onInlineFieldClick,
   activeInlineFieldId,
   onAddAction,
+  onDeleteAction,
 }: {
   skills: SkillCategory[];
   servicesTitle?: string;
@@ -138,6 +141,7 @@ const ServicesSection = ({
   ) => void;
   activeInlineFieldId?: string | null;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
+  onDeleteAction?: (action: string) => void;
 }) => {
   const { isDarkMode } = useThemeContext();
   const {
@@ -281,12 +285,41 @@ const ServicesSection = ({
               borderRadius: "1rem",
               transition: "all 0.3s ease",
               height: "100%",
+              position: "relative",
               "&:hover": {
                 transform: "translateY(-8px)",
                 boxShadow: hoverShadow,
               },
             }}
           >
+            {onDeleteAction && (
+              <IconButton
+                aria-label="Delete service category"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onDeleteAction(`services.${categoryIndex}`);
+                }}
+                sx={{
+                  position: "absolute",
+                  top: 12,
+                  right: 12,
+                  zIndex: 2,
+                  backgroundColor: "rgba(0,0,0,0.55)",
+                  color: "common.white",
+                  width: 38,
+                  height: 38,
+                  boxShadow: "0 10px 24px rgba(0, 0, 0, 0.16)",
+                  transition: "transform 0.2s ease, opacity 0.2s ease",
+                  opacity: 0.9,
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                    backgroundColor: "rgba(0,0,0,0.75)",
+                  },
+                }}
+              >
+                <DeleteOutlineIcon fontSize="small" />
+              </IconButton>
+            )}
             <CardContent sx={{ p: 4 }}>
               {/* Header with Icon */}
               <Box

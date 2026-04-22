@@ -114,6 +114,18 @@ const ResumePage = ({
     };
   };
 
+  const getEditableProps = () => {
+    if (!interactiveSections) return {};
+
+    return {
+      isEditMode: interactiveSections,
+      onInlineFieldClick,
+      activeInlineFieldId,
+      onAddAction,
+      onDeleteAction,
+    };
+  };
+
   return (
     <Box component="main" sx={{ width: "100%", minHeight: "100vh" }}>
       {/* Navbar */}
@@ -129,9 +141,7 @@ const ResumePage = ({
         <HeroSection
           personalInfo={resume.personalInfo}
           stats={resume.stats}
-          onInlineFieldClick={onInlineFieldClick}
-          activeInlineFieldId={activeInlineFieldId}
-          onAddAction={onAddAction}
+          {...getEditableProps()}
         />
       </Box>
 
@@ -150,9 +160,7 @@ const ResumePage = ({
               skills={resume.skills}
               servicesTitle={resume.servicesTitle}
               servicesSubtitle={resume.servicesSubtitle}
-              onInlineFieldClick={onInlineFieldClick}
-              activeInlineFieldId={activeInlineFieldId}
-              onAddAction={onAddAction}
+              {...getEditableProps()}
             />
           </Box>
 
@@ -165,9 +173,7 @@ const ResumePage = ({
           >
             <Experience
               experience={resume.experience}
-              onInlineFieldClick={onInlineFieldClick}
-              activeInlineFieldId={activeInlineFieldId}
-              onAddAction={onAddAction}
+              {...getEditableProps()}
             />
           </Box>
 
@@ -178,13 +184,7 @@ const ResumePage = ({
             sx={getSectionSx("portfolio")}
             {...createSectionProps("portfolio")}
           >
-            <Portfolio
-              portfolio={resume.portfolio}
-              onInlineFieldClick={onInlineFieldClick}
-              activeInlineFieldId={activeInlineFieldId}
-              onAddAction={onAddAction}
-              onDeleteAction={onDeleteAction}
-            />
+            <Portfolio portfolio={resume.portfolio} {...getEditableProps()} />
           </Box>
 
           {/* Projects Section */}
@@ -192,24 +192,13 @@ const ResumePage = ({
             sx={getSectionSx("projects")}
             {...createSectionProps("projects")}
           >
-            <Projects
-              projects={resume.projects}
-              onInlineFieldClick={onInlineFieldClick}
-              activeInlineFieldId={activeInlineFieldId}
-              onAddAction={onAddAction}
-              onDeleteAction={onDeleteAction}
-            />
+            <Projects projects={resume.projects} {...getEditableProps()} />
           </Box>
           <Box
             sx={getSectionSx("education")}
             {...createSectionProps("education")}
           >
-            <Education
-              education={resume.education}
-              onInlineFieldClick={onInlineFieldClick}
-              activeInlineFieldId={activeInlineFieldId}
-              onAddAction={onAddAction}
-            />
+            <Education education={resume.education} {...getEditableProps()} />
           </Box>
 
           {/* Skills Section */}
@@ -219,11 +208,7 @@ const ResumePage = ({
             sx={getSectionSx("skills")}
             {...createSectionProps("skills")}
           >
-            <Skills
-              skills={resume.skills}
-              onInlineFieldClick={onInlineFieldClick}
-              activeInlineFieldId={activeInlineFieldId}
-            />
+            <Skills skills={resume.skills} {...getEditableProps()} />
           </Box>
 
           {/* Certifications Section */}
@@ -233,9 +218,7 @@ const ResumePage = ({
           >
             <Certifications
               certifications={resume.certifications}
-              onInlineFieldClick={onInlineFieldClick}
-              activeInlineFieldId={activeInlineFieldId}
-              onAddAction={onAddAction}
+              {...getEditableProps()}
             />
           </Box>
 
@@ -247,11 +230,8 @@ const ResumePage = ({
             {...createSectionProps("contact")}
           >
             <ContactSection
-              theme={theme}
-              isDarkMode={isDarkMode}
               personalInfo={resume.personalInfo}
-              onInlineFieldClick={onInlineFieldClick}
-              activeInlineFieldId={activeInlineFieldId}
+              {...getEditableProps()}
             />
           </Box>
 

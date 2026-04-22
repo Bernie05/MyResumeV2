@@ -1,7 +1,15 @@
 "use client";
 
-import { Box, Card, CardContent, Typography, Chip } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Chip,
+  IconButton,
+} from "@mui/material";
 import SchoolIcon from "@mui/icons-material/School";
+import { DeleteOutline as DeleteOutlineIcon } from "@mui/icons-material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "./ResumePage";
@@ -24,6 +32,7 @@ interface EducationProps {
   ) => void;
   activeInlineFieldId?: string | null;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
+  onDeleteAction?: (action: string) => void;
 }
 
 const Education = ({
@@ -31,6 +40,7 @@ const Education = ({
   onInlineFieldClick,
   activeInlineFieldId,
   onAddAction,
+  onDeleteAction,
 }: EducationProps) => {
   const { isDarkMode } = useThemeContext();
   const {
@@ -145,6 +155,7 @@ const Education = ({
                 borderLeft: `4px solid ${primaryAccent}`,
                 borderRadius: "1rem",
                 transition: "all 0.3s ease",
+                position: "relative",
                 "&:hover": {
                   transform: "translateX(8px)",
                   boxShadow: hoverShadow,
@@ -152,6 +163,34 @@ const Education = ({
                 },
               }}
             >
+              {onDeleteAction && (
+                <IconButton
+                  aria-label="Delete education"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDeleteAction(`education.${index}`);
+                  }}
+                  sx={{
+                    position: "absolute",
+                    top: 12,
+                    right: 12,
+                    zIndex: 2,
+                    backgroundColor: "rgba(0,0,0,0.55)",
+                    color: "common.white",
+                    width: 38,
+                    height: 38,
+                    boxShadow: "0 10px 24px rgba(0, 0, 0, 0.16)",
+                    transition: "transform 0.2s ease, opacity 0.2s ease",
+                    opacity: 0.9,
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                      backgroundColor: "rgba(0,0,0,0.75)",
+                    },
+                  }}
+                >
+                  <DeleteOutlineIcon fontSize="small" />
+                </IconButton>
+              )}
               <CardContent sx={{ p: 4 }}>
                 {/* Header Row */}
                 <Box
