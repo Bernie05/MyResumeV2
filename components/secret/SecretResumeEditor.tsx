@@ -109,36 +109,42 @@ export interface IEditorCreateInlineFieldProps {
 }
 
 export interface IEditorProps {
-  onInlineFieldClick: (
+  onInlineFieldClick?: (
     section: ResumeEditableSection,
     fieldId: InlineEditableFieldId,
     anchor?: HTMLElement,
   ) => void;
-  activeInlineFieldId: InlineEditableFieldId | null;
-  onAddAction: (action: string, anchor: HTMLElement) => void;
-  onDeleteAction: (action: string) => void;
-  isEditMode: boolean;
+  activeInlineFieldId?: InlineEditableFieldId | null;
+  onAddAction?: (action: string, anchor: HTMLElement) => void;
+  onDeleteAction?: (action: string) => void;
+  isEditMode?: boolean;
 }
 
 const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
   const router = useRouter();
   const { isDarkMode } = useThemeContext();
-  const [activeSection, setActiveSection] =
-    useState<EditorSection>("personalInfo");
-  const [draft, setDraft] = useState<ResumeData>(() =>
-    cloneResumeData(initialResume),
-  );
-  const [savedDraft, setSavedDraft] = useState<ResumeData>(() =>
-    cloneResumeData(initialResume),
-  );
   const [isHydrated, setIsHydrated] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const [activeSection, setActiveSection] =
+    useState<EditorSection>("personalInfo");
+
+  const [draft, setDraft] = useState<ResumeData>(() =>
+    cloneResumeData(initialResume),
+  );
+
+  const [savedDraft, setSavedDraft] = useState<ResumeData>(() =>
+    cloneResumeData(initialResume),
+  );
+
   const [selectedPreviewSection, setSelectedPreviewSection] =
     useState<ResumeEditableSection | null>(null);
+
   const [selectedInlineFieldId, setSelectedInlineFieldId] =
     useState<InlineEditableFieldId | null>(null);
+
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
