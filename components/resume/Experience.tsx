@@ -16,9 +16,11 @@ import {
   FiberManualRecord,
   DeleteOutline as DeleteOutlineIcon,
 } from "@mui/icons-material";
+import { useInlineEditing } from "@/hook/useInlineEditing";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
+import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 
 interface Job {
   id: number;
@@ -39,7 +41,7 @@ const Experience = ({
   experience: Job[];
   onInlineFieldClick?: (
     section: ResumeEditableSection,
-    fieldId: string,
+    fieldId: InlineEditableFieldId,
     anchor?: HTMLElement,
   ) => void;
   activeInlineFieldId?: string | null;
@@ -62,53 +64,11 @@ const Experience = ({
     hoverShadow,
   } = getSectionPalette(isDarkMode);
 
-  const getInlineFieldSx = (fieldId: string) => ({
-    borderRadius: 1,
-    outline:
-      activeInlineFieldId === fieldId
-        ? "2px solid rgba(20, 184, 166, 0.9)"
-        : "2px solid transparent",
-    outlineOffset: 2,
-    cursor: onInlineFieldClick ? "pointer" : "inherit",
-    transition: "outline-color 160ms ease, box-shadow 160ms ease",
-    "&:hover": onInlineFieldClick
-      ? {
-          outlineColor: "rgba(20, 184, 166, 0.55)",
-          boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-        }
-      : undefined,
+  const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
+    targetSection: "experience",
+    activeInlineFieldId,
+    onInlineFieldClick,
   });
-
-  const createInlineFieldProps = (fieldId: string) => {
-    if (!onInlineFieldClick) {
-      return {};
-    }
-
-    return {
-      onClick: (event: React.MouseEvent) => {
-        event.stopPropagation();
-        onInlineFieldClick(
-          "experience",
-          fieldId,
-          event.currentTarget as HTMLElement,
-        );
-      },
-      onKeyDown: (event: React.KeyboardEvent) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          event.stopPropagation();
-          onInlineFieldClick(
-            "experience",
-            fieldId,
-            event.currentTarget as HTMLElement,
-          );
-        }
-      },
-      role: "button",
-      tabIndex: 0,
-      "aria-label": `Edit ${fieldId}`,
-    };
-  };
 
   return (
     <Box

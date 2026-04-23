@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useThemeContext } from "@/context/ThemeContext";
+import { useInlineEditing } from "@/hook/useInlineEditing";
 import { getSectionPalette } from "../../../../theme/sectionPalette";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -21,6 +22,7 @@ import {
 } from "@mui/material";
 import { IPortfolioItem } from "@/types/portfolio";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
+import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 
 interface CardComponentProps extends IPortfolioItem {
   inlineSection?: ResumeEditableSection;
@@ -28,7 +30,7 @@ interface CardComponentProps extends IPortfolioItem {
   activeInlineFieldId?: string | null;
   onInlineFieldClick?: (
     section: ResumeEditableSection,
-    fieldId: string,
+    fieldId: InlineEditableFieldId,
     anchor?: HTMLElement,
   ) => void;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
@@ -63,69 +65,22 @@ export const CardComponent = ({
   } = getSectionPalette(isDarkMode);
   const [selectedId] = useState<number | null>(null);
 
-  const buildFieldId = (fieldName: string) => {
-    if (!inlineSection || itemIndex === undefined) {
-      return null;
-    }
+  const { fieldIds, getInlineFieldSx, createInlineFieldProps, buildFieldId } =
+    useInlineEditing({
+      targetSection: inlineSection,
+      itemIndex,
+      activeInlineFieldId,
+      onInlineFieldClick,
+    });
 
-    return `${inlineSection}.${itemIndex}.${fieldName}`;
-  };
-
-  const getInlineFieldSx = (fieldId: string | null) => ({
-    borderRadius: 1,
-    outline:
-      fieldId && activeInlineFieldId === fieldId
-        ? "2px solid rgba(20, 184, 166, 0.9)"
-        : "2px solid transparent",
-    outlineOffset: 2,
-    cursor: fieldId && onInlineFieldClick ? "pointer" : "inherit",
-    transition: "outline-color 160ms ease, box-shadow 160ms ease",
-    "&:hover":
-      fieldId && onInlineFieldClick
-        ? {
-            outlineColor: "rgba(20, 184, 166, 0.55)",
-            boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-          }
-        : undefined,
-  });
-
-  const createInlineFieldProps = (fieldId: string | null) => {
-    if (!fieldId || !inlineSection || !onInlineFieldClick) {
-      return {};
-    }
-
-    return {
-      onClick: (event: React.MouseEvent) => {
-        event.stopPropagation();
-        onInlineFieldClick(
-          inlineSection,
-          fieldId,
-          event.currentTarget as HTMLElement,
-        );
-      },
-      onKeyDown: (event: React.KeyboardEvent) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          event.stopPropagation();
-          onInlineFieldClick(
-            inlineSection,
-            fieldId,
-            event.currentTarget as HTMLElement,
-          );
-        }
-      },
-      role: "button",
-      tabIndex: 0,
-      "aria-label": `Edit ${fieldId}`,
-    };
-  };
-
-  const titleFieldId = buildFieldId("name");
-  const descriptionFieldId = buildFieldId("description");
-  const imageFieldId = buildFieldId("image");
-  const techFieldId = buildFieldId("technologies");
-  const testimonialFieldId = buildFieldId("testimonial");
-  const clientFieldId = buildFieldId("client");
+  const {
+    titleFieldId,
+    descriptionFieldId,
+    imageFieldId,
+    techFieldId,
+    testimonialFieldId,
+    clientFieldId,
+  } = fieldIds;
 
   return (
     <Card
