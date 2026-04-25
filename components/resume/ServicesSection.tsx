@@ -39,6 +39,8 @@ import {
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
+import { IEditorProps } from "../secret/SecretResumeEditor";
+import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 
 interface SkillItem {
   name: string;
@@ -122,6 +124,12 @@ const getCategoryIcon = (
   return CodeIcon;
 };
 
+export interface IServiceSection extends IEditorProps {
+  skills: SkillCategory[];
+  servicesTitle: string | undefined;
+  servicesSubtitle: string | undefined;
+}
+
 const ServicesSection = ({
   skills,
   servicesTitle,
@@ -136,10 +144,10 @@ const ServicesSection = ({
   servicesSubtitle?: string;
   onInlineFieldClick?: (
     section: ResumeEditableSection,
-    fieldId: string,
+    fieldId: InlineEditableFieldId,
     anchor?: HTMLElement,
   ) => void;
-  activeInlineFieldId?: string | null;
+  activeInlineFieldId?: InlineEditableFieldId | null;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
   onDeleteAction?: (action: string) => void;
 }) => {

@@ -13,6 +13,7 @@ import { DeleteOutline as DeleteOutlineIcon } from "@mui/icons-material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "./ResumePage";
+import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 
 interface EducationItem {
   id: number;
@@ -27,10 +28,10 @@ interface EducationProps {
   education: EducationItem[];
   onInlineFieldClick?: (
     section: ResumeEditableSection,
-    fieldId: string,
+    fieldId: InlineEditableFieldId,
     anchor?: HTMLElement,
   ) => void;
-  activeInlineFieldId?: string | null;
+  activeInlineFieldId?: InlineEditableFieldId | null;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
   onDeleteAction?: (action: string) => void;
 }

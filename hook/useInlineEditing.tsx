@@ -25,14 +25,14 @@ export const useInlineEditing = ({
 
   const buildFieldId = useMemo(
     () => (fieldName: string) => {
-      if (!inlineSection || itemIndex === undefined) {
+      if (!targetSection || itemIndex === undefined) {
         return null;
       }
 
       // Ex. project.0.name
-      return `${inlineSection}.${itemIndex}.${fieldName}`;
+      return `${targetSection}.${itemIndex}.${fieldName}`;
     },
-    [inlineSection, itemIndex],
+    [targetSection, itemIndex],
   );
 
   const getInlineFieldSx = useMemo(
@@ -66,7 +66,7 @@ export const useInlineEditing = ({
           event.stopPropagation();
           onInlineFieldClick(
             targetSection,
-            fieldId,
+            fieldId as InlineEditableFieldId,
             event.currentTarget as HTMLElement,
           );
         },
@@ -76,7 +76,7 @@ export const useInlineEditing = ({
             event.stopPropagation();
             onInlineFieldClick(
               targetSection,
-              fieldId,
+              fieldId as InlineEditableFieldId,
               event.currentTarget as HTMLElement,
             );
           }
@@ -90,7 +90,7 @@ export const useInlineEditing = ({
   );
 
   const getSectionField = {
-    Project: [
+    portfolio: [
       "name",
       "description",
       "image",
@@ -104,8 +104,11 @@ export const useInlineEditing = ({
     return getSectionField[section as keyof typeof getSectionField] || [];
   };
 
-  const getSectionBuildFieldIds = (section: string, isInitialize?: boolean) => {
-    const fields = getFieldBySection(section);
+  const getSectionBuildFieldIds = (
+    section: string | undefined,
+    isInitialize?: boolean,
+  ) => {
+    const fields = getFieldBySection(section || "");
 
     return fields.reduce(
       (acc, field) => {
@@ -117,18 +120,18 @@ export const useInlineEditing = ({
   };
 
   const fieldIds = useMemo(() => {
-    if (!inlineSection || itemIndex === undefined) {
+    if (!targetSection || itemIndex === undefined) {
       // Initialize all field IDs to null when not in edit mode to prevent stale IDs from previous edits
       return {
-        ...(getSectionBuildFieldIds(sectionId, true) as any),
+        ...(getSectionBuildFieldIds(targetSection!, true) as any),
       };
     }
 
     // Return the actual field IDs for the current inline section and item index
     return {
-      ...(getSectionBuildFieldIds(sectionId) as any),
+      ...(getSectionBuildFieldIds(targetSection!, true) as any),
     };
-  }, [inlineSection, itemIndex, buildFieldId]);
+  }, [targetSection, itemIndex, buildFieldId]);
 
   return {
     targetSection,
