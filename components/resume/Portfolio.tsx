@@ -6,6 +6,7 @@ import { IPortfolioItem } from "@/types/portfolio";
 import { ProjectCardComponent } from "./components/cards/ProjectCardComponent";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
+import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 
 const Portfolio = ({
   portfolio,
@@ -18,10 +19,10 @@ const Portfolio = ({
   portfolio: IPortfolioItem[];
   onInlineFieldClick?: (
     section: ResumeEditableSection,
-    fieldId: string,
+    fieldId: InlineEditableFieldId,
     anchor?: HTMLElement,
   ) => void;
-  activeInlineFieldId?: string | null;
+  activeInlineFieldId?: InlineEditableFieldId | null;
   onAddAction?: (action: string, anchor: HTMLElement) => void;
   onDeleteAction?: (action: string) => void;
   isEditMode?: boolean;

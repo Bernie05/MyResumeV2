@@ -17,6 +17,8 @@ import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import { DeleteOutline as DeleteOutlineIcon } from "@mui/icons-material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
+import type { ResumeEditableSection } from "@/components/resume/ResumePage";
+import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 
 interface SkillItem {
   readonly name: string;
@@ -31,11 +33,11 @@ interface SkillCategory {
 interface SkillsProps {
   readonly skills: readonly SkillCategory[];
   readonly onInlineFieldClick?: (
-    section: "skills",
-    fieldId: string,
+    section: ResumeEditableSection,
+    fieldId: InlineEditableFieldId,
     anchor?: HTMLElement,
   ) => void;
-  readonly activeInlineFieldId?: string | null;
+  readonly activeInlineFieldId?: InlineEditableFieldId | null;
   readonly onDeleteAction?: (action: string) => void;
 }
 

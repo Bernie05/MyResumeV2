@@ -19,15 +19,16 @@ import {
 import Box from "@mui/material/Box/Box";
 import { getSectionPalette, IThemePalette } from "@/theme/sectionPalette";
 import { useThemeContext } from "@/context/ThemeContext";
+import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 
 interface ContactSectionProps {
   personalInfo: PersonalInfo;
   onInlineFieldClick?: (
     section: ResumeEditableSection,
-    fieldId: string,
+    fieldId: InlineEditableFieldId,
     anchor?: HTMLElement,
   ) => void;
-  activeInlineFieldId?: string | null;
+  activeInlineFieldId?: InlineEditableFieldId | null;
 }
 
 export const ContactSection = ({

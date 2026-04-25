@@ -23,6 +23,7 @@ import {
   getInlineFieldSx,
 } from "../secret/utils/componentUtil";
 import { SocialMediaBtn } from "./components/buttons/SocialMediaBtn";
+import { IEditorProps } from "../secret/SecretResumeEditor";
 
 export interface PersonalInfo {
   // Basic info
@@ -61,16 +62,16 @@ export interface StatsItems {
   suffix?: string;
 }
 
-export interface HeroSectionProps {
+export interface HeroSectionProps extends IEditorProps {
   personalInfo: PersonalInfo;
   stats?: HeroStats;
-  onInlineFieldClick?: (
-    section: ResumeEditableSection,
-    fieldId: string,
-    anchor?: HTMLElement,
-  ) => void;
-  activeInlineFieldId?: string | null;
-  onAddAction?: (action: string, anchor: HTMLElement) => void;
+  // onInlineFieldClick?: (
+  //   section: ResumeEditableSection,
+  //   fieldId: string,
+  //   anchor?: HTMLElement,
+  // ) => void;
+  // activeInlineFieldId?: string | null;
+  // onAddAction?: (action: string, anchor: HTMLElement) => void;
 }
 
 const HeroSection = ({
