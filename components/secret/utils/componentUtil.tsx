@@ -8,6 +8,7 @@ import {
   IEditorFieldAndSectionProps,
   IEditorInlineFieldSxProps,
 } from "../SecretResumeEditor";
+import { get } from "http";
 
 /**
  *  Utility function to generate sx styles for inline editable fields, applying special styles when the field is active or hovered, and ensuring consistent styling across different types of fields (text, icons, etc.) based on the fieldId.
@@ -30,6 +31,26 @@ export const getInlineFieldSx = ({
   cursor: onInlineFieldClick ? "pointer" : "inherit",
   transition: "outline-color 160ms ease, box-shadow 160ms ease",
   "&:hover": onInlineFieldClick && {
+    outlineColor: "rgba(20, 184, 166, 0.55)",
+    boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
+  },
+});
+
+// test V2
+export const getInlineFieldSxV2 = ({
+  fieldId,
+  activeInlineFieldId,
+  isEditMode = false,
+}: IEditorInlineFieldSxProps) => ({
+  borderRadius: 1,
+  outline:
+    activeInlineFieldId === fieldId
+      ? "2px solid rgba(20, 184, 166, 0.9)"
+      : "2px solid transparent",
+  outlineOffset: 2,
+  cursor: getCursorPointer(isEditMode),
+  transition: "outline-color 160ms ease, box-shadow 160ms ease",
+  "&:hover": isEditMode && {
     outlineColor: "rgba(20, 184, 166, 0.55)",
     boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
   },
@@ -270,11 +291,11 @@ export const createSectionProps = (
  */
 export const createInlineFieldProps = (
   sectionId: ResumeEditableSection,
-  fieldId: string,
+  fieldId: InlineEditableFieldId,
   onInlineFieldClick:
     | ((
         section: ResumeEditableSection,
-        fieldId: string,
+        fieldId: InlineEditableFieldId,
         anchor?: HTMLElement,
       ) => void)
     | undefined,
@@ -307,4 +328,8 @@ export const createInlineFieldProps = (
     tabIndex: 0,
     "aria-label": `Edit ${fieldId}`,
   };
+};
+
+export const getCursorPointer = (isEditMode: boolean = false) => {
+  return isEditMode ? "pointer" : "inherit";
 };

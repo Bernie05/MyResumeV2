@@ -20,10 +20,12 @@ import {
 import { heroSectionId, socialLinks, statItems } from "./constants/constant";
 import {
   createInlineFieldProps,
-  getInlineFieldSx,
+  getCursorPointer,
+  getInlineFieldSxV2,
 } from "../secret/utils/componentUtil";
 import { SocialMediaBtn } from "./components/buttons/SocialMediaBtn";
 import { IEditorProps } from "../secret/SecretResumeEditor";
+import { InlineEditableFieldId } from "../secret/constants/constant";
 
 export interface PersonalInfo {
   // Basic info
@@ -65,13 +67,6 @@ export interface StatsItems {
 export interface HeroSectionProps extends IEditorProps {
   personalInfo: PersonalInfo;
   stats?: HeroStats;
-  // onInlineFieldClick?: (
-  //   section: ResumeEditableSection,
-  //   fieldId: string,
-  //   anchor?: HTMLElement,
-  // ) => void;
-  // activeInlineFieldId?: string | null;
-  // onAddAction?: (action: string, anchor: HTMLElement) => void;
 }
 
 const HeroSection = ({
@@ -80,12 +75,14 @@ const HeroSection = ({
   onInlineFieldClick,
   activeInlineFieldId,
   onAddAction,
+  isEditMode,
 }: HeroSectionProps) => {
-  const { animatedStats, statsRef } = useAnimatedStats(stats, 2000);
+  const sectionId = "about";
   const { isDarkMode } = useThemeContext();
   const theme = getSectionPalette(isDarkMode);
-  const cursor = onInlineFieldClick ? "pointer" : "inherit";
-  const sectionId = "about";
+  const cursor = getCursorPointer(isEditMode);
+
+  const { animatedStats, statsRef } = useAnimatedStats(stats, 2000);
 
   const {
     primaryAccent,
@@ -95,56 +92,43 @@ const HeroSection = ({
     buttonHoverGradient,
   } = theme;
 
-  // For Inline Editing - get props for avatar field
-  const getInlineFieldForAvatar = () => {
-    return {
-      ...createInlineFieldProps(
+  const inlineFieldClick = onInlineFieldClick as
+    | ((
+        section: ResumeEditableSection,
+        fieldId: string,
+        anchor?: HTMLElement,
+      ) => void)
+    | undefined;
+
+  // Utility function to generate inline field props for all fields in a section, based on a common prefix and an array of field names. This helps reduce boilerplate when creating inline editable fields for sections with multiple fields (like personalInfo).
+  const getAllInlineFields = <TField extends string>(
+    prefixField: string,
+    arr: readonly TField[],
+  ): Record<TField, ReturnType<typeof createInlineFieldProps>> => {
+    const inlineFields = {} as Record<
+      TField,
+      ReturnType<typeof createInlineFieldProps>
+    >;
+
+    for (const field of arr) {
+      // This is a bit of a TypeScript hack to ensure the fieldId is correctly typed as InlineEditableFieldId
+      inlineFields[field] = createInlineFieldProps(
         sectionId,
-        "personalInfo.photoUrl",
+        `${prefixField}.${field}` as InlineEditableFieldId,
         onInlineFieldClick,
-      ),
-    };
+      );
+    }
+
+    return inlineFields;
   };
 
-  const getInlineFieldForName = () => {
-    return {
-      ...createInlineFieldProps(
-        sectionId,
-        "personalInfo.name",
-        onInlineFieldClick,
-      ),
-    };
-  };
-
-  const getInlineFieldForTitle = () => {
-    return {
-      ...createInlineFieldProps(
-        sectionId,
-        "personalInfo.title",
-        onInlineFieldClick,
-      ),
-    };
-  };
-
-  const getInlineFieldForBackground = () => {
-    return {
-      ...createInlineFieldProps(
-        sectionId,
-        "personalInfo.backgroundUrl",
-        onInlineFieldClick,
-      ),
-    };
-  };
-
-  const getInlineFieldForSummary = () => {
-    return {
-      ...createInlineFieldProps(
-        sectionId,
-        "personalInfo.summary",
-        onInlineFieldClick,
-      ),
-    };
-  };
+  const fields = getAllInlineFields("personalInfo", [
+    "name",
+    "title",
+    "photoUrl",
+    "backgroundUrl",
+    "summary",
+  ]);
 
   return (
     <Box
@@ -153,7 +137,7 @@ const HeroSection = ({
     >
       <Box
         id={`${heroSectionId}-background-img`}
-        {...getInlineFieldForBackground()}
+        {...fields.backgroundUrl}
         sx={{
           position: "relative",
           minHeight: { xs: "100vh", md: 640 },
@@ -171,7 +155,6 @@ const HeroSection = ({
               ? "rgba(2, 6, 23, 0.78)"
               : "linear-gradient(90deg, rgba(15, 23, 42, 0.78) 0%, rgba(30, 41, 59, 0.48) 45%, rgba(30, 64, 175, 0.18) 100%)",
           },
-          // TODO: the background image should also have an outline when in edit mode, but we need to make sure the outline doesn't get cut off by the container's overflow:hidden
           outline:
             activeInlineFieldId === "personalInfo.backgroundUrl"
               ? "2px solid rgba(20, 184, 166, 0.9)"
@@ -254,7 +237,7 @@ const HeroSection = ({
                       : undefined),
                   },
                 }}
-                {...getInlineFieldForAvatar()}
+                {...fields.photoUrl}
               />
             </Box>
 
@@ -272,13 +255,13 @@ const HeroSection = ({
                   letterSpacing: "-0.04em",
                   fontSize: { xs: "2.75rem", sm: "4rem", md: "5.25rem" },
                   lineHeight: 0.96,
-                  ...getInlineFieldSx({
+                  ...getInlineFieldSxV2({
                     fieldId: "personalInfo.name",
                     activeInlineFieldId,
-                    onInlineFieldClick,
+                    isEditMode,
                   }),
                 }}
-                {...getInlineFieldForName()}
+                {...fields.name}
               >
                 {personalInfo.name}
               </Typography>
@@ -292,13 +275,13 @@ const HeroSection = ({
                   letterSpacing: "0.24em",
                   textTransform: "uppercase",
                   fontSize: { xs: "0.8rem", md: "0.95rem" },
-                  ...getInlineFieldSx({
+                  ...getInlineFieldSxV2({
                     fieldId: "personalInfo.title",
                     activeInlineFieldId,
-                    onInlineFieldClick,
+                    isEditMode,
                   }),
                 }}
-                {...getInlineFieldForTitle()}
+                {...fields.title}
               >
                 {personalInfo.title}
               </Typography>
@@ -313,13 +296,13 @@ const HeroSection = ({
                     fontSize: { xs: "1rem", md: "1.125rem" },
                     lineHeight: 1.75,
                     mt: 1,
-                    ...getInlineFieldSx({
+                    ...getInlineFieldSxV2({
                       fieldId: "personalInfo.summary",
                       activeInlineFieldId,
-                      onInlineFieldClick,
+                      isEditMode,
                     }),
                   }}
-                  {...getInlineFieldForSummary()}
+                  {...fields.summary}
                 >
                   {personalInfo.summary}
                 </Typography>
@@ -434,7 +417,7 @@ const HeroSection = ({
                 socialLinks={socialLinks}
                 theme={theme}
                 isDarkMode={isDarkMode}
-                onInlineFieldClick={onInlineFieldClick}
+                onInlineFieldClick={inlineFieldClick}
                 onAddAction={onAddAction}
               />
 
@@ -456,10 +439,10 @@ const HeroSection = ({
                       : "rgba(255, 255, 255, 0.18)",
                     border: "1px solid rgba(255,255,255,0.16)",
                     backdropFilter: "blur(12px)",
-                    ...getInlineFieldSx({
+                    ...getInlineFieldSxV2({
                       fieldId: `personalInfo.social.custom.${idx}`,
                       activeInlineFieldId,
-                      onInlineFieldClick,
+                      isEditMode,
                     }),
                     transition:
                       "transform 0.25s ease, background-color 0.25s ease, outline-color 160ms ease, box-shadow 160ms ease",
@@ -567,16 +550,16 @@ const HeroSection = ({
                         color: primaryAccent,
                         lineHeight: 1,
                         mb: 1,
-                        ...getInlineFieldSx({
+                        ...getInlineFieldSxV2({
                           fieldId: `stats.${key}`,
                           activeInlineFieldId,
-                          onInlineFieldClick,
+                          isEditMode,
                         }),
                       }}
                       {...createInlineFieldProps(
                         "stats",
                         `stats.${key}`,
-                        onInlineFieldClick,
+                        inlineFieldClick,
                       )}
                     >
                       {(animatedStats[key] ?? 0).toLocaleString()}
@@ -616,16 +599,16 @@ const HeroSection = ({
                       color: primaryAccent,
                       lineHeight: 1,
                       mb: 1,
-                      ...getInlineFieldSx({
+                      ...getInlineFieldSxV2({
                         fieldId: `stats.custom.${idx}`,
                         activeInlineFieldId,
-                        onInlineFieldClick,
+                        isEditMode,
                       }),
                     }}
                     {...createInlineFieldProps(
                       "stats",
                       `stats.custom.${idx}`,
-                      onInlineFieldClick,
+                      inlineFieldClick,
                     )}
                   >
                     {customStat.value.toLocaleString()}

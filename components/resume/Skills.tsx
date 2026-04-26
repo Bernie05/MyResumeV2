@@ -136,7 +136,7 @@ const Skills = ({
       : undefined,
   });
 
-  const createInlineFieldProps = (fieldId: string) => {
+  const createInlineFieldProps = (fieldId: InlineEditableFieldId) => {
     if (!onInlineFieldClick) {
       return {};
     }

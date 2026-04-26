@@ -20,11 +20,12 @@ const getInitialAnimatedStats = <T extends object>(
 export const useAnimatedStats = <T extends object>(
   stats?: T,
   duration: number = 2000,
-  animate: boolean = true,
 ) => {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [statsNode, setStatsNode] = useState<HTMLDivElement | null>(null);
   const hasStartedRef = useRef(false);
+
+  // Initialize animated stats when stats change
   const [animatedStats, setAnimatedStats] = useState<AnimatedStats<T>>(() =>
     getInitialAnimatedStats(stats),
   );
@@ -33,6 +34,7 @@ export const useAnimatedStats = <T extends object>(
     setStatsNode(node);
   }, []);
 
+  // The animation is based first on the stats prop, so we reset the animation state whenever stats changes
   useEffect(() => {
     setHasAnimated(false);
     hasStartedRef.current = false;
@@ -40,6 +42,7 @@ export const useAnimatedStats = <T extends object>(
   }, [stats]);
 
   useEffect(() => {
+    // If there's no stats or the animation has already started, we don't need to set up the animation
     if (!statsNode || !stats || hasStartedRef.current) {
       return;
     }
@@ -47,33 +50,41 @@ export const useAnimatedStats = <T extends object>(
     const frameIds: number[] = [];
 
     const startAnimation = () => {
+      // Prevent multiple animations from starting if the user scrolls quickly
       if (hasStartedRef.current) {
         return;
       }
 
+      // Mark the animation as started to prevent it from being triggered again
       hasStartedRef.current = true;
       setHasAnimated(true);
 
+      // Animate each stat from 0 to its target value
       Object.entries(stats).forEach(([key, value]) => {
         const target = typeof value === "number" ? value : 0;
         const startTime = performance.now();
 
+        // The animate function calculates the current value based on the elapsed time and updates the state. It continues to request animation frames until the animation is complete.
         const animate = (currentTime: number) => {
+          // Calculate the elapsed time and progress of the animation
           const elapsed = currentTime - startTime;
           const progress = Math.min(elapsed / duration, 1);
           const currentValue = Math.round(target * progress);
 
+          // Update the animated stat value in the state
           setAnimatedStats((prev) => ({
             ...prev,
             [key]: currentValue,
           }));
 
+          // If the animation is not yet complete, request the next animation frame
           if (progress < 1) {
             const frameId = requestAnimationFrame(animate);
             frameIds.push(frameId);
             return;
           }
 
+          // Ensure the final value is set at the end of the animation
           setAnimatedStats((prev) => ({
             ...prev,
             [key]: target,
@@ -101,9 +112,11 @@ export const useAnimatedStats = <T extends object>(
     };
 
     checkVisibility();
+    // Use passive event listeners for scroll to improve performance
     window.addEventListener("scroll", checkVisibility, { passive: true });
     window.addEventListener("resize", checkVisibility);
 
+    // Clean up event listeners and cancel any pending animation frames when the component unmounts or when stats/duration changes
     return () => {
       frameIds.forEach(cancelAnimationFrame);
       window.removeEventListener("scroll", checkVisibility);

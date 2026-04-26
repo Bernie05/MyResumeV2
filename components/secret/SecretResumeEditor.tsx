@@ -73,6 +73,7 @@ interface SecretResumeEditorProps {
 }
 
 export interface IEditorInterface {
+  isEditMode?: boolean;
   activeSectionId?: ResumeEditableSection | null;
   onInlineFieldClick?: (
     section: ResumeEditableSection,
@@ -255,12 +256,11 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
 
   const handleInlineFieldClick = (
     section: ResumeEditableSection,
-    fieldId: string,
+    fieldId: InlineEditableFieldId,
     anchor?: HTMLElement,
   ) => {
-    const typedFieldId = fieldId as InlineEditableFieldId;
     setSelectedPreviewSection(section);
-    setSelectedInlineFieldId(typedFieldId);
+    setSelectedInlineFieldId(fieldId);
     setAnchorEl(anchor ?? null);
   };
 
