@@ -21,6 +21,21 @@ import { getSectionPalette, IThemePalette } from "@/theme/sectionPalette";
 import { useThemeContext } from "@/context/ThemeContext";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 
+interface ContactItem {
+  icon: JSX.Element;
+  label: string;
+  value: string;
+  href?: string;
+  fieldId: InlineEditableFieldId;
+}
+
+interface SocialLinkItem {
+  icon: JSX.Element;
+  href: string;
+  label: string;
+  fieldId: InlineEditableFieldId;
+}
+
 interface ContactSectionProps {
   personalInfo: PersonalInfo;
   onInlineFieldClick?: (
@@ -52,13 +67,13 @@ export const ContactSection = ({
   } = getSectionPalette(isDarkMode);
 
   // change this and use the herosection funvc
-  const socialLinks = [
+  const socialLinks: SocialLinkItem[] = [
     personalInfo.linkedin
       ? {
           icon: <LinkedInIcon />,
           href: personalInfo.linkedin,
           label: "LinkedIn",
-          fieldId: "personalInfo.linkedin",
+          fieldId: "personalInfo.linkedin" as InlineEditableFieldId,
         }
       : null,
     personalInfo.github
@@ -66,7 +81,7 @@ export const ContactSection = ({
           icon: <GitHubIcon />,
           href: personalInfo.github,
           label: "GitHub",
-          fieldId: "personalInfo.github",
+          fieldId: "personalInfo.github" as InlineEditableFieldId,
         }
       : null,
     personalInfo.website
@@ -74,40 +89,35 @@ export const ContactSection = ({
           icon: <LanguageIcon />,
           href: personalInfo.website,
           label: "Website",
-          fieldId: "personalInfo.website",
+          fieldId: "personalInfo.website" as InlineEditableFieldId,
         }
       : null,
-  ].filter(Boolean) as Array<{
-    icon: JSX.Element;
-    href: string;
-    label: string;
-    fieldId: string;
-  }>;
+  ].filter(Boolean) as SocialLinkItem[];
 
-  const contactItems = [
+  const contactItems: ContactItem[] = [
     {
       icon: <EmailOutlinedIcon fontSize="small" />,
       label: "Email",
       value: personalInfo.email,
       href: `mailto:${personalInfo.email}`,
-      fieldId: "personalInfo.email",
+      fieldId: "personalInfo.email" as InlineEditableFieldId,
     },
     {
       icon: <PhoneOutlinedIcon fontSize="small" />,
       label: "Phone",
       value: personalInfo.phone,
       href: `tel:${personalInfo.phone}`,
-      fieldId: "personalInfo.phone",
+      fieldId: "personalInfo.phone" as InlineEditableFieldId,
     },
     {
       icon: <LocationOnOutlinedIcon fontSize="small" />,
       label: "Location",
       value: personalInfo.location,
-      fieldId: "personalInfo.location",
+      fieldId: "personalInfo.location" as InlineEditableFieldId,
     },
   ];
 
-  const getInlineFieldSx = (fieldId: string) => ({
+  const getInlineFieldSx = (fieldId: InlineEditableFieldId) => ({
     outline:
       activeInlineFieldId === fieldId
         ? "2px solid rgba(20, 184, 166, 0.9)"
@@ -116,7 +126,7 @@ export const ContactSection = ({
     cursor: onInlineFieldClick ? "pointer" : "inherit",
   });
 
-  const createInlineFieldProps = (fieldId: string) => {
+  const createInlineFieldProps = (fieldId: InlineEditableFieldId) => {
     if (!onInlineFieldClick) {
       return {};
     }

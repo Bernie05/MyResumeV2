@@ -58,7 +58,7 @@ const Education = ({
     hoverShadow,
   } = getSectionPalette(isDarkMode);
 
-  const getInlineFieldSx = (fieldId: string) => ({
+  const getInlineFieldSx = (fieldId: InlineEditableFieldId) => ({
     borderRadius: 1,
     outline:
       activeInlineFieldId === fieldId
@@ -75,7 +75,7 @@ const Education = ({
       : undefined,
   });
 
-  const createInlineFieldProps = (fieldId: string) => {
+  const createInlineFieldProps = (fieldId: InlineEditableFieldId) => {
     if (!onInlineFieldClick) {
       return {};
     }
