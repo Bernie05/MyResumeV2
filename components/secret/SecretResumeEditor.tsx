@@ -62,6 +62,7 @@ import {
   InlineEditableFieldId,
   PREVIEW_SECTION_TO_EDITOR_SECTION,
 } from "./constants/constant";
+import { CustomPopover } from "./components/CustomPopover";
 
 const STORAGE_KEY = "resume-secret-draft";
 const LEGACY_DRAFT_STORAGE_KEY = "resume-studio-draft";
@@ -3667,57 +3668,14 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
         />
       </Box>
 
-      <Popover
-        open={Boolean(anchorEl) && Boolean(selectedInlineFieldId)}
+      {/* Popover */}
+      <CustomPopover
         anchorEl={anchorEl}
-        onClose={handleCloseInlineEditor}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        transformOrigin={{ vertical: "top", horizontal: "left" }}
-        slotProps={{
-          paper: {
-            sx: {
-              p: 2.5,
-              minWidth: 300,
-              maxWidth: 520,
-              maxHeight: "70vh",
-              overflowY: "auto",
-              borderRadius: 3,
-              border: "2px solid",
-              borderColor: isDarkMode
-                ? "rgba(20, 184, 166, 0.5)"
-                : "rgba(15, 118, 110, 0.35)",
-              backgroundColor: isDarkMode
-                ? "rgba(15, 23, 42, 0.97)"
-                : "rgba(255, 255, 255, 0.97)",
-              backdropFilter: "blur(12px)",
-              boxShadow: isDarkMode
-                ? "0 8px 32px rgba(0, 0, 0, 0.5)"
-                : "0 8px 32px rgba(0, 0, 0, 0.15)",
-            },
-          },
-        }}
-      >
-        {selectedInlineFieldId && (
-          <Stack spacing={1.5}>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                {getInlineFieldLabel(selectedInlineFieldId)}
-              </Typography>
-              <Chip
-                size="small"
-                label="Editing"
-                color="primary"
-                variant="filled"
-              />
-            </Stack>
-            {renderInlineFieldToolbox()}
-          </Stack>
-        )}
-      </Popover>
+        selectedInlineFieldId={selectedInlineFieldId}
+        handleCloseInlineEditor={handleCloseInlineEditor}
+        getInlineFieldLabel={getInlineFieldLabel}
+        renderInlineFieldToolbox={renderInlineFieldToolbox}
+      />
 
       <Snackbar
         open={Boolean(notice) || Boolean(error)}

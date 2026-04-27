@@ -64,9 +64,7 @@ const ResumePage = ({
   onAddAction,
   onDeleteAction,
 }: ResumePageProps) => {
-  console.log("MAIN RESUME");
   const { isDarkMode } = useThemeContext();
-  const theme = getSectionPalette(isDarkMode);
 
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated" && Boolean(session);

@@ -333,3 +333,33 @@ export const createInlineFieldProps = (
 export const getCursorPointer = (isEditMode: boolean = false) => {
   return isEditMode ? "pointer" : "inherit";
 };
+
+// Utility function to generate inline field props for all fields in a section, based on a common prefix and an array of field names. This helps reduce boilerplate when creating inline editable fields for sections with multiple fields (like personalInfo).
+export const getCreatedInlineFields = <TField extends string>(
+  sectionId: ResumeEditableSection,
+  prefixField: string,
+  arr: readonly TField[],
+  onInlineFieldClick:
+    | ((
+        section: ResumeEditableSection,
+        fieldId: InlineEditableFieldId,
+        anchor?: HTMLElement,
+      ) => void)
+    | undefined,
+): Record<TField, ReturnType<typeof createInlineFieldProps>> => {
+  const inlineFields = {} as Record<
+    TField,
+    ReturnType<typeof createInlineFieldProps>
+  >;
+
+  for (const field of arr) {
+    // This is a bit of a TypeScript hack to ensure the fieldId is correctly typed as InlineEditableFieldId
+    inlineFields[field] = createInlineFieldProps(
+      sectionId,
+      `${prefixField}.${field}` as InlineEditableFieldId,
+      onInlineFieldClick,
+    );
+  }
+
+  return inlineFields;
+};
