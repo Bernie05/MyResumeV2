@@ -5,27 +5,27 @@ import { useThemeContext } from "@/context/ThemeContext";
 import { useAnimatedStats } from "@/hook/useAnimated";
 import { getSectionPalette, IThemePalette } from "../../theme/sectionPalette";
 import DownloadIcon from "@mui/icons-material/Download";
-import LinkIcon from "@mui/icons-material/Link";
-import { ICON_MAP } from "@/components/resume/ServicesSection";
+
 import { type ResumeEditableSection } from "@/components/resume/ResumePage";
 import {
   Avatar,
   Box,
   Button,
   Container,
-  IconButton,
   Stack,
   Typography,
 } from "@mui/material";
 import { heroSectionId, socialLinks, statItems } from "./constants/constant";
 import {
   createInlineFieldProps,
+  getCreatedInlineFields,
   getCursorPointer,
   getInlineFieldSxV2,
 } from "../secret/utils/componentUtil";
 import { SocialMediaBtn } from "./components/buttons/SocialMediaBtn";
 import { IEditorProps } from "../secret/SecretResumeEditor";
-import { InlineEditableFieldId } from "../secret/constants/constant";
+import { CustomSocialMedia } from "../secret/components/CustomSocialMedia";
+import { CustomStats } from "../secret/components/CustomStats";
 
 export interface PersonalInfo {
   // Basic info
@@ -100,35 +100,12 @@ const HeroSection = ({
       ) => void)
     | undefined;
 
-  // Utility function to generate inline field props for all fields in a section, based on a common prefix and an array of field names. This helps reduce boilerplate when creating inline editable fields for sections with multiple fields (like personalInfo).
-  const getAllInlineFields = <TField extends string>(
-    prefixField: string,
-    arr: readonly TField[],
-  ): Record<TField, ReturnType<typeof createInlineFieldProps>> => {
-    const inlineFields = {} as Record<
-      TField,
-      ReturnType<typeof createInlineFieldProps>
-    >;
-
-    for (const field of arr) {
-      // This is a bit of a TypeScript hack to ensure the fieldId is correctly typed as InlineEditableFieldId
-      inlineFields[field] = createInlineFieldProps(
-        sectionId,
-        `${prefixField}.${field}` as InlineEditableFieldId,
-        onInlineFieldClick,
-      );
-    }
-
-    return inlineFields;
-  };
-
-  const fields = getAllInlineFields("personalInfo", [
-    "name",
-    "title",
-    "photoUrl",
-    "backgroundUrl",
-    "summary",
-  ]);
+  const personalInfoFields = getCreatedInlineFields(
+    sectionId,
+    "personalInfo",
+    ["name", "title", "photoUrl", "backgroundUrl", "summary"],
+    inlineFieldClick,
+  );
 
   return (
     <Box
@@ -137,7 +114,7 @@ const HeroSection = ({
     >
       <Box
         id={`${heroSectionId}-background-img`}
-        {...fields.backgroundUrl}
+        {...personalInfoFields.backgroundUrl}
         sx={{
           position: "relative",
           minHeight: { xs: "100vh", md: 640 },
@@ -237,7 +214,7 @@ const HeroSection = ({
                       : undefined),
                   },
                 }}
-                {...fields.photoUrl}
+                {...personalInfoFields.photoUrl}
               />
             </Box>
 
@@ -261,7 +238,7 @@ const HeroSection = ({
                     isEditMode,
                   }),
                 }}
-                {...fields.name}
+                {...personalInfoFields.name}
               >
                 {personalInfo.name}
               </Typography>
@@ -281,7 +258,7 @@ const HeroSection = ({
                     isEditMode,
                   }),
                 }}
-                {...fields.title}
+                {...personalInfoFields.title}
               >
                 {personalInfo.title}
               </Typography>
@@ -302,7 +279,7 @@ const HeroSection = ({
                       isEditMode,
                     }),
                   }}
-                  {...fields.summary}
+                  {...personalInfoFields.summary}
                 >
                   {personalInfo.summary}
                 </Typography>
@@ -363,6 +340,7 @@ const HeroSection = ({
               >
                 {personalInfo.hireButtonText || "Hire Me"}
               </Button>
+
               <Button
                 variant="outlined"
                 startIcon={<DownloadIcon />}
@@ -422,83 +400,13 @@ const HeroSection = ({
               />
 
               {/* Custom Social Links */}
-              {(personalInfo.social ?? []).map((s, idx) => (
-                <IconButton
-                  key={`custom-social-${idx}`}
-                  component="a"
-                  href={onInlineFieldClick ? undefined : s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={s.label || "Custom link"}
-                  sx={{
-                    width: 52,
-                    height: 52,
-                    color: "common.white",
-                    backgroundColor: isDarkMode
-                      ? "rgba(15, 23, 42, 0.78)"
-                      : "rgba(255, 255, 255, 0.18)",
-                    border: "1px solid rgba(255,255,255,0.16)",
-                    backdropFilter: "blur(12px)",
-                    ...getInlineFieldSxV2({
-                      fieldId: `personalInfo.social.custom.${idx}`,
-                      activeInlineFieldId,
-                      isEditMode,
-                    }),
-                    transition:
-                      "transform 0.25s ease, background-color 0.25s ease, outline-color 160ms ease, box-shadow 160ms ease",
-                    "&:hover": {
-                      transform: "translateY(-3px)",
-                      backgroundColor: `${primaryAccent}55`,
-                      ...(onInlineFieldClick
-                        ? {
-                            outlineColor: "rgba(20, 184, 166, 0.55)",
-                            boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-                          }
-                        : undefined),
-                    },
-                  }}
-                  {...(onInlineFieldClick
-                    ? {
-                        onClick: (event: React.MouseEvent) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          onInlineFieldClick(
-                            "about",
-                            `personalInfo.social.custom.${idx}`,
-                            event.currentTarget as HTMLElement,
-                          );
-                        },
-                      }
-                    : {})}
-                >
-                  {s.icon && ICON_MAP[s.icon] ? (
-                    React.createElement(ICON_MAP[s.icon])
-                  ) : (
-                    <LinkIcon />
-                  )}
-                </IconButton>
-              ))}
-              {/* Add Social Link */}
-              {onAddAction && (
-                <IconButton
-                  aria-label="Add social link"
-                  sx={{
-                    width: 52,
-                    height: 52,
-                    color: "common.white",
-                    backgroundColor: "rgba(20, 184, 166, 0.25)",
-                    border: "2px dashed rgba(20, 184, 166, 0.5)",
-                    "&:hover": {
-                      backgroundColor: "rgba(20, 184, 166, 0.4)",
-                    },
-                  }}
-                  onClick={(event) =>
-                    onAddAction("social", event.currentTarget as HTMLElement)
-                  }
-                >
-                  <Box sx={{ fontSize: "1.5rem", fontWeight: 700 }}>+</Box>
-                </IconButton>
-              )}
+              <CustomSocialMedia
+                socialLinks={personalInfo.social ?? []}
+                isEditMode={isEditMode}
+                onInlineFieldClick={inlineFieldClick}
+                activeInlineFieldId={activeInlineFieldId}
+                onAddAction={onAddAction}
+              />
             </Stack>
           </Stack>
         </Container>
@@ -565,6 +473,8 @@ const HeroSection = ({
                       {(animatedStats[key] ?? 0).toLocaleString()}
                       {suffix}
                     </Typography>
+
+                    {/* Stats Label */}
                     <Typography
                       sx={{
                         fontSize: { xs: "0.85rem", md: "1rem" },
@@ -577,99 +487,15 @@ const HeroSection = ({
                     </Typography>
                   </Box>
                 ))}
-              {(stats.custom ?? []).map((customStat, idx) => (
-                <Box
-                  key={`custom-stat-${idx}`}
-                  sx={{
-                    flex: "1 1 180px",
-                    maxWidth: { xs: "100%", sm: 220 },
-                    minWidth: { xs: 130, sm: 160 },
-                    textAlign: "center",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    px: { xs: 1, sm: 2 },
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: { xs: "2rem", md: "2.5rem" },
-                      fontWeight: 800,
-                      color: primaryAccent,
-                      lineHeight: 1,
-                      mb: 1,
-                      ...getInlineFieldSxV2({
-                        fieldId: `stats.custom.${idx}`,
-                        activeInlineFieldId,
-                        isEditMode,
-                      }),
-                    }}
-                    {...createInlineFieldProps(
-                      "stats",
-                      `stats.custom.${idx}`,
-                      inlineFieldClick,
-                    )}
-                  >
-                    {customStat.value.toLocaleString()}
-                    {customStat.suffix}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: { xs: "0.85rem", md: "1rem" },
-                      fontWeight: 600,
-                      color: isDarkMode ? "#cbd5e1" : "#64748b",
-                      maxWidth: 180,
-                    }}
-                  >
-                    {customStat.label}
-                  </Typography>
-                </Box>
-              ))}
-              {onAddAction && (
-                <Box
-                  sx={{
-                    flex: "1 1 180px",
-                    maxWidth: { xs: "100%", sm: 220 },
-                    minWidth: { xs: 130, sm: 160 },
-                    textAlign: "center",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    px: { xs: 1, sm: 2 },
-                    cursor: "pointer",
-                    border: `2px dashed ${primaryAccent}50`,
-                    borderRadius: 2,
-                    py: 2,
-                    "&:hover": { borderColor: primaryAccent },
-                  }}
-                  onClick={(event) =>
-                    onAddAction("stat", event.currentTarget as HTMLElement)
-                  }
-                >
-                  <Typography
-                    sx={{
-                      fontSize: "2rem",
-                      fontWeight: 800,
-                      color: primaryAccent,
-                      lineHeight: 1,
-                      mb: 1,
-                    }}
-                  >
-                    +
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: "0.85rem",
-                      fontWeight: 600,
-                      color: primaryAccent,
-                    }}
-                  >
-                    Add Stat
-                  </Typography>
-                </Box>
-              )}
+
+              {/* Custom Stats */}
+              <CustomStats
+                stats={stats}
+                isEditMode={isEditMode}
+                onInlineFieldClick={inlineFieldClick}
+                activeInlineFieldId={activeInlineFieldId}
+                onAddAction={onAddAction}
+              />
             </Box>
           </Container>
         </Box>
