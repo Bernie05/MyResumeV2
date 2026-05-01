@@ -4,7 +4,7 @@ import { IEditorInterface } from "@/components/secret/SecretResumeEditor";
 import { getInlineFieldSx } from "@/components/secret/utils/componentUtil";
 import { IThemePalette } from "@/theme/sectionPalette";
 import { Box, IconButton, Stack } from "@mui/material";
-import { ICON_MAP } from "../../ServicesSection";
+import { ICON_MAP } from "../resume/ServicesSection";
 import LinkIcon from "@mui/icons-material/Link";
 
 interface SocialMediaBtnProps extends IEditorInterface, IThemePalette {

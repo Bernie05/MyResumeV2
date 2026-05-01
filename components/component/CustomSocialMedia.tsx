@@ -2,8 +2,8 @@ import React from "react";
 
 import { IconButton, Box } from "@mui/material";
 import LinkIcon from "@mui/icons-material/Link";
-import { IEditorProps } from "../SecretResumeEditor";
-import { getInlineFieldSxV2 } from "../utils/componentUtil";
+import { IEditorProps } from "../secret/SecretResumeEditor";
+import { getInlineFieldSxV2 } from "../secret/utils/componentUtil";
 import { ICON_MAP } from "@/components/resume/ServicesSection";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "@/theme/sectionPalette";
@@ -20,11 +20,10 @@ interface ICustomStatsProps extends IEditorProps {
 
 export const CustomSocialMedia = ({
   socialLinks,
-  isEditMode,
-  onInlineFieldClick,
-  activeInlineFieldId,
-  onAddAction,
+  editorProps,
 }: ICustomStatsProps) => {
+  const { isEditMode, activeInlineFieldId, onInlineFieldClick, onAddAction } =
+    editorProps || {};
   const { isDarkMode } = useThemeContext();
   const { primaryAccent } = getSectionPalette(isDarkMode);
 

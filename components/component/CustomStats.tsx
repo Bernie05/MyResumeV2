@@ -5,10 +5,10 @@ import Typography from "@mui/material/Typography/Typography";
 import {
   createInlineFieldProps,
   getInlineFieldSxV2,
-} from "../utils/componentUtil";
+} from "../secret/utils/componentUtil";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "@/theme/sectionPalette";
-import { IEditorProps } from "../SecretResumeEditor";
+import { IEditorProps } from "../secret/SecretResumeEditor";
 import { ResumeEditableSection } from "@/components/resume/ResumePage";
 
 interface ICustomStatsProps extends IEditorProps {

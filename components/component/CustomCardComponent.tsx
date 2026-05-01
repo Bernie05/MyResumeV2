@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useThemeContext } from "@/context/ThemeContext";
 import { useInlineEditing } from "@/hook/useInlineEditing";
-import { getSectionPalette } from "../../../../theme/sectionPalette";
+import { getSectionPalette } from "../../theme/sectionPalette";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -23,32 +23,28 @@ import {
 import { IPortfolioItem } from "@/types/portfolio";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
+import { IEditorProps } from "../secret/SecretResumeEditor";
 
-interface CardComponentProps extends IPortfolioItem {
+interface CardComponentProps extends IPortfolioItem, IEditorProps {
   inlineSection?: ResumeEditableSection;
   itemIndex?: number;
-  activeInlineFieldId?: string | null;
-  onInlineFieldClick?: (
-    section: ResumeEditableSection,
-    fieldId: InlineEditableFieldId,
-    anchor?: HTMLElement,
-  ) => void;
-  onAddAction?: (action: string, anchor: HTMLElement) => void;
-  onDelete?: () => void;
-  isEditMode?: boolean;
 }
 
 export const CardComponent = ({
   inlineSection,
   itemIndex,
-  activeInlineFieldId,
-  onInlineFieldClick,
-  onAddAction,
-  onDelete,
-  isEditMode,
+  editorProps,
   ...item
 }: CardComponentProps) => {
   const { isDarkMode } = useThemeContext();
+  const {
+    activeInlineFieldId,
+    onInlineFieldClick,
+    onAddAction,
+    onDelete,
+    isEditMode,
+  } = editorProps || {};
+
   const {
     primaryAccent,
     accentText,
