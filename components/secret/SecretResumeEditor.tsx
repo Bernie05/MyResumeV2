@@ -62,7 +62,7 @@ import {
   InlineEditableFieldId,
   PREVIEW_SECTION_TO_EDITOR_SECTION,
 } from "./constants/constant";
-import { CustomPopover } from "./components/CustomPopover";
+import { CustomPopover } from "../component/CustomPopover";
 
 const STORAGE_KEY = "resume-secret-draft";
 const LEGACY_DRAFT_STORAGE_KEY = "resume-studio-draft";
@@ -110,16 +110,30 @@ export interface IEditorCreateInlineFieldProps {
   ) => void;
 }
 
+export type OnSectionClick = (section: ResumeEditableSection) => void;
+
+export type OnInlineFieldClickHandler = (
+  section: ResumeEditableSection,
+  fieldId: InlineEditableFieldId,
+  anchor?: HTMLElement,
+) => void;
+
 export interface IEditorProps {
-  onInlineFieldClick?: (
-    section: ResumeEditableSection,
-    fieldId: InlineEditableFieldId,
-    anchor?: HTMLElement,
-  ) => void;
-  activeInlineFieldId?: InlineEditableFieldId | null;
-  onAddAction?: (action: string, anchor: HTMLElement) => void;
-  onDeleteAction?: (action: string) => void;
-  isEditMode?: boolean;
+  editorProps: {
+    // Field level interactions
+    onInlineFieldClick?: OnInlineFieldClickHandler;
+    activeInlineFieldId?: InlineEditableFieldId | null;
+
+    // Section level interactions
+    onSectionClick?: OnSectionClick;
+    activeSectionId?: ResumeEditableSection | null;
+
+    // Action
+    onAddAction?: (action: string, anchor: HTMLElement) => void;
+    onDeleteAction?: (action: string) => void;
+    isEditMode?: boolean;
+    onDelete?: () => void;
+  };
 }
 
 const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
@@ -3658,13 +3672,15 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
         <ResumePage
           resume={draft}
           position="static"
-          interactiveSections
-          activeSectionId={selectedPreviewSection}
-          onSectionClick={handlePreviewSectionClick}
-          activeInlineFieldId={selectedInlineFieldId}
-          onInlineFieldClick={handleInlineFieldClick}
-          onAddAction={handleAddAction}
-          onDeleteAction={handleDeleteAction}
+          editorProps={{
+            isEditMode: true,
+            activeSectionId: selectedPreviewSection,
+            onSectionClick: handlePreviewSectionClick,
+            activeInlineFieldId: selectedInlineFieldId,
+            onInlineFieldClick: handleInlineFieldClick,
+            onAddAction: handleAddAction,
+            onDeleteAction: handleDeleteAction,
+          }}
         />
       </Box>
 

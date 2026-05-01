@@ -16,6 +16,7 @@ import { getSectionPalette } from "@/theme/sectionPalette";
 import { ContactSection } from "./ContactSection";
 import { useSession } from "next-auth/react";
 import { InlineEditableFieldId } from "../secret/constants/constant";
+import { IEditorProps } from "../secret/SecretResumeEditor";
 
 export type NavbarPosition =
   | "fixed"
@@ -36,41 +37,34 @@ export type ResumeEditableSection =
   | "contact"
   | "stats";
 
-interface ResumePageProps {
+interface IResumePageProps extends IEditorProps {
   resume: ResumeData;
   position?: NavbarPosition;
   interactiveSections?: boolean;
-  activeSectionId?: ResumeEditableSection | null;
-  onSectionClick?: (section: ResumeEditableSection) => void;
-  activeInlineFieldId?: InlineEditableFieldId | null;
-  onInlineFieldClick?: (
-    section: ResumeEditableSection,
-    fieldId: InlineEditableFieldId,
-    anchor?: HTMLElement,
-  ) => void;
-  onAddAction?: (action: string, anchor: HTMLElement) => void;
-  onDeleteAction?: (action: string) => void;
 }
 
 const ResumePage = ({
   resume,
   position = "sticky",
-  // This is used in SecretResumeEditor to enable click interactions on sections and fields
-  interactiveSections = false,
-  activeSectionId = null,
-  activeInlineFieldId = null,
-  onSectionClick,
-  onInlineFieldClick,
-  onAddAction,
-  onDeleteAction,
-}: ResumePageProps) => {
+  editorProps,
+}: IResumePageProps) => {
+  const {
+    activeSectionId,
+    onSectionClick,
+    activeInlineFieldId,
+    onInlineFieldClick,
+    onAddAction,
+    onDeleteAction,
+  } = editorProps || {};
+
+  const { isEditMode } = editorProps || {};
   const { isDarkMode } = useThemeContext();
 
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated" && Boolean(session);
 
   const getSectionSx = (sectionId: ResumeEditableSection) => {
-    if (!interactiveSections) {
+    if (!isEditMode) {
       return undefined;
     }
 
@@ -95,7 +89,7 @@ const ResumePage = ({
   };
 
   const createSectionProps = (sectionId: ResumeEditableSection) => {
-    if (!interactiveSections) {
+    if (!isEditMode) {
       return {};
     }
 
@@ -114,10 +108,10 @@ const ResumePage = ({
   };
 
   const getEditableProps = () => {
-    if (!interactiveSections) return {};
+    if (!isEditMode) return {};
 
     return {
-      isEditMode: interactiveSections,
+      isEditMode,
       onInlineFieldClick,
       activeInlineFieldId,
       onAddAction,
@@ -141,6 +135,7 @@ const ResumePage = ({
           personalInfo={resume.personalInfo}
           stats={resume.stats}
           {...getEditableProps()}
+          editorProps={editorProps}
         />
       </Box>
 
@@ -183,7 +178,11 @@ const ResumePage = ({
             sx={getSectionSx("portfolio")}
             {...createSectionProps("portfolio")}
           >
-            <Portfolio portfolio={resume.portfolio} {...getEditableProps()} />
+            <Portfolio
+              portfolio={resume.portfolio}
+              editorProps={editorProps}
+              {...getEditableProps()}
+            />
           </Box>
 
           {/* Projects Section */}
@@ -191,7 +190,11 @@ const ResumePage = ({
             sx={getSectionSx("projects")}
             {...createSectionProps("projects")}
           >
-            <Projects projects={resume.projects} {...getEditableProps()} />
+            <Projects
+              projects={resume.projects}
+              editorProps={editorProps}
+              {...getEditableProps()}
+            />
           </Box>
           <Box
             sx={getSectionSx("education")}

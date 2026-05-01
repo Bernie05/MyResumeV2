@@ -1,11 +1,12 @@
 import { useThemeContext } from "@/context/ThemeContext";
 import { Chip, Popover, Stack, Typography } from "@mui/material";
+import { InlineEditableFieldId } from "../secret/constants/constant";
 
 interface CustomPopoverProps {
   anchorEl: HTMLElement | null;
   selectedInlineFieldId: string | null;
   handleCloseInlineEditor: () => void;
-  getInlineFieldLabel: (fieldId: string) => string;
+  getInlineFieldLabel: (selectedInlineFieldId: InlineEditableFieldId) => string;
   renderInlineFieldToolbox: () => React.ReactNode;
 }
 

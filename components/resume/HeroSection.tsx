@@ -22,10 +22,11 @@ import {
   getCursorPointer,
   getInlineFieldSxV2,
 } from "../secret/utils/componentUtil";
-import { SocialMediaBtn } from "./components/buttons/SocialMediaBtn";
+import { SocialMediaBtn } from "../component/CustomSocialMediaBtn";
 import { IEditorProps } from "../secret/SecretResumeEditor";
-import { CustomSocialMedia } from "../secret/components/CustomSocialMedia";
-import { CustomStats } from "../secret/components/CustomStats";
+import { CustomSocialMedia } from "../component/CustomSocialMedia";
+import { CustomStats } from "../component/CustomStats";
+import { CustomAvatar } from "../component/CustomAvatar";
 
 export interface PersonalInfo {
   // Basic info
@@ -72,12 +73,11 @@ export interface HeroSectionProps extends IEditorProps {
 const HeroSection = ({
   personalInfo,
   stats,
-  onInlineFieldClick,
-  activeInlineFieldId,
-  onAddAction,
-  isEditMode,
+  editorProps,
 }: HeroSectionProps) => {
   const sectionId = "about";
+  const { isEditMode, onInlineFieldClick, onAddAction, activeInlineFieldId } =
+    editorProps || {};
   const { isDarkMode } = useThemeContext();
   const theme = getSectionPalette(isDarkMode);
   const cursor = getCursorPointer(isEditMode);
@@ -184,37 +184,26 @@ const HeroSection = ({
               />
 
               {/* Avatar */}
-              <Avatar
-                id={`${heroSectionId}-avatar`}
-                alt={personalInfo.name}
-                src={personalInfo.photoUrl}
-                sx={{
-                  width: { xs: 160, md: 192 },
-                  height: { xs: 160, md: 192 },
-                  border: "4px solid",
-                  borderColor: primaryAccent,
-                  boxShadow: `0 24px 60px ${accentGlow}`,
-                  position: "relative",
-                  borderRadius: 1,
-                  outline:
-                    activeInlineFieldId === "personalInfo.photoUrl"
-                      ? "2px solid rgba(20, 184, 166, 0.9)"
-                      : "2px solid transparent",
-                  outlineOffset: 2,
-                  cursor,
-                  transition:
-                    "transform 0.35s ease, outline-color 160ms ease, box-shadow 160ms ease",
-                  "&:hover": {
-                    transform: "scale(1.05)",
-                    ...(onInlineFieldClick
-                      ? {
-                          outlineColor: "rgba(20, 184, 166, 0.55)",
-                          boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-                        }
-                      : undefined),
+              <CustomAvatar
+                targetFieldId="personalInfo.photoUrl"
+                editorProps={editorProps}
+                photoURL={personalInfo.photoUrl}
+                props={{
+                  id: `${heroSectionId}-avatar`,
+                  alt: personalInfo.name,
+                  src: personalInfo.photoUrl,
+                  sx: {
+                    width: { xs: 160, md: 192 },
+                    height: { xs: 160, md: 192 },
+                    border: "4px solid",
+                    borderColor: primaryAccent,
+                    boxShadow: `0 24px 60px ${accentGlow}`,
+                    position: "relative",
+                    borderRadius: 1,
+                    outlineOffset: 2,
+                    cursor,
                   },
                 }}
-                {...personalInfoFields.photoUrl}
               />
             </Box>
 
@@ -402,10 +391,7 @@ const HeroSection = ({
               {/* Custom Social Links */}
               <CustomSocialMedia
                 socialLinks={personalInfo.social ?? []}
-                isEditMode={isEditMode}
-                onInlineFieldClick={inlineFieldClick}
-                activeInlineFieldId={activeInlineFieldId}
-                onAddAction={onAddAction}
+                editorProps={editorProps}
               />
             </Stack>
           </Stack>
@@ -489,13 +475,7 @@ const HeroSection = ({
                 ))}
 
               {/* Custom Stats */}
-              <CustomStats
-                stats={stats}
-                isEditMode={isEditMode}
-                onInlineFieldClick={inlineFieldClick}
-                activeInlineFieldId={activeInlineFieldId}
-                onAddAction={onAddAction}
-              />
+              <CustomStats stats={stats} editorProps={editorProps} />
             </Box>
           </Container>
         </Box>

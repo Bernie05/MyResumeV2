@@ -7,26 +7,14 @@ import { ProjectCardComponent } from "./components/cards/ProjectCardComponent";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
+import { IEditorProps } from "../secret/SecretResumeEditor";
 
-const Portfolio = ({
-  portfolio,
-  onInlineFieldClick,
-  activeInlineFieldId,
-  onAddAction,
-  onDeleteAction,
-  isEditMode,
-}: {
+interface IPortfolioProps extends IEditorProps {
   portfolio: IPortfolioItem[];
-  onInlineFieldClick?: (
-    section: ResumeEditableSection,
-    fieldId: InlineEditableFieldId,
-    anchor?: HTMLElement,
-  ) => void;
-  activeInlineFieldId?: InlineEditableFieldId | null;
-  onAddAction?: (action: string, anchor: HTMLElement) => void;
-  onDeleteAction?: (action: string) => void;
-  isEditMode?: boolean;
-}) => {
+}
+
+const Portfolio = ({ portfolio, editorProps }: IPortfolioProps) => {
+  const { onAddAction, onDeleteAction } = editorProps || {};
   const { isDarkMode } = useThemeContext();
   const {
     titleColor,
@@ -100,15 +88,15 @@ const Portfolio = ({
       >
         {portfolio.map((item, index) => (
           <ProjectCardComponent
-            key={item.id}
-            {...item}
-            inlineSection="portfolio"
             itemIndex={index}
-            activeInlineFieldId={activeInlineFieldId}
-            onInlineFieldClick={onInlineFieldClick}
-            onAddAction={onAddAction}
-            onDelete={() => onDeleteAction?.(`portfolio.${index}`)}
-            isEditMode={isEditMode}
+            key={item.id}
+            inlineSection="portfolio"
+            {...item}
+            editorProps={{
+              ...editorProps,
+              onDelete: () =>
+                editorProps.onDeleteAction?.(`portfolio.${index}`),
+            }}
           />
         ))}
       </Box>
