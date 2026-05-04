@@ -57,7 +57,9 @@ export const CustomPopover = ({
             alignItems="center"
           >
             <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-              {getInlineFieldLabel(selectedInlineFieldId)}
+              {getInlineFieldLabel(
+                selectedInlineFieldId as InlineEditableFieldId,
+              )}
             </Typography>
             <Chip
               size="small"
