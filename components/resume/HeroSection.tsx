@@ -27,6 +27,7 @@ import { IEditorProps } from "../secret/SecretResumeEditor";
 import { CustomSocialMedia } from "../component/CustomSocialMedia";
 import { CustomStats } from "../component/CustomStats";
 import { CustomAvatar } from "../component/CustomAvatar";
+import { CustomBox } from "../component/CustomBox";
 
 export interface PersonalInfo {
   // Basic info
@@ -112,40 +113,35 @@ const HeroSection = ({
       id={`${heroSectionId}-main-container`}
       sx={{ position: "relative", width: "100%" }}
     >
-      <Box
-        id={`${heroSectionId}-background-img`}
-        {...personalInfoFields.backgroundUrl}
-        sx={{
-          position: "relative",
-          minHeight: { xs: "100vh", md: 640 },
-          display: "flex",
-          alignItems: "center",
-          overflow: "hidden",
-          backgroundImage: `url('${personalInfo.backgroundUrl}')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            inset: 0,
-            background: isDarkMode
-              ? "rgba(2, 6, 23, 0.78)"
-              : "linear-gradient(90deg, rgba(15, 23, 42, 0.78) 0%, rgba(30, 41, 59, 0.48) 45%, rgba(30, 64, 175, 0.18) 100%)",
-          },
-          outline:
-            activeInlineFieldId === "personalInfo.backgroundUrl"
-              ? "2px solid rgba(20, 184, 166, 0.9)"
-              : "2px solid transparent",
-          cursor,
-          "&:hover": {
-            ...(onInlineFieldClick
-              ? {
-                  outlineColor: "rgba(20, 184, 166, 0.55)",
-                  boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-                }
-              : undefined),
+      <CustomBox
+        props={{
+          id: `${heroSectionId}-editable-container`,
+          ...personalInfoFields.backgroundUrl,
+          sx: {
+            position: "relative",
+            minHeight: { xs: "100vh", md: 640 },
+            display: "flex",
+            alignItems: "center",
+            overflow: "hidden",
+            backgroundImage: `url('${personalInfo.backgroundUrl}')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              inset: 0,
+              background: isDarkMode
+                ? "rgba(2, 6, 23, 0.78)"
+                : "linear-gradient(90deg, rgba(15, 23, 42, 0.78) 0%, rgba(30, 41, 59, 0.48) 45%, rgba(30, 64, 175, 0.18) 100%)",
+            },
+            outline:
+              activeInlineFieldId === "personalInfo.backgroundUrl"
+                ? "2px solid rgba(20, 184, 166, 0.9)"
+                : "2px solid transparent",
+            cursor,
           },
         }}
+        editorProps={editorProps}
       >
         {/* Content Container */}
         <Container
@@ -396,7 +392,7 @@ const HeroSection = ({
             </Stack>
           </Stack>
         </Container>
-      </Box>
+      </CustomBox>
 
       {/* Stats transfer to other section */}
       {stats && (
