@@ -120,6 +120,8 @@ export type OnInlineFieldClickHandler = (
 
 export interface IEditorProps {
   editorProps: {
+    // section & field
+
     // Field level interactions
     onInlineFieldClick?: OnInlineFieldClickHandler;
     activeInlineFieldId?: InlineEditableFieldId | null;
@@ -3674,9 +3676,10 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
           position="static"
           editorProps={{
             isEditMode: true,
+            // section and fieldId
             activeSectionId: selectedPreviewSection,
-            onSectionClick: handlePreviewSectionClick,
             activeInlineFieldId: selectedInlineFieldId,
+            onSectionClick: handlePreviewSectionClick,
             onInlineFieldClick: handleInlineFieldClick,
             onAddAction: handleAddAction,
             onDeleteAction: handleDeleteAction,
