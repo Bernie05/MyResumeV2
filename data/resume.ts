@@ -19,6 +19,16 @@ export const resumeData: ResumeData = {
     summary:
       "Seeking a position as software developer to apply my knowledge and experience in my field of specialization, where I can utilize my technical skill and dedication to learn new technologies.",
   },
+  socialMedia: [
+    {
+      label: "LinkedIn",
+      url: "https://www.linkedin.com/in/bernie-baltazar/",
+    },
+    {
+      label: "GitHub",
+      url: "https://github.com/berniebaltazar",
+    },
+  ],
   stats: {
     yearsExperience: 7,
     projects: 50,

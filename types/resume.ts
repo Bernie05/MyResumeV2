@@ -15,6 +15,12 @@ export interface PersonalInfo {
   social?: Array<{ label: string; url: string; icon?: string }>;
 }
 
+export interface SocialMediaLink {
+  label: string;
+  url: string;
+  icon?: string;
+}
+
 export interface ResumeStats {
   yearsExperience: number;
   projects: number;
@@ -89,6 +95,7 @@ export interface PortfolioItem {
 
 export interface ResumeData {
   personalInfo: PersonalInfo;
+  socialMedia: SocialMediaLink[];
   stats: ResumeStats;
   experience: ExperienceItem[];
   education: EducationItem[];

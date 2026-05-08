@@ -15,15 +15,11 @@ interface ICustomStatsProps extends IEditorProps {
   stats: HeroStats;
 }
 
-export const CustomStats = ({
-  stats,
-  isEditMode,
-  activeInlineFieldId,
-  onInlineFieldClick,
-  onAddAction,
-}: ICustomStatsProps) => {
+export const CustomStats = ({ stats, editorProps }: ICustomStatsProps) => {
   const { isDarkMode } = useThemeContext();
   const { primaryAccent } = getSectionPalette(isDarkMode);
+  const { activeInlineFieldId, onInlineFieldClick, isEditMode, onAddAction } =
+    editorProps || {};
 
   const inlineFieldClick = onInlineFieldClick as
     | ((

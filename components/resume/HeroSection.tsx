@@ -7,14 +7,7 @@ import { getSectionPalette, IThemePalette } from "../../theme/sectionPalette";
 import DownloadIcon from "@mui/icons-material/Download";
 
 import { type ResumeEditableSection } from "@/components/resume/ResumePage";
-import {
-  Avatar,
-  Box,
-  Button,
-  Container,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Container, Stack, Typography } from "@mui/material";
 import { heroSectionId, socialLinks, statItems } from "./constants/constant";
 import {
   createInlineFieldProps,
@@ -28,6 +21,7 @@ import { CustomSocialMedia } from "../component/CustomSocialMedia";
 import { CustomStats } from "../component/CustomStats";
 import { CustomAvatar } from "../component/CustomAvatar";
 import { CustomBox } from "../component/CustomBox";
+import { CustomButton } from "../component/CustomButton";
 
 export interface PersonalInfo {
   // Basic info
@@ -277,105 +271,71 @@ const HeroSection = ({
               direction={{ xs: "column", sm: "row" }}
               spacing={2}
             >
-              <Button
-                variant="contained"
-                component="a"
-                href={
-                  personalInfo.email
+              {/* Hire Button */}
+              <CustomButton
+                sectionId="about"
+                fieldId="personalInfo.hireButtonText"
+                editorProps={editorProps}
+                props={{
+                  variant: "contained",
+                  component: "a",
+                  href: personalInfo.email
                     ? `mailto:${personalInfo.email}`
-                    : "#contact"
-                }
-                sx={{
-                  px: 4,
-                  py: 1.5,
-                  textTransform: "none",
-                  fontWeight: 700,
-                  color: accentText,
-                  background: buttonGradient,
-                  boxShadow: `0 18px 45px ${accentGlow}`,
-                  borderRadius: 999,
-                  outline:
-                    activeInlineFieldId === "personalInfo.hireButtonText"
-                      ? "2px solid rgba(20, 184, 166, 0.9)"
-                      : "2px solid transparent",
-                  outlineOffset: 2,
-                  cursor,
-                  transition: "outline-color 160ms ease, box-shadow 160ms ease",
-                  "&:hover": {
-                    background: buttonHoverGradient,
-                    ...(onInlineFieldClick && {
-                      outlineColor: "rgba(20, 184, 166, 0.55)",
-                      boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-                    }),
+                    : "#contact",
+                  sx: {
+                    px: 4,
+                    py: 1.5,
+                    textTransform: "none",
+                    fontWeight: 700,
+                    color: accentText,
+                    background: buttonGradient,
+                    boxShadow: `0 18px 45px ${accentGlow}`,
+                    borderRadius: 999,
+                    outline:
+                      activeInlineFieldId === "personalInfo.hireButtonText"
+                        ? "2px solid rgba(20, 184, 166, 0.9)"
+                        : "2px solid transparent",
+                    outlineOffset: 2,
+                    cursor,
+                    transition:
+                      "outline-color 160ms ease, box-shadow 160ms ease",
                   },
                 }}
-                {...(onInlineFieldClick && {
-                  onClick: (event: React.MouseEvent) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    onInlineFieldClick(
-                      "about",
-                      "personalInfo.hireButtonText",
-                      event.currentTarget as HTMLElement,
-                    );
-                  },
-                  role: "button",
-                  tabIndex: 0,
-                })}
               >
                 {personalInfo.hireButtonText || "Hire Me"}
-              </Button>
+              </CustomButton>
 
-              <Button
-                variant="outlined"
-                startIcon={<DownloadIcon />}
-                sx={{
-                  px: 4,
-                  py: 1.5,
-                  textTransform: "none",
-                  fontWeight: 700,
-                  color: "common.white",
-                  borderColor: "rgba(255,255,255,0.7)",
-                  backdropFilter: "blur(8px)",
-                  borderRadius: 999,
-                  outline:
-                    activeInlineFieldId === "personalInfo.downloadButtonText"
-                      ? "2px solid rgba(20, 184, 166, 0.9)"
-                      : "2px solid transparent",
-                  outlineOffset: 2,
-                  cursor,
-                  transition: "outline-color 160ms ease, box-shadow 160ms ease",
-                  "&:hover": {
-                    borderColor: "common.white",
-                    backgroundColor: "rgba(255,255,255,0.08)",
-                    ...(onInlineFieldClick
-                      ? {
-                          outlineColor: "rgba(20, 184, 166, 0.55)",
-                          boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-                        }
-                      : undefined),
+              {/* Download Button */}
+              <CustomButton
+                sectionId="about"
+                fieldId="personalInfo.downloadButtonText"
+                editorProps={editorProps}
+                props={{
+                  variant: "outlined",
+                  startIcon: <DownloadIcon />,
+                  sx: {
+                    px: 4,
+                    py: 1.5,
+                    textTransform: "none",
+                    fontWeight: 700,
+                    color: "common.white",
+                    borderColor: "rgba(255,255,255,0.7)",
+                    backdropFilter: "blur(8px)",
+                    borderRadius: 999,
+                    outlineOffset: 2,
+                    cursor,
+                    transition:
+                      "outline-color 160ms ease, box-shadow 160ms ease",
                   },
                 }}
-                {...(onInlineFieldClick && {
-                  onClick: (event: React.MouseEvent) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    onInlineFieldClick(
-                      "about",
-                      "personalInfo.downloadButtonText",
-                      event.currentTarget as HTMLElement,
-                    );
-                  },
-                  role: "button",
-                  tabIndex: 0,
-                })}
               >
                 {personalInfo.downloadButtonText || "Download CV"}
-              </Button>
+              </CustomButton>
             </Stack>
 
-            {/* Social Links */}
+            {/* Social Media */}
             <Stack direction="row" spacing={1.5} flexWrap="wrap">
+              {/* Static Social Links */}
               <SocialMediaBtn
                 socialLinks={socialLinks}
                 theme={theme}
@@ -394,6 +354,7 @@ const HeroSection = ({
         </Container>
       </CustomBox>
 
+      {/* Render of the Stats */}
       {/* Stats transfer to other section */}
       {stats && (
         <Box
@@ -470,7 +431,7 @@ const HeroSection = ({
                   </Box>
                 ))}
 
-              {/* Custom Stats */}
+              {/* Render of the Custom Stats + */}
               <CustomStats stats={stats} editorProps={editorProps} />
             </Box>
           </Container>

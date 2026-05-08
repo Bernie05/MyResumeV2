@@ -46,7 +46,7 @@ interface IResumePageProps extends IEditorProps {
 const ResumePage = ({
   resume,
   position = "sticky",
-  editorProps,
+  editorProps = {},
 }: IResumePageProps) => {
   const {
     activeSectionId,

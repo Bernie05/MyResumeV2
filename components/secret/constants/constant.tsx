@@ -15,6 +15,7 @@ export const EDITOR_SECTIONS = [
 ] as const;
 
 export type InlineEditableFieldId =
+  | `${string}.${number}` // generic field
   | `personalInfo.${keyof ResumeData["personalInfo"]}`
   | `personalInfo.hireButtonText`
   | `personalInfo.downloadButtonText`
