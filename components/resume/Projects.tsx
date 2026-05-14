@@ -5,6 +5,7 @@ import { useThemeContext } from "@/context/ThemeContext";
 import { ProjectCardComponent } from "./components/cards/ProjectCardComponent";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import { IEditorProps } from "../secret/SecretResumeEditor";
+import { AddButton } from "../component/static/AddButton";
 
 interface Project {
   id: number;
@@ -21,14 +22,7 @@ export interface IProjectsSection extends IEditorProps {
   projects: Project[];
 }
 
-const Projects = ({
-  projects,
-  onInlineFieldClick,
-  activeInlineFieldId,
-  onAddAction,
-  onDeleteAction,
-  isEditMode,
-}: IProjectsSection) => {
+const Projects = ({ projects, editorProps }: IProjectsSection) => {
   const { isDarkMode } = useThemeContext();
   const {
     titleColor,
@@ -37,7 +31,10 @@ const Projects = ({
     outline,
     buttonGradient,
     accentText,
+    primaryAccent,
   } = getSectionPalette(isDarkMode);
+
+  const { onAddAction } = editorProps || {};
 
   return (
     <Box
@@ -108,45 +105,24 @@ const Projects = ({
             {...project}
             inlineSection="projects"
             itemIndex={index}
-            activeInlineFieldId={activeInlineFieldId}
-            onInlineFieldClick={onInlineFieldClick}
-            onAddAction={onAddAction}
-            onDelete={() => onDeleteAction?.(`projects.${index}`)}
-            isEditMode={isEditMode}
+            editorProps={editorProps}
           />
         ))}
       </Box>
 
       {/* Add Project Button */}
       {onAddAction && (
-        <Box
-          sx={{
-            mt: 4,
-            p: 4,
-            border: `2px dashed ${accentText}40`,
-            borderRadius: "1rem",
-            textAlign: "center",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              borderColor: accentText,
-              background: `${mutedColor}10`,
-            },
-          }}
-          onClick={(event) =>
-            onAddAction("projects", event.currentTarget as HTMLElement)
-          }
-        >
+        <AddButton targetSectionId="projects" editorProps={editorProps}>
           <Typography
             sx={{
-              color: accentText,
+              color: primaryAccent,
               fontWeight: 700,
               fontSize: "1.1rem",
             }}
           >
             + Add Project
           </Typography>
-        </Box>
+        </AddButton>
       )}
     </Box>
   );

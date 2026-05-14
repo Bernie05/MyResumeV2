@@ -22,6 +22,7 @@ import { CustomStats } from "../component/CustomStats";
 import { CustomAvatar } from "../component/CustomAvatar";
 import { CustomBox } from "../component/CustomBox";
 import { CustomButton } from "../component/CustomButton";
+import { CustomTypography } from "../component/CustomTypography";
 
 export interface PersonalInfo {
   // Basic info
@@ -75,17 +76,10 @@ const HeroSection = ({
     editorProps || {};
   const { isDarkMode } = useThemeContext();
   const theme = getSectionPalette(isDarkMode);
-  const cursor = getCursorPointer(isEditMode);
 
   const { animatedStats, statsRef } = useAnimatedStats(stats, 2000);
 
-  const {
-    primaryAccent,
-    accentGlow,
-    accentText,
-    buttonGradient,
-    buttonHoverGradient,
-  } = theme;
+  const { primaryAccent, accentGlow, accentText, buttonGradient } = theme;
 
   const inlineFieldClick = onInlineFieldClick as
     | ((
@@ -108,6 +102,7 @@ const HeroSection = ({
       sx={{ position: "relative", width: "100%" }}
     >
       <CustomBox
+        targetFieldId="personalInfo.backgroundUrl"
         props={{
           id: `${heroSectionId}-editable-container`,
           ...personalInfoFields.backgroundUrl,
@@ -128,11 +123,6 @@ const HeroSection = ({
                 ? "rgba(2, 6, 23, 0.78)"
                 : "linear-gradient(90deg, rgba(15, 23, 42, 0.78) 0%, rgba(30, 41, 59, 0.48) 45%, rgba(30, 64, 175, 0.18) 100%)",
             },
-            outline:
-              activeInlineFieldId === "personalInfo.backgroundUrl"
-                ? "2px solid rgba(20, 184, 166, 0.9)"
-                : "2px solid transparent",
-            cursor,
           },
         }}
         editorProps={editorProps}
@@ -191,7 +181,6 @@ const HeroSection = ({
                     position: "relative",
                     borderRadius: 1,
                     outlineOffset: 2,
-                    cursor,
                   },
                 }}
               />
@@ -203,7 +192,7 @@ const HeroSection = ({
               spacing={1.5}
               alignItems="center"
             >
-              <Typography
+              {/* <Typography
                 component="h1"
                 sx={{
                   color: "common.white",
@@ -220,10 +209,24 @@ const HeroSection = ({
                 {...personalInfoFields.name}
               >
                 {personalInfo.name}
-              </Typography>
+              </Typography> */}
+              <CustomTypography
+                targetFieldId="personalInfo.name"
+                editorProps={editorProps}
+                props={{
+                  component: "h1",
+                  color: "common.white",
+                  fontWeight: 800,
+                  letterSpacing: "-0.04em",
+                  fontSize: { xs: "2.75rem", sm: "4rem", md: "5.25rem" },
+                  lineHeight: 0.96,
+                }}
+              >
+                {personalInfo.name}
+              </CustomTypography>
 
               {/* Subtitle */}
-              <Typography
+              {/* <Typography
                 id={`${heroSectionId}-subtitle`}
                 sx={{
                   color: "rgba(255,255,255,0.84)",
@@ -240,7 +243,19 @@ const HeroSection = ({
                 {...personalInfoFields.title}
               >
                 {personalInfo.title}
-              </Typography>
+              </Typography> */}
+              <CustomTypography
+                targetFieldId="personalInfo.title"
+                editorProps={editorProps}
+                props={{
+                  fontWeight: 700,
+                  letterSpacing: "0.24em",
+                  textTransform: "uppercase",
+                  fontSize: { xs: "0.8rem", md: "0.95rem" },
+                }}
+              >
+                {personalInfo.title}
+              </CustomTypography>
 
               {/* Summary */}
               {personalInfo.summary && (
@@ -273,8 +288,8 @@ const HeroSection = ({
             >
               {/* Hire Button */}
               <CustomButton
-                sectionId="about"
-                fieldId="personalInfo.hireButtonText"
+                targetSectionId="about"
+                targetFieldId="personalInfo.hireButtonText"
                 editorProps={editorProps}
                 props={{
                   variant: "contained",
@@ -296,7 +311,6 @@ const HeroSection = ({
                         ? "2px solid rgba(20, 184, 166, 0.9)"
                         : "2px solid transparent",
                     outlineOffset: 2,
-                    cursor,
                     transition:
                       "outline-color 160ms ease, box-shadow 160ms ease",
                   },
@@ -307,8 +321,8 @@ const HeroSection = ({
 
               {/* Download Button */}
               <CustomButton
-                sectionId="about"
-                fieldId="personalInfo.downloadButtonText"
+                targetSectionId="about"
+                targetFieldId="personalInfo.downloadButtonText"
                 editorProps={editorProps}
                 props={{
                   variant: "outlined",
@@ -323,7 +337,6 @@ const HeroSection = ({
                     backdropFilter: "blur(8px)",
                     borderRadius: 999,
                     outlineOffset: 2,
-                    cursor,
                     transition:
                       "outline-color 160ms ease, box-shadow 160ms ease",
                   },

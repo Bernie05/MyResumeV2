@@ -4,13 +4,14 @@ import { IEditorProps } from "../secret/SecretResumeEditor";
 import { useThemeContext } from "@/context/ThemeContext";
 import { ResumeEditableSection } from "../resume/ResumePage";
 import { InlineEditableFieldId } from "../secret/constants/constant";
+import { getCursorPointer } from "../secret/utils/componentUtil";
 
 interface CustomButtonProps extends IEditorProps {
   props: ButtonProps;
   children: React.ReactNode;
   // Reference for identifying the section and field
-  sectionId: ResumeEditableSection;
-  fieldId: InlineEditableFieldId;
+  targetSectionId: ResumeEditableSection;
+  targetFieldId: InlineEditableFieldId;
 }
 
 export const CustomButton = ({
@@ -18,20 +19,23 @@ export const CustomButton = ({
   children,
   editorProps,
   // consumer will pass these two props to identify which field is being edited when onInlineFieldClick is triggered
-  sectionId,
-  fieldId,
+  targetSectionId,
+  targetFieldId,
 }: CustomButtonProps) => {
   const theme = useThemeContext();
   const { buttonHoverGradient } = getSectionPalette(theme.isDarkMode);
-  const { onInlineFieldClick, activeInlineFieldId } = editorProps || {};
+  const { onInlineFieldClick, activeInlineFieldId, isEditMode } =
+    editorProps || {};
+  const cursor = getCursorPointer(isEditMode);
 
   return (
     <Button
       {...props}
       sx={{
         ...props.sx,
+        cursor,
         outline:
-          activeInlineFieldId === fieldId
+          activeInlineFieldId === targetFieldId
             ? "2px solid rgba(20, 184, 166, 0.9)"
             : "2px solid transparent",
         "&:hover": {
@@ -48,8 +52,8 @@ export const CustomButton = ({
           event.preventDefault();
           event.stopPropagation();
           onInlineFieldClick(
-            sectionId,
-            fieldId,
+            targetSectionId,
+            targetFieldId,
             event.currentTarget as HTMLElement,
           );
         },

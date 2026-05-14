@@ -14,8 +14,10 @@ import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "./ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
+import { AddButton } from "../component/static/AddButton";
+import { IEditorProps } from "../secret/SecretResumeEditor";
 
-interface EducationItem {
+interface IEducationItem {
   id: number;
   school: string;
   degree: string;
@@ -24,8 +26,8 @@ interface EducationItem {
   location: string;
 }
 
-interface EducationProps {
-  education: EducationItem[];
+interface IEducationProps extends IEditorProps {
+  education: IEducationItem[];
   onInlineFieldClick?: (
     section: ResumeEditableSection,
     fieldId: InlineEditableFieldId,
@@ -42,7 +44,8 @@ const Education = ({
   activeInlineFieldId,
   onAddAction,
   onDeleteAction,
-}: EducationProps) => {
+  editorProps,
+}: IEducationProps) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -271,30 +274,13 @@ const Education = ({
 
         {/* Add Education Button */}
         {onAddAction && (
-          <Box
-            sx={{
-              mt: 3,
-              p: 3,
-              border: `2px dashed ${primaryAccent}50`,
-              borderRadius: "1rem",
-              textAlign: "center",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                borderColor: primaryAccent,
-                background: softBackground,
-              },
-            }}
-            onClick={(event) =>
-              onAddAction("education", event.currentTarget as HTMLElement)
-            }
-          >
+          <AddButton targetSectionId="education" editorProps={editorProps}>
             <Typography
               sx={{ color: primaryAccent, fontWeight: 600, fontSize: "1rem" }}
             >
               + Add Education
             </Typography>
-          </Box>
+          </AddButton>
         )}
       </Box>
     </Box>

@@ -21,6 +21,8 @@ import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
+import { AddButton } from "../component/static/AddButton";
+import { IEditorProps } from "../secret/SecretResumeEditor";
 
 interface Job {
   id: number;
@@ -31,23 +33,11 @@ interface Job {
   description: string[];
 }
 
-const Experience = ({
-  experience,
-  onInlineFieldClick,
-  activeInlineFieldId,
-  onAddAction,
-  onDeleteAction,
-}: {
+interface IExperience extends IEditorProps {
   experience: Job[];
-  onInlineFieldClick?: (
-    section: ResumeEditableSection,
-    fieldId: InlineEditableFieldId,
-    anchor?: HTMLElement,
-  ) => void;
-  activeInlineFieldId?: string | null;
-  onAddAction?: (action: string, anchor: HTMLElement) => void;
-  onDeleteAction?: (action: string) => void;
-}) => {
+}
+
+const Experience = ({ experience, editorProps }: IExperience) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -63,6 +53,13 @@ const Experience = ({
     accentText,
     hoverShadow,
   } = getSectionPalette(isDarkMode);
+
+  const {
+    activeInlineFieldId,
+    onInlineFieldClick,
+    onDeleteAction,
+    onAddAction,
+  } = editorProps || {};
 
   const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
     targetSection: "experience",
@@ -309,30 +306,13 @@ const Experience = ({
 
         {/* Add Experience Button */}
         {onAddAction && (
-          <Box
-            sx={{
-              mt: 3,
-              p: 3,
-              border: `2px dashed ${primaryAccent}50`,
-              borderRadius: "1rem",
-              textAlign: "center",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                borderColor: primaryAccent,
-                background: softBackground,
-              },
-            }}
-            onClick={(event) =>
-              onAddAction("experience", event.currentTarget as HTMLElement)
-            }
-          >
+          <AddButton targetSectionId="experience" editorProps={editorProps}>
             <Typography
               sx={{ color: primaryAccent, fontWeight: 600, fontSize: "1rem" }}
             >
               + Add Experience
             </Typography>
-          </Box>
+          </AddButton>
         )}
       </Box>
     </Box>
