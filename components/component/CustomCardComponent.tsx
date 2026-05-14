@@ -37,6 +37,7 @@ export const CardComponent = ({
   ...item
 }: CardComponentProps) => {
   const { isDarkMode } = useThemeContext();
+
   const {
     activeInlineFieldId,
     onInlineFieldClick,

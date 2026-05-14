@@ -1,6 +1,7 @@
 import { Avatar, AvatarProps } from "@mui/material";
 import { IEditorProps } from "../secret/SecretResumeEditor";
 import React from "react";
+import { getCursorPointer } from "../secret/utils/componentUtil";
 
 export interface ICustomAvatarProps extends IEditorProps {
   props: AvatarProps;
@@ -15,6 +16,7 @@ export const CustomAvatar = ({
   editorProps,
 }: ICustomAvatarProps) => {
   const { isEditMode, activeInlineFieldId } = editorProps || {};
+  const cursor = getCursorPointer(isEditMode);
 
   const getAvatar = React.useMemo(() => {
     if (!photoURL) return null;
@@ -26,6 +28,7 @@ export const CustomAvatar = ({
         {...props}
         sx={{
           ...props.sx,
+          cursor,
           outline:
             activeInlineFieldId === targetFieldId
               ? "2px solid rgba(20, 184, 166, 0.9)"

@@ -6,20 +6,27 @@ import { getSectionPalette } from "@/theme/sectionPalette";
 export interface ICustomBoxProps extends IEditorProps {
   props: BoxProps;
   children: React.ReactNode;
+  targetFieldId: string;
 }
 
 // All the Custom React Element should have a editable state, which is determined by the presence of editorProps and its isEditMode property. When in editable state, the component should provide visual cues (like outlines or hover effects) to indicate that it can be interacted with for editing purposes. The activeInlineFieldId can be used to determine which specific field is currently being edited, allowing for targeted styling and interactions.
 export const CustomBox = ({
   children,
   props,
+  targetFieldId,
   editorProps,
 }: ICustomBoxProps) => {
   const { activeInlineFieldId, onInlineFieldClick } = editorProps || {};
+
   return (
     <Box
       {...props}
       sx={{
         ...props.sx,
+        outline:
+          activeInlineFieldId === targetFieldId
+            ? "2px solid rgba(20, 184, 166, 0.9)"
+            : "2px solid transparent",
         "&:hover": {
           ...(onInlineFieldClick
             ? {
