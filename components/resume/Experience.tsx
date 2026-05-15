@@ -23,6 +23,7 @@ import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 import { AddButton } from "../component/static/AddButton";
 import { IEditorProps } from "../secret/SecretResumeEditor";
+import { useMemo } from "react";
 
 interface Job {
   id: number;
@@ -66,6 +67,10 @@ const Experience = ({ experience, editorProps }: IExperience) => {
     activeInlineFieldId,
     onInlineFieldClick,
   });
+
+  // const memoizedExperience = useMemo(() => {
+  //   return experience.
+  // }, []);
 
   return (
     <Box

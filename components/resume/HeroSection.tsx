@@ -12,12 +12,10 @@ import { heroSectionId, socialLinks, statItems } from "./constants/constant";
 import {
   createInlineFieldProps,
   getCreatedInlineFields,
-  getCursorPointer,
   getInlineFieldSxV2,
 } from "../secret/utils/componentUtil";
-import { SocialMediaBtn } from "../component/CustomSocialMediaBtn";
+import { SocialLink, SocialMediaBtn } from "../component/CustomSocialMediaBtn";
 import { IEditorProps } from "../secret/SecretResumeEditor";
-import { CustomSocialMedia } from "../component/CustomSocialMedia";
 import { CustomStats } from "../component/CustomStats";
 import { CustomAvatar } from "../component/CustomAvatar";
 import { CustomBox } from "../component/CustomBox";
@@ -44,7 +42,7 @@ export interface PersonalInfo {
   downloadButtonText?: string;
 
   // Custom social links
-  social?: Array<{ label: string; url: string; icon?: string }>;
+  social?: SocialLink[];
 }
 
 export interface HeroStats {
@@ -192,25 +190,8 @@ const HeroSection = ({
               spacing={1.5}
               alignItems="center"
             >
-              {/* <Typography
-                component="h1"
-                sx={{
-                  color: "common.white",
-                  fontWeight: 800,
-                  letterSpacing: "-0.04em",
-                  fontSize: { xs: "2.75rem", sm: "4rem", md: "5.25rem" },
-                  lineHeight: 0.96,
-                  ...getInlineFieldSxV2({
-                    fieldId: "personalInfo.name",
-                    activeInlineFieldId,
-                    isEditMode,
-                  }),
-                }}
-                {...personalInfoFields.name}
-              >
-                {personalInfo.name}
-              </Typography> */}
               <CustomTypography
+                targetSectionId="about"
                 targetFieldId="personalInfo.name"
                 editorProps={editorProps}
                 props={{
@@ -226,28 +207,12 @@ const HeroSection = ({
               </CustomTypography>
 
               {/* Subtitle */}
-              {/* <Typography
-                id={`${heroSectionId}-subtitle`}
-                sx={{
-                  color: "rgba(255,255,255,0.84)",
-                  fontWeight: 700,
-                  letterSpacing: "0.24em",
-                  textTransform: "uppercase",
-                  fontSize: { xs: "0.8rem", md: "0.95rem" },
-                  ...getInlineFieldSxV2({
-                    fieldId: "personalInfo.title",
-                    activeInlineFieldId,
-                    isEditMode,
-                  }),
-                }}
-                {...personalInfoFields.title}
-              >
-                {personalInfo.title}
-              </Typography> */}
               <CustomTypography
+                targetSectionId="about"
                 targetFieldId="personalInfo.title"
                 editorProps={editorProps}
                 props={{
+                  color: "common.white",
                   fontWeight: 700,
                   letterSpacing: "0.24em",
                   textTransform: "uppercase",
@@ -259,24 +224,20 @@ const HeroSection = ({
 
               {/* Summary */}
               {personalInfo.summary && (
-                <Typography
-                  id={`${heroSectionId}-summary`}
-                  sx={{
-                    maxWidth: 760,
-                    color: "rgba(255,255,255,0.82)",
-                    fontSize: { xs: "1rem", md: "1.125rem" },
-                    lineHeight: 1.75,
-                    mt: 1,
-                    ...getInlineFieldSxV2({
-                      fieldId: "personalInfo.summary",
-                      activeInlineFieldId,
-                      isEditMode,
-                    }),
+                <CustomTypography
+                  targetSectionId="about"
+                  targetFieldId="personalInfo.summary"
+                  editorProps={editorProps}
+                  props={{
+                    color: "common.white",
+                    fontWeight: 700,
+                    letterSpacing: "0.24em",
+                    textTransform: "uppercase",
+                    fontSize: { xs: "0.8rem", md: "0.95rem" },
                   }}
-                  {...personalInfoFields.summary}
                 >
                   {personalInfo.summary}
-                </Typography>
+                </CustomTypography>
               )}
             </Stack>
 
@@ -349,17 +310,10 @@ const HeroSection = ({
             {/* Social Media */}
             <Stack direction="row" spacing={1.5} flexWrap="wrap">
               {/* Static Social Links */}
+              {/* Make this component dynamic */}
               <SocialMediaBtn
-                socialLinks={socialLinks}
-                theme={theme}
-                isDarkMode={isDarkMode}
-                onInlineFieldClick={inlineFieldClick}
-                onAddAction={onAddAction}
-              />
-
-              {/* Custom Social Links */}
-              <CustomSocialMedia
-                socialLinks={personalInfo.social ?? []}
+                defaultLinks={socialLinks as SocialLink[]}
+                newLinks={personalInfo.social ?? []}
                 editorProps={editorProps}
               />
             </Stack>

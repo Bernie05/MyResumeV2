@@ -468,7 +468,13 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     }
   };
 
+  // TODO: Create a globa state to handle this issue
+  // render
   const renderInlineFieldToolbox = () => {
+    console.log(
+      "Rendering inline field toolbox for fieldId: ",
+      selectedInlineFieldId,
+    );
     if (!selectedInlineFieldId) {
       return null;
     }
@@ -478,8 +484,10 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       const socialMatch = selectedInlineFieldId.match(
         /^personalInfo\.social\.(.+)$/,
       );
+
       if (socialMatch) {
         const socialInfo = draft.personalInfo.social ?? [];
+        console.log("socialInfo: ", socialInfo);
         return (
           <Stack spacing={1.25} sx={{ mt: 1.5 }}>
             <Typography variant="caption" color="text.secondary">

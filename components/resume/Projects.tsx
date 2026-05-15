@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useMemo } from "react";
 import { Box, Typography } from "@mui/material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { ProjectCardComponent } from "./components/cards/ProjectCardComponent";
@@ -35,6 +36,21 @@ const Projects = ({ projects, editorProps }: IProjectsSection) => {
   } = getSectionPalette(isDarkMode);
 
   const { onAddAction } = editorProps || {};
+
+  // Memoize projects to avoid unnecessary re-renders
+  const memoizedProjects = useMemo(
+    () =>
+      projects?.map((project, index) => (
+        <ProjectCardComponent
+          key={project.id}
+          {...project}
+          inlineSection="projects"
+          itemIndex={index}
+          editorProps={editorProps}
+        />
+      )) || [],
+    [projects, editorProps],
+  );
 
   return (
     <Box
@@ -99,15 +115,7 @@ const Projects = ({ projects, editorProps }: IProjectsSection) => {
           gap: 3,
         }}
       >
-        {projects.map((project, index) => (
-          <ProjectCardComponent
-            key={project.id}
-            {...project}
-            inlineSection="projects"
-            itemIndex={index}
-            editorProps={editorProps}
-          />
-        ))}
+        {memoizedProjects}
       </Box>
 
       {/* Add Project Button */}
@@ -128,4 +136,4 @@ const Projects = ({ projects, editorProps }: IProjectsSection) => {
   );
 };
 
-export default Projects;
+export default React.memo(Projects);
