@@ -35,6 +35,10 @@ import {
   Language as LanguageIcon,
   Dns as DnsIcon,
   DeleteOutline as DeleteOutlineIcon,
+  Facebook as FacebookIcon,
+  Twitter as TwitterIcon,
+  LinkedIn as LinkedInIcon,
+  Instagram as InstagramIcon,
 } from "@mui/icons-material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
@@ -76,6 +80,10 @@ export const ICON_MAP: Record<string, React.ElementType> = {
   design: DesignServicesIcon,
   language: LanguageIcon,
   dns: DnsIcon,
+  facebook: FacebookIcon,
+  twitter: TwitterIcon,
+  linkedin: LinkedInIcon,
+  instagram: InstagramIcon,
 };
 
 export const ICON_NAMES = Object.keys(ICON_MAP);

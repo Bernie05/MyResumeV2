@@ -18,6 +18,10 @@ export const CustomPopover = ({
   renderInlineFieldToolbox,
 }: CustomPopoverProps) => {
   const { isDarkMode } = useThemeContext();
+  console.log(
+    "Rendering CustomPopover with selectedInlineFieldId: ",
+    selectedInlineFieldId,
+  );
   return (
     <Popover
       open={Boolean(anchorEl) && Boolean(selectedInlineFieldId)}

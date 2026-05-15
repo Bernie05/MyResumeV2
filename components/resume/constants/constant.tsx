@@ -22,14 +22,14 @@ export const NAV_ITEMS = [
 /** Hero section */
 export const heroSectionId = "hero-section";
 export const socialLinks = [
-  { icon: <FacebookIcon />, href: "#", label: "Facebook" },
-  { icon: <TwitterIcon />, href: "#", label: "Twitter" },
+  { icon: "facebook", href: "#/facebook", label: "Facebook" },
+  { icon: "twitter", href: "#/twitter", label: "Twitter" },
   {
-    icon: <LinkedInIcon />,
-    href: "#",
+    icon: "linkedin",
+    href: "#/linkedin",
     label: "LinkedIn",
   },
-  { icon: <InstagramIcon />, href: "#", label: "Instagram" },
+  { icon: "instagram", href: "#/instagram", label: "Instagram" },
 ];
 
 export const statItems: StatsItems[] = [

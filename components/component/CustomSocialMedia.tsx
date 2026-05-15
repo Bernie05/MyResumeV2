@@ -7,15 +7,10 @@ import { getInlineFieldSxV2 } from "../secret/utils/componentUtil";
 import { ICON_MAP } from "@/components/resume/ServicesSection";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "@/theme/sectionPalette";
-
-interface ICustomSocial {
-  icon?: string;
-  label: string;
-  url: string;
-}
+import { SocialLink } from "./CustomSocialMediaBtn";
 
 interface ICustomStatsProps extends IEditorProps {
-  socialLinks: ICustomSocial[];
+  socialLinks: SocialLink[];
 }
 
 export const CustomSocialMedia = ({
@@ -79,8 +74,8 @@ export const CustomSocialMedia = ({
               }
             : {})}
         >
-          {s.icon && ICON_MAP[s.icon] ? (
-            React.createElement(ICON_MAP[s.icon])
+          {s.icon && ICON_MAP[s.icon as string] ? (
+            React.createElement(ICON_MAP[s.icon as string])
           ) : (
             <LinkIcon />
           )}

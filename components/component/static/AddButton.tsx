@@ -17,7 +17,7 @@ export const AddButton = ({
 }: IAddButtonProps) => {
   const { isDarkMode } = useThemeContext();
   const { primaryAccent, softBackground } = getSectionPalette(isDarkMode);
-  const { onAddAction } = editorProps;
+  const { onAddAction } = editorProps || {};
 
   return (
     <Box
@@ -35,7 +35,7 @@ export const AddButton = ({
         },
       }}
       onClick={(event) =>
-        onAddAction!(targetSectionId, event.currentTarget as HTMLElement)
+        onAddAction?.(targetSectionId, event.currentTarget as HTMLElement)
       }
     >
       {children}
