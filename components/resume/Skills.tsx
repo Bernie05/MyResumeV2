@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Box,
   Card,
@@ -119,53 +119,59 @@ const Skills = ({
   const sectionRef = useRef<HTMLDivElement>(null);
   const hasTriggeredRef = useRef(false);
 
-  const getInlineFieldSx = (fieldId: string) => ({
-    borderRadius: 1,
-    outline:
-      activeInlineFieldId === fieldId
-        ? "2px solid rgba(20, 184, 166, 0.9)"
-        : "2px solid transparent",
-    outlineOffset: 2,
-    cursor: onInlineFieldClick ? "pointer" : "inherit",
-    transition: "outline-color 160ms ease, box-shadow 160ms ease",
-    "&:hover": onInlineFieldClick
-      ? {
-          outlineColor: "rgba(20, 184, 166, 0.55)",
-          boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-        }
-      : undefined,
-  });
+  const getInlineFieldSx = useCallback(
+    (fieldId: string) => ({
+      borderRadius: 1,
+      outline:
+        activeInlineFieldId === fieldId
+          ? "2px solid rgba(20, 184, 166, 0.9)"
+          : "2px solid transparent",
+      outlineOffset: 2,
+      cursor: onInlineFieldClick ? "pointer" : "inherit",
+      transition: "outline-color 160ms ease, box-shadow 160ms ease",
+      "&:hover": onInlineFieldClick
+        ? {
+            outlineColor: "rgba(20, 184, 166, 0.55)",
+            boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
+          }
+        : undefined,
+    }),
+    [activeInlineFieldId, onInlineFieldClick],
+  );
 
-  const createInlineFieldProps = (fieldId: InlineEditableFieldId) => {
-    if (!onInlineFieldClick) {
-      return {};
-    }
+  const createInlineFieldProps = useCallback(
+    (fieldId: InlineEditableFieldId) => {
+      if (!onInlineFieldClick) {
+        return {};
+      }
 
-    return {
-      onClick: (event: React.MouseEvent) => {
-        event.stopPropagation();
-        onInlineFieldClick(
-          "skills",
-          fieldId,
-          event.currentTarget as HTMLElement,
-        );
-      },
-      onKeyDown: (event: React.KeyboardEvent) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
+      return {
+        onClick: (event: React.MouseEvent) => {
           event.stopPropagation();
           onInlineFieldClick(
             "skills",
             fieldId,
             event.currentTarget as HTMLElement,
           );
-        }
-      },
-      role: "button",
-      tabIndex: 0,
-      "aria-label": `Edit ${fieldId}`,
-    };
-  };
+        },
+        onKeyDown: (event: React.KeyboardEvent) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            event.stopPropagation();
+            onInlineFieldClick(
+              "skills",
+              fieldId,
+              event.currentTarget as HTMLElement,
+            );
+          }
+        },
+        role: "button",
+        tabIndex: 0,
+        "aria-label": `Edit ${fieldId}`,
+      };
+    },
+    [onInlineFieldClick],
+  );
 
   useEffect(() => {
     const sectionElement = sectionRef.current;

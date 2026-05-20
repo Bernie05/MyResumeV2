@@ -17,6 +17,7 @@ import { ContactSection } from "./ContactSection";
 import { useSession } from "next-auth/react";
 import { InlineEditableFieldId } from "../secret/constants/constant";
 import { IEditorProps } from "../secret/SecretResumeEditor";
+import { isAuthenticated } from "./util/authUtil";
 
 export type NavbarPosition =
   | "fixed"
@@ -43,11 +44,7 @@ interface IResumePageProps extends IEditorProps {
   interactiveSections?: boolean;
 }
 
-const ResumePage = ({
-  resume,
-  position = "sticky",
-  editorProps = {},
-}: IResumePageProps) => {
+const ResumePage = ({ resume, position, editorProps }: IResumePageProps) => {
   const {
     activeSectionId,
     onSectionClick,
@@ -61,33 +58,13 @@ const ResumePage = ({
   const { isDarkMode } = useThemeContext();
 
   const { data: session, status } = useSession();
-  const isAuthenticated = status === "authenticated" && Boolean(session);
-
-  const getSectionSx = (sectionId: ResumeEditableSection) => {
-    if (!isEditMode) {
-      return undefined;
-    }
-
-    const isActive = activeSectionId === sectionId;
-
-    return {
-      position: "relative",
-      cursor: "pointer",
-      borderRadius: 2,
-      transition: "outline-color 180ms ease, box-shadow 180ms ease",
-      outline: isActive ? "2px solid #14b8a6" : "1px dashed transparent",
-      outlineOffset: 4,
-      "&:hover": {
-        outlineColor: isActive ? "#14b8a6" : "rgba(20, 184, 166, 0.5)",
-        boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.14)",
-      },
-    };
-  };
+  const hasAccess = isAuthenticated(status, session);
 
   const handleSectionClick = (sectionId: ResumeEditableSection) => {
     onSectionClick?.(sectionId);
   };
 
+  // we need to transfer this
   const createSectionProps = (sectionId: ResumeEditableSection) => {
     if (!isEditMode) {
       return {};
@@ -110,6 +87,7 @@ const ResumePage = ({
   const getEditableProps = () => {
     if (!isEditMode) return {};
 
+    // I think we can do this as useHook (activeInlineFieldId)
     return {
       isEditMode,
       onInlineFieldClick,
@@ -122,13 +100,13 @@ const ResumePage = ({
   return (
     <Box component="main" sx={{ width: "100%", minHeight: "100vh" }}>
       {/* Navbar */}
-      <Navbar isAuthenticated={isAuthenticated} position={position} />
+      <Navbar isAuthenticated={hasAccess} position={position!} />
 
       {/* Hero Section */}
       <Box
-        component="section"
         id="about"
-        sx={getSectionSx("about")}
+        component="section"
+        sx={getSectionSx(isEditMode, activeSectionId, "about")}
         {...createSectionProps("about")}
       >
         <HeroSection
@@ -147,7 +125,7 @@ const ResumePage = ({
         <Stack spacing={{ xs: 10, md: 14 }}>
           {/* Services Section */}
           <Box
-            sx={getSectionSx("services")}
+            sx={getSectionSx(isEditMode, activeSectionId, "services")}
             {...createSectionProps("services")}
           >
             <ServicesSection

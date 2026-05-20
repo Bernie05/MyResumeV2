@@ -68,10 +68,6 @@ const Experience = ({ experience, editorProps }: IExperience) => {
     onInlineFieldClick,
   });
 
-  // const memoizedExperience = useMemo(() => {
-  //   return experience.
-  // }, []);
-
   return (
     <Box
       sx={{
