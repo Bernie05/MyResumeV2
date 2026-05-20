@@ -4,21 +4,15 @@ export interface PersonalInfo {
   email: string;
   phone: string;
   location: string;
-  website: string;
-  linkedin: string;
-  github: string;
   photoUrl: string;
   backgroundUrl: string;
   summary: string;
-  hireButtonText?: string;
-  downloadButtonText?: string;
-  social?: Array<{ label: string; url: string; icon?: string }>;
 }
 
 export interface SocialMediaLink {
   label: string;
-  url: string;
   icon?: string;
+  href?: string;
 }
 
 export interface ResumeStats {

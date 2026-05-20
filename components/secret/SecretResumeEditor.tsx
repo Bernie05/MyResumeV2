@@ -39,6 +39,15 @@ import {
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import {
+  loadResumeDataSuccess,
+  markAsSaved,
+  clearResumeData,
+  resetToBaseline as reduxResetToBaseline,
+  discardChanges as reduxDiscardChanges,
+} from "@/store/slices/resumeDataSlice";
+import { useResumeEditor } from "@/hook/useResumeEditor";
 import {
   clampProficiency,
   cloneResumeData,
@@ -119,7 +128,7 @@ export type OnInlineFieldClickHandler = (
 ) => void;
 
 export interface IEditorProps {
-  editorProps: {
+  editorProps?: {
     // section & field
 
     // Field level interactions
@@ -140,22 +149,18 @@ export interface IEditorProps {
 
 const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
   const router = useRouter();
+  const mainDispatch = useDispatch();
   const { isDarkMode } = useThemeContext();
   const [isHydrated, setIsHydrated] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  // Use the resume editor hook for all draft management
+  const { draft, setDraft, hasChanges } = useResumeEditor();
+
   const [activeSection, setActiveSection] =
     useState<EditorSection>("personalInfo");
-
-  const [draft, setDraft] = useState<ResumeData>(() =>
-    cloneResumeData(initialResume),
-  );
-
-  const [savedDraft, setSavedDraft] = useState<ResumeData>(() =>
-    cloneResumeData(initialResume),
-  );
 
   const [selectedPreviewSection, setSelectedPreviewSection] =
     useState<ResumeEditableSection | null>(null);
@@ -166,45 +171,10 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    const baseline = cloneResumeData(initialResume);
-    const savedValue = window.localStorage.getItem(STORAGE_KEY);
-    const legacySavedValue = savedValue
-      ? null
-      : window.localStorage.getItem(LEGACY_DRAFT_STORAGE_KEY);
-    const storedValue = savedValue ?? legacySavedValue;
-
-    if (!storedValue) {
-      setDraft(baseline);
-      setSavedDraft(baseline);
-      setIsHydrated(true);
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(storedValue) as ResumeData;
-
-      if (legacySavedValue) {
-        window.localStorage.setItem(STORAGE_KEY, legacySavedValue);
-        window.localStorage.removeItem(LEGACY_DRAFT_STORAGE_KEY);
-      }
-
-      setDraft(parsed);
-      setSavedDraft(parsed);
-    } catch {
-      window.localStorage.removeItem(STORAGE_KEY);
-      window.localStorage.removeItem(LEGACY_DRAFT_STORAGE_KEY);
-      setDraft(baseline);
-      setSavedDraft(baseline);
-      setError(
-        "Saved private draft was invalid and has been reset to the baseline resume.",
-      );
-    } finally {
-      setIsHydrated(true);
-    }
-  }, [initialResume]);
-
-  const hasUnsavedChanges =
-    isHydrated && JSON.stringify(draft) !== JSON.stringify(savedDraft);
+    // Initialize Redux with the initial resume data
+    mainDispatch(loadResumeDataSuccess(initialResume));
+    setIsHydrated(true);
+  }, [initialResume, mainDispatch]);
 
   const updateStatsField = (field: keyof ResumeStats, value: string) => {
     setDraft((current) => ({
@@ -215,24 +185,22 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       },
     }));
   };
+  // TODO: We need to create a handler for holding the new value and default value
 
+  // TODO: This will save on the session Storage
   const handleSaveDraft = () => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
-    setSavedDraft(cloneResumeData(draft));
-    setNotice("Draft saved locally in this browser.");
+    mainDispatch(markAsSaved());
+    setNotice("Draft saved.");
   };
 
-  const handleDiscardChanges = () => {
-    setDraft(cloneResumeData(savedDraft));
+  const handleDiscardChangesClick = () => {
+    setDraft(() => cloneResumeData(initialResume));
     setNotice("Unsaved changes discarded.");
   };
 
-  const handleResetToBaseline = () => {
-    const baseline = cloneResumeData(initialResume);
-    window.localStorage.removeItem(STORAGE_KEY);
-    window.localStorage.removeItem(LEGACY_DRAFT_STORAGE_KEY);
-    setDraft(baseline);
-    setSavedDraft(baseline);
+  const handleResetToBaselineClick = () => {
+    mainDispatch(reduxResetToBaseline(cloneResumeData(initialResume)));
+    setDraft(() => cloneResumeData(initialResume));
     setNotice("Draft reset to the static resume baseline.");
   };
 
@@ -245,15 +213,15 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
         redirect: false,
       });
 
+      mainDispatch(clearResumeData());
       router.replace(result.url || "/secret/login");
       router.refresh();
     } catch {
+      mainDispatch(clearResumeData());
       router.replace("/secret/login");
       router.refresh();
     } finally {
       setIsLoggingOut(false);
-      window.localStorage.removeItem(STORAGE_KEY);
-      window.localStorage.removeItem(LEGACY_DRAFT_STORAGE_KEY);
     }
   };
 
@@ -468,8 +436,6 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     }
   };
 
-  // TODO: Create a globa state to handle this issue
-  // render
   const renderInlineFieldToolbox = () => {
     console.log(
       "Rendering inline field toolbox for fieldId: ",
@@ -3648,8 +3614,8 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
               <Button
                 variant="outlined"
                 startIcon={<RefreshIcon />}
-                onClick={handleDiscardChanges}
-                disabled={!hasUnsavedChanges}
+                onClick={handleDiscardChangesClick}
+                disabled={!hasChanges}
                 sx={{ textTransform: "none" }}
               >
                 Discard changes
@@ -3658,7 +3624,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
                 variant="outlined"
                 color="warning"
                 startIcon={<SettingsBackupRestoreIcon />}
-                onClick={handleResetToBaseline}
+                onClick={handleResetToBaselineClick}
                 sx={{ textTransform: "none" }}
               >
                 Reset to baseline

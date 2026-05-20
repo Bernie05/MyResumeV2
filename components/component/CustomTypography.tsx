@@ -12,27 +12,29 @@ interface ICustomTypographyProps extends IEditorProps {
 }
 
 export const CustomTypography = React.memo(
-  (
-    {
-      props,
-      children,
-      editorProps,
-      targetSectionId = "about",
-      targetFieldId,
-    }: ICustomTypographyProps
-  ) => {
+  ({
+    props,
+    children,
+    editorProps,
+    targetSectionId,
+    targetFieldId,
+  }: ICustomTypographyProps) => {
     const { activeInlineFieldId, isEditMode, onInlineFieldClick } =
       editorProps || {};
     const isActive = activeInlineFieldId === targetFieldId;
 
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLElement>) => {
-        if (onInlineFieldClick && !isEditMode) {
+        if (onInlineFieldClick) {
           event.stopPropagation();
-          onInlineFieldClick(targetSectionId, targetFieldId, event.currentTarget);
+          onInlineFieldClick(
+            targetSectionId!,
+            targetFieldId,
+            event.currentTarget,
+          );
         }
       },
-      [onInlineFieldClick, targetFieldId, targetSectionId, isEditMode]
+      [onInlineFieldClick, targetFieldId, targetSectionId],
     );
 
     const typographySx = useMemo(
@@ -55,15 +57,13 @@ export const CustomTypography = React.memo(
               }
             : {},
       }),
-      [props.sx, onInlineFieldClick, isEditMode, isActive]
+      [props.sx, onInlineFieldClick, isEditMode, isActive],
     );
 
     return (
       <Typography
         {...props}
-        onClick={
-          onInlineFieldClick && !isEditMode ? handleClick : props.onClick
-        }
+        onClick={onInlineFieldClick ? handleClick : props.onClick}
         sx={typographySx}
       >
         {children}
@@ -79,7 +79,7 @@ export const CustomTypography = React.memo(
         nextProps.editorProps?.activeInlineFieldId &&
       prevProps.editorProps?.isEditMode === nextProps.editorProps?.isEditMode
     );
-  }
+  },
 );
 
 CustomTypography.displayName = "CustomTypography";

@@ -8,7 +8,6 @@ import {
   IEditorFieldAndSectionProps,
   IEditorInlineFieldSxProps,
 } from "../SecretResumeEditor";
-import { get } from "http";
 
 /**
  *  Utility function to generate sx styles for inline editable fields, applying special styles when the field is active or hovered, and ensuring consistent styling across different types of fields (text, icons, etc.) based on the fieldId.
@@ -243,14 +242,6 @@ export const getInlineFieldLabel = (fieldId: InlineEditableFieldId): string => {
   }
 
   return fieldId;
-};
-
-// Other utility functions related to sections and fields can be added here, such as createSectionProps for making sections interactive in the SecretResumeEditor, etc.
-const handleSectionClick = (
-  sectionId: ResumeEditableSection,
-  onSectionClick: ((sectionId: ResumeEditableSection) => void) | undefined,
-) => {
-  onSectionClick?.(sectionId);
 };
 
 /**

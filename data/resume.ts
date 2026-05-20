@@ -9,9 +9,6 @@ export const resumeData: ResumeData = {
     email: "baltazarbernie05@gmail.com",
     phone: "09765720622",
     location: "Urban Deca Homes Rosario Extension, Pasig City",
-    website: "w",
-    linkedin: "w",
-    github: "w",
     photoUrl:
       "https://i.pinimg.com/736x/21/8b/fa/218bfa98ae6f59f19eecf4791a2f8730.jpg",
     backgroundUrl:
@@ -20,14 +17,14 @@ export const resumeData: ResumeData = {
       "Seeking a position as software developer to apply my knowledge and experience in my field of specialization, where I can utilize my technical skill and dedication to learn new technologies.",
   },
   socialMedia: [
+    { icon: "facebook", href: "#/facebook", label: "Facebook" },
+    { icon: "twitter", href: "#/twitter", label: "Twitter" },
     {
+      icon: "linkedin",
+      href: "#/linkedin",
       label: "LinkedIn",
-      url: "https://www.linkedin.com/in/bernie-baltazar/",
     },
-    {
-      label: "GitHub",
-      url: "https://github.com/berniebaltazar",
-    },
+    { icon: "instagram", href: "#/instagram", label: "Instagram" },
   ],
   stats: {
     yearsExperience: 7,
