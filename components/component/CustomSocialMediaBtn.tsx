@@ -8,10 +8,10 @@ import { ICON_MAP } from "../resume/ServicesSection";
 import LinkIcon from "@mui/icons-material/Link";
 
 export interface SocialLink {
-  icon: React.ReactNode | string;
+  icon?: React.ReactNode | string;
   href?: string;
   label: string;
-  url: string;
+  url?: string;
 }
 
 interface SocialMediaBtnProps extends IEditorProps {

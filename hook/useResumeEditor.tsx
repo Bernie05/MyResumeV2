@@ -1,110 +1,71 @@
-import { useDispatch, useSelector } from "react-redux";
 import { useCallback } from "react";
-import type { RootState } from "@/store";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { ResumeData } from "@/types/resume";
 import {
-  updatePersonalInfo,
-  addExperience,
-  updateExperience,
-  deleteExperience,
-  addEducation,
-  updateEducation,
-  deleteEducation,
-  addProject,
-  updateProject,
-  deleteProject,
-  addPortfolioItem,
-  updatePortfolioItem,
-  deletePortfolioItem,
-  addPortfolioResult,
-  updatePortfolioResult,
-  deletePortfolioResult,
-  addSocialLink,
-  updateSocialLink,
-  deleteSocialLink,
-  addCustomStat,
-  updateCustomStat,
-  deleteCustomStat,
-  updateStatsField,
-  addExperienceBullet,
-  updateExperienceBullet,
-  deleteExperienceBullet,
-  markAsSaved,
-  resetToBaseline,
-  discardChanges,
-  loadResumeDataSuccess,
+  replaceResumeDraft,
 } from "@/store/slices/resumeDataSlice";
+
+const EMPTY_RESUME_DATA: ResumeData = {
+  personalInfo: {
+    name: "",
+    title: "",
+    email: "",
+    phone: "",
+    location: "",
+    photoUrl: "",
+    backgroundUrl: "",
+    summary: "",
+    website: "",
+    linkedin: "",
+    github: "",
+    hireButtonText: "",
+    downloadButtonText: "",
+    social: [],
+  },
+  socialMedia: [],
+  stats: {
+    yearsExperience: 0,
+    projects: 0,
+    clients: 0,
+    awards: 0,
+    custom: [],
+  },
+  experience: [],
+  education: [],
+  skills: [],
+  certifications: [],
+  projects: [],
+  portfolio: [],
+  servicesTitle: "",
+  servicesSubtitle: "",
+};
 
 /**
  * Custom hook to manage resume data editing with Redux backend.
  * Provides a setDraft-like interface while using Redux for state management.
  */
 export const useResumeEditor = () => {
-  const dispatch = useDispatch();
-  const draft = useSelector((state: RootState) => state.resumeData.data);
-  const hasChanges = useSelector(
-    (state: RootState) => state.resumeData.hasChanges,
-  );
+  const dispatch = useAppDispatch();
+  const storedDraft = useAppSelector((state) => state.resumeData.data);
+  const hasChanges = useAppSelector((state) => state.resumeData.hasChanges);
+  const hasDraft = Boolean(storedDraft);
 
   // Wrapper function that mimics setDraft behavior
   const setDraft = useCallback(
     (updater: (current: ResumeData) => ResumeData) => {
-      if (draft) {
-        const updated = updater(draft);
-        dispatch(loadResumeDataSuccess(updated));
+      if (!storedDraft) {
+        return;
       }
+
+      dispatch(replaceResumeDraft(updater(storedDraft)));
     },
-    [draft, dispatch],
+    [storedDraft, dispatch],
   );
 
-  // Safe draft access with null checks
-  const safeDraft = draft || {
-    personalInfo: {},
-    experience: [],
-    education: [],
-    projects: [],
-    portfolio: [],
-    certifications: [],
-    skills: [],
-    stats: {},
-  };
-
   return {
-    draft: safeDraft,
+    draft: storedDraft ?? EMPTY_RESUME_DATA,
+    hasDraft,
     setDraft,
     hasChanges,
-    // Redux actions
-    dispatch,
-    // Action creators
-    updatePersonalInfo,
-    addExperience,
-    updateExperience,
-    deleteExperience,
-    addEducation,
-    updateEducation,
-    deleteEducation,
-    addProject,
-    updateProject,
-    deleteProject,
-    addPortfolioItem,
-    updatePortfolioItem,
-    deletePortfolioItem,
-    addPortfolioResult,
-    updatePortfolioResult,
-    deletePortfolioResult,
-    addSocialLink,
-    updateSocialLink,
-    deleteSocialLink,
-    addCustomStat,
-    updateCustomStat,
-    deleteCustomStat,
-    updateStatsField,
-    addExperienceBullet,
-    updateExperienceBullet,
-    deleteExperienceBullet,
-    markAsSaved,
-    resetToBaseline,
-    discardChanges,
-    loadResumeDataSuccess,
   };
 };

@@ -7,12 +7,19 @@ export interface PersonalInfo {
   photoUrl: string;
   backgroundUrl: string;
   summary: string;
+  website?: string;
+  linkedin?: string;
+  github?: string;
+  hireButtonText?: string;
+  downloadButtonText?: string;
+  social?: SocialMediaLink[];
 }
 
 export interface SocialMediaLink {
   label: string;
   icon?: string;
   href?: string;
+  url?: string;
 }
 
 export interface ResumeStats {

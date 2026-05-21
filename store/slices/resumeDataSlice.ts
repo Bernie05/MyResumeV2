@@ -7,6 +7,9 @@ import type {
   SkillCategory,
   CertificationItem,
   ProjectItem,
+  PortfolioItem,
+  ResumeStats,
+  SocialMediaLink,
 } from "@/types/resume";
 
 interface ResumeDataState {
@@ -39,6 +42,12 @@ const resumeDataSlice = createSlice({
       state.isLoading = false;
       state.error = null;
       state.hasChanges = false;
+    },
+    replaceResumeDraft: (state, action: PayloadAction<ResumeData>) => {
+      state.data = action.payload;
+      state.isLoading = false;
+      state.error = null;
+      state.hasChanges = true;
     },
     loadResumeDataFailure: (state, action: PayloadAction<string>) => {
       state.isLoading = false;
@@ -262,7 +271,7 @@ const resumeDataSlice = createSlice({
     },
 
     // Portfolio operations
-    addPortfolioItem: (state, action: PayloadAction<any>) => {
+    addPortfolioItem: (state, action: PayloadAction<PortfolioItem>) => {
       if (state.data) {
         state.data.portfolio.push(action.payload);
         state.hasChanges = true;
@@ -270,7 +279,7 @@ const resumeDataSlice = createSlice({
     },
     updatePortfolioItem: (
       state,
-      action: PayloadAction<{ index: number; updates: any }>,
+      action: PayloadAction<{ index: number; updates: Partial<PortfolioItem> }>,
     ) => {
       if (state.data && state.data.portfolio[action.payload.index]) {
         state.data.portfolio[action.payload.index] = {
@@ -328,10 +337,7 @@ const resumeDataSlice = createSlice({
     },
 
     // Social links operations
-    addSocialLink: (
-      state,
-      action: PayloadAction<{ label: string; url: string; icon?: string }>,
-    ) => {
+    addSocialLink: (state, action: PayloadAction<SocialMediaLink>) => {
       if (state.data) {
         if (!state.data.socialMedia) {
           state.data.socialMedia = [];
@@ -344,7 +350,7 @@ const resumeDataSlice = createSlice({
       state,
       action: PayloadAction<{
         index: number;
-        updates: { label?: string; url?: string; icon?: string };
+        updates: Partial<SocialMediaLink>;
       }>,
     ) => {
       if (state.data && state.data.socialMedia) {
@@ -400,7 +406,10 @@ const resumeDataSlice = createSlice({
     // Update stats field
     updateStatsField: (
       state,
-      action: PayloadAction<{ field: keyof any; value: any }>,
+      action: PayloadAction<{
+        field: keyof ResumeStats;
+        value: ResumeStats[keyof ResumeStats];
+      }>,
     ) => {
       if (state.data) {
         state.data.stats = {
@@ -429,6 +438,7 @@ const resumeDataSlice = createSlice({
 export const {
   loadResumeDataStart,
   loadResumeDataSuccess,
+  replaceResumeDraft,
   loadResumeDataFailure,
   updatePersonalInfo,
   addExperience,
