@@ -61,7 +61,6 @@ export const getInlineFieldSxV2 = ({
  * @returns A user-friendly label for the inline editable field.
  */
 export const getInlineFieldLabel = (fieldId: InlineEditableFieldId): string => {
-  console.log("Getting label for fieldId:", fieldId);
   // Check if there's a direct label mapping first
   const directLabel = INLINE_FIELD_LABELS[fieldId];
 
@@ -244,6 +243,13 @@ export const getInlineFieldLabel = (fieldId: InlineEditableFieldId): string => {
   return fieldId;
 };
 
+const handleSectionClick = (
+  sectionId: ResumeEditableSection,
+  onSectionClick: ((sectionId: ResumeEditableSection) => void) | undefined,
+) => {
+  onSectionClick?.(sectionId);
+};
+
 /**
  * Utility function to generate props for resume sections that can be edited in the SecretResumeEditor, enabling click interactions and keyboard accessibility when an onSectionClick handler is provided. This function helps to keep the ResumePage component cleaner by abstracting the logic for making sections interactive based on the presence of the onSectionClick handler and the active section state.
  * @param interactiveSections - A boolean indicating whether sections should be interactive (clickable).
@@ -255,7 +261,7 @@ export const createSectionProps = (
   sectionId: ResumeEditableSection,
   onSectionClick: ((sectionId: ResumeEditableSection) => void) | undefined,
 ) => {
-  if (!interactiveSections) {
+  if (!interactiveSections || !onSectionClick) {
     return {};
   }
 

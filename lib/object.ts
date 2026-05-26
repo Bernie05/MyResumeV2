@@ -14,10 +14,10 @@ export const deepMerge = <T extends Record<string, any>>(
   const source = sources.shift();
   if (!source) return target;
 
-  const result = { ...target };
+  const result = { ...target } as Record<string, any>;
 
   for (const key in source) {
-    if (source.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
       const sourceValue = source[key];
       const targetValue = result[key];
 
@@ -36,7 +36,7 @@ export const deepMerge = <T extends Record<string, any>>(
     }
   }
 
-  return deepMerge(result, ...sources);
+  return deepMerge(result as T, ...sources);
 };
 
 /**
@@ -186,8 +186,8 @@ export const setDeep = <T extends Record<string, any>>(
   value: any,
 ): T => {
   const keys = path.split(".");
-  const result = { ...obj };
-  let current = result;
+  const result = { ...obj } as Record<string, any>;
+  let current: Record<string, any> = result;
 
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
@@ -198,7 +198,7 @@ export const setDeep = <T extends Record<string, any>>(
   }
 
   current[keys[keys.length - 1]] = value;
-  return result;
+  return result as T;
 };
 
 /**

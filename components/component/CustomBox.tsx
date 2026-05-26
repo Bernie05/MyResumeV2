@@ -1,10 +1,11 @@
 import React from "react";
-import { Box, BoxProps } from "@mui/material";
+import { Box, BoxProps, SxProps } from "@mui/material";
 import { useThemeContext } from "../../context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import { withEditableField } from "../hoc/withEditableField";
 
-interface CustomBoxProps extends BoxProps {
+interface CustomBoxProps extends Omit<BoxProps, "sx"> {
+  sx?: SxProps;
   children: React.ReactNode;
   targetSectionId?: any;
   targetFieldId?: any;
@@ -12,17 +13,11 @@ interface CustomBoxProps extends BoxProps {
 
 const BaseBox = React.forwardRef<HTMLDivElement, CustomBoxProps>(
   ({ sx, ...props }, ref) => {
-    const theme = useThemeContext();
-    const { buttonHoverGradient } = getSectionPalette(theme.isDarkMode);
-
     return (
       <Box
         ref={ref}
         sx={{
           ...sx,
-          "&:hover": {
-            background: buttonHoverGradient,
-          },
         }}
         {...props}
       />

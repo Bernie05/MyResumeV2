@@ -29,23 +29,41 @@ export const useIsFieldActive = (fieldId: string): boolean => {
   return useActiveField() === fieldId;
 };
 
+// TODO, we need to have a listener for the hover.
 export const useFieldEditorState = (targetFieldId: string) => {
   // Hooks to access editor state and interactions
   const isEditMode = useIsEditMode();
   const activeFieldId = useActiveField();
   const onFieldClick = useOnFieldClick();
 
+  console.log({ isEditMode, targetFieldId, activeFieldId });
+
   // Determine if the target field is currently active
-  const isActive = activeFieldId === targetFieldId;
+  const isActive = isEditMode && activeFieldId === targetFieldId;
+
+  console.log("hook: ", isActive);
+
+  // We need to identify what component is used.
 
   return {
     isEditMode,
     isActive,
     onFieldClick,
-    cursor: isEditMode ? "pointer" : "inherit", // Change cursor to pointer in edit mode
+    // cursor should be pointer if in edit mode, otherwise inherit
+    cursor: isEditMode ? "pointer" : "inherit",
+
+    // outline should be visible if active, otherwise transparent
     outline: isActive
-      ? "2px solid rgba(20, 184, 166, 0.9)"
-      : "2px solid transparent",
+      ? "2px solid rgba(20, 184, 166, 0.9)" // need to update depend on the theme
+      : "",
+
+    // hover styles will be handled in the component's sx using onFieldClick and isActive
+    hover: {
+      outlineColor: isActive
+        ? "2px solid rgba(20, 184, 166, 0.9)" // need to update depend on the theme
+        : "inherit",
+      boxShadow: isActive ? "0 0 0 4px rgba(20, 184, 166, 0.2)" : "none",
+    },
   };
 };
 

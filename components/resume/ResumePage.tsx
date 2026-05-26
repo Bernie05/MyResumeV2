@@ -1,22 +1,26 @@
-﻿"use client";
+"use client";
 
-import Navbar from "@/components/resume/Navbar";
-import HeroSection from "@/components/resume/HeroSection";
-import ServicesSection from "@/components/resume/ServicesSection";
-import Experience from "@/components/resume/Experience";
-import Education from "@/components/resume/Education";
-import Skills from "@/components/resume/Skills";
-import Portfolio from "@/components/resume/Portfolio";
-import Projects from "@/components/resume/Projects";
-import Certifications from "@/components/resume/Certifications";
-import { useThemeContext } from "@/context/ThemeContext";
-import type { ResumeData } from "@/types/resume";
+import type { ElementType, ReactNode } from "react";
+import Navbar from "./Navbar";
+import HeroSection from "./HeroSection";
+import ServicesSection from "./ServicesSection";
+import Experience from "./Experience";
+import Education from "./Education";
+import Skills from "./Skills";
+import Portfolio from "./Portfolio";
+import Projects from "./Projects";
+import Certifications from "./Certifications";
+import { useThemeContext } from "../../context/ThemeContext";
+import type { ResumeData } from "../../types/resume";
 import { Box, Container, Stack, Typography } from "@mui/material";
-import { getSectionPalette } from "@/theme/sectionPalette";
 import { ContactSection } from "./ContactSection";
 import { useSession } from "next-auth/react";
-import { InlineEditableFieldId } from "../secret/constants/constant";
-import { IEditorProps } from "../secret/SecretResumeEditor";
+import {
+  useEditor,
+  useIsEditMode,
+  useOnSectionClick,
+} from "../../hook/useEditor";
+import { createSectionProps } from "../secret/utils/componentUtil";
 import { isAuthenticated } from "./util/authUtil";
 
 export type NavbarPosition =
@@ -38,184 +42,156 @@ export type ResumeEditableSection =
   | "contact"
   | "stats";
 
-interface IResumePageProps extends IEditorProps {
+interface IResumePageProps {
   resume: ResumeData;
   position?: NavbarPosition;
   interactiveSections?: boolean;
 }
 
-const ResumePage = ({ resume, position, editorProps }: IResumePageProps) => {
-  const {
-    activeSectionId,
-    onSectionClick,
-    activeInlineFieldId,
-    onInlineFieldClick,
-    onAddAction,
-    onDeleteAction,
-  } = editorProps || {};
+interface PreviewSectionProps {
+  children: ReactNode;
+  sectionId: ResumeEditableSection;
+  component?: ElementType;
+  domId?: string;
+}
 
-  const { isEditMode } = editorProps || {};
+const ResumePage = ({
+  resume,
+  position = "sticky",
+  interactiveSections,
+}: IResumePageProps) => {
+  const editor = useEditor();
+  const isEditMode = useIsEditMode();
+  const activeSectionId = useEditor()?.activeSection;
+  const onSectionClick = useOnSectionClick();
+
   const { isDarkMode } = useThemeContext();
+  const sectionsAreInteractive = interactiveSections ?? Boolean(isEditMode);
 
   const { data: session, status } = useSession();
   const hasAccess = isAuthenticated(status, session);
 
-  const handleSectionClick = (sectionId: ResumeEditableSection) => {
-    onSectionClick?.(sectionId);
-  };
-
-  // we need to transfer this
-  const createSectionProps = (sectionId: ResumeEditableSection) => {
-    if (!isEditMode) {
-      return {};
-    }
+  const getSectionSx = (sectionId: ResumeEditableSection) => {
+    const isActiveSection = activeSectionId === sectionId;
 
     return {
-      role: "button",
-      tabIndex: 0,
-      "aria-label": `Edit ${sectionId} section`,
-      onClick: () => handleSectionClick(sectionId),
-      onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          handleSectionClick(sectionId);
-        }
-      },
+      borderRadius: sectionsAreInteractive ? { xs: 4, md: 5 } : undefined,
+      outline:
+        sectionsAreInteractive && isActiveSection
+          ? "2px solid rgba(20, 184, 166, 0.9)"
+          : "2px solid transparent",
+      outlineOffset: 8,
+      scrollMarginTop: { xs: 88, md: 104 },
+      transition: "outline-color 160ms ease, box-shadow 160ms ease",
+      "&:hover": sectionsAreInteractive
+        ? {
+            outlineColor: "rgba(20, 184, 166, 0.55)",
+            boxShadow: isActiveSection
+              ? "0 0 0 6px rgba(20, 184, 166, 0.2)"
+              : "0 0 0 4px rgba(20, 184, 166, 0.12)",
+          }
+        : undefined,
     };
   };
 
-  const getEditableProps = () => {
-    if (!isEditMode) return {};
-
-    // I think we can do this as useHook (activeInlineFieldId)
-    return {
-      isEditMode,
-      onInlineFieldClick,
-      activeInlineFieldId,
-      onAddAction,
-      onDeleteAction,
-    };
+  const renderSection = ({
+    children,
+    sectionId,
+    component = "div",
+    domId = sectionId,
+  }: PreviewSectionProps) => {
+    return (
+      <Box
+        id={domId}
+        component={component}
+        sx={getSectionSx(sectionId)}
+        {...createSectionProps(
+          sectionsAreInteractive,
+          sectionId,
+          onSectionClick,
+        )}
+      >
+        {children}
+      </Box>
+    );
   };
+
+  const footerBorderColor = isDarkMode
+    ? "rgba(71, 85, 105, 0.55)"
+    : "rgba(203, 213, 225, 0.9)";
+
+  const footerTextColor = isDarkMode ? "#94a3b8" : "#64748b";
 
   return (
     <Box component="main" sx={{ width: "100%", minHeight: "100vh" }}>
-      {/* Navbar */}
-      <Navbar isAuthenticated={hasAccess} position={position!} />
+      <Navbar isAuthenticated={hasAccess} position={position} />
 
-      {/* Hero Section */}
-      <Box
-        id="about"
-        component="section"
-        sx={getSectionSx(isEditMode, activeSectionId, "about")}
-        {...createSectionProps("about")}
-      >
-        <HeroSection
-          personalInfo={resume.personalInfo}
-          stats={resume.stats}
-          {...getEditableProps()}
-          editorProps={editorProps}
-        />
-      </Box>
+      {renderSection({
+        sectionId: "about",
+        component: "section",
+        children: (
+          <HeroSection
+            personalInfo={resume.personalInfo}
+            stats={resume.stats}
+          />
+        ),
+      })}
 
-      {/* Main Content */}
-      <Container
+      {/* <Container
         maxWidth="xl"
         sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, sm: 3, lg: 4 } }}
       >
         <Stack spacing={{ xs: 10, md: 14 }}>
-          {/* Services Section */}
-          <Box
-            sx={getSectionSx(isEditMode, activeSectionId, "services")}
-            {...createSectionProps("services")}
-          >
-            <ServicesSection
-              skills={resume.skills}
-              servicesTitle={resume.servicesTitle}
-              servicesSubtitle={resume.servicesSubtitle}
-              {...getEditableProps()}
-            />
-          </Box>
+          {renderSection({
+            sectionId: "services",
+            children: (
+              <ServicesSection
+                skills={resume.skills}
+                servicesTitle={resume.servicesTitle}
+                servicesSubtitle={resume.servicesSubtitle}
+              />
+            ),
+          })}
 
-          {/* Experience Section */}
-          <Box
-            component="section"
-            id="experience"
-            sx={getSectionSx("experience")}
-            {...createSectionProps("experience")}
-          >
-            <Experience
-              experience={resume.experience}
-              {...getEditableProps()}
-            />
-          </Box>
+          {renderSection({
+            sectionId: "experience",
+            component: "section",
+            children: <Experience experience={resume.experience} />,
+          })}
 
-          {/* Portfolio Section */}
-          <Box
-            component="section"
-            id="portfolio"
-            sx={getSectionSx("portfolio")}
-            {...createSectionProps("portfolio")}
-          >
-            <Portfolio
-              portfolio={resume.portfolio}
-              editorProps={editorProps}
-              {...getEditableProps()}
-            />
-          </Box>
+          {renderSection({
+            sectionId: "portfolio",
+            component: "section",
+            children: <Portfolio portfolio={resume.portfolio} />,
+          })}
 
-          {/* Projects Section */}
-          <Box
-            sx={getSectionSx("projects")}
-            {...createSectionProps("projects")}
-          >
-            <Projects
-              projects={resume.projects}
-              editorProps={editorProps}
-              {...getEditableProps()}
-            />
-          </Box>
-          <Box
-            sx={getSectionSx("education")}
-            {...createSectionProps("education")}
-          >
-            <Education education={resume.education} {...getEditableProps()} />
-          </Box>
+          {renderSection({
+            sectionId: "projects",
+            children: <Projects projects={resume.projects} />,
+          })}
 
-          {/* Skills Section */}
-          <Box
-            component="section"
-            id="skills"
-            sx={getSectionSx("skills")}
-            {...createSectionProps("skills")}
-          >
-            <Skills skills={resume.skills} {...getEditableProps()} />
-          </Box>
+          {renderSection({
+            sectionId: "education",
+            children: <Education education={resume.education} />,
+          })}
 
-          {/* Certifications Section */}
-          <Box
-            sx={getSectionSx("certifications")}
-            {...createSectionProps("certifications")}
-          >
-            <Certifications
-              certifications={resume.certifications}
-              {...getEditableProps()}
-            />
-          </Box>
+          {renderSection({
+            sectionId: "skills",
+            component: "section",
+            children: <Skills skills={resume.skills} />,
+          })}
 
-          {/* Contact Section */}
-          <Box
-            component="section"
-            id="contact"
-            sx={getSectionSx("contact")}
-            {...createSectionProps("contact")}
-          >
-            <ContactSection
-              personalInfo={resume.personalInfo}
-              {...getEditableProps()}
-            />
-          </Box>
+          {renderSection({
+            sectionId: "certifications",
+            children: <Certifications certifications={resume.certifications} />,
+          })}
 
-          {/* Footer Section */}
+          {renderSection({
+            sectionId: "contact",
+            component: "section",
+            children: <ContactSection personalInfo={resume.personalInfo} />,
+          })}
+
           <Box
             component="footer"
             id="footer"
@@ -224,23 +200,16 @@ const ResumePage = ({ resume, position, editorProps }: IResumePageProps) => {
               py: 8,
               mt: 10,
               borderTop: "1px solid",
-              borderColor: isDarkMode
-                ? "rgba(71, 85, 105, 0.55)"
-                : "rgba(203, 213, 225, 0.9)",
+              borderColor: footerBorderColor,
             }}
           >
-            <Typography
-              variant="body2"
-              sx={{
-                color: isDarkMode ? "#94a3b8" : "#64748b",
-              }}
-            >
+            <Typography variant="body2" sx={{ color: footerTextColor }}>
               {new Date().getFullYear()} © {resume.personalInfo.name}. All
               rights reserved.
             </Typography>
           </Box>
         </Stack>
-      </Container>
+      </Container> */}
     </Box>
   );
 };

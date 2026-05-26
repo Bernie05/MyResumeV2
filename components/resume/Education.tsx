@@ -15,7 +15,7 @@ import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "./ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 import { AddButton } from "../component/static/AddButton";
-import { IEditorProps } from "../secret/SecretResumeEditor";
+import { useEditor, useActiveField, useOnFieldClick } from "@/hook/useEditor";
 
 interface IEducationItem {
   id: number;
@@ -26,26 +26,11 @@ interface IEducationItem {
   location: string;
 }
 
-interface IEducationProps extends IEditorProps {
+interface IEducationProps {
   education: IEducationItem[];
-  onInlineFieldClick?: (
-    section: ResumeEditableSection,
-    fieldId: InlineEditableFieldId,
-    anchor?: HTMLElement,
-  ) => void;
-  activeInlineFieldId?: InlineEditableFieldId | null;
-  onAddAction?: (action: string, anchor: HTMLElement) => void;
-  onDeleteAction?: (action: string) => void;
 }
 
-const Education = ({
-  education,
-  onInlineFieldClick,
-  activeInlineFieldId,
-  onAddAction,
-  onDeleteAction,
-  editorProps,
-}: IEducationProps) => {
+const Education = ({ education }: IEducationProps) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -60,6 +45,12 @@ const Education = ({
     accentText,
     hoverShadow,
   } = getSectionPalette(isDarkMode);
+
+  const editor = useEditor();
+  const activeInlineFieldId = useActiveField();
+  const onInlineFieldClick = useOnFieldClick();
+
+  const { onAddAction, onDeleteAction } = editor || {};
 
   const getInlineFieldSx = (fieldId: InlineEditableFieldId) => ({
     borderRadius: 1,
@@ -274,7 +265,7 @@ const Education = ({
 
         {/* Add Education Button */}
         {onAddAction && (
-          <AddButton targetSectionId="education" editorProps={editorProps}>
+          <AddButton targetSectionId="education">
             <Typography
               sx={{ color: primaryAccent, fontWeight: 600, fontSize: "1rem" }}
             >

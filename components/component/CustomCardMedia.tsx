@@ -1,10 +1,11 @@
 import React from "react";
-import { CardMedia, CardMediaProps } from "@mui/material";
+import { CardMedia, CardMediaProps, SxProps } from "@mui/material";
 import { useThemeContext } from "../../context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import { withEditableField } from "../hoc/withEditableField";
 
-interface CustomCardMedia extends CardMediaProps {
+interface CustomCardMedia extends Omit<CardMediaProps, "sx"> {
+  sx?: SxProps;
   children: React.ReactNode;
   targetSectionId?: any;
   targetFieldId?: any;

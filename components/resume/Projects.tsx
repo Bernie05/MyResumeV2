@@ -5,8 +5,8 @@ import { Box, Typography } from "@mui/material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { ProjectCardComponent } from "./components/cards/ProjectCardComponent";
 import { getSectionPalette } from "../../theme/sectionPalette";
-import { IEditorProps } from "../secret/SecretResumeEditor";
 import { AddButton } from "../component/static/AddButton";
+import { useEditor } from "@/hook/useEditor";
 
 interface Project {
   id: number;
@@ -19,11 +19,11 @@ interface Project {
   caseStudy?: string;
 }
 
-export interface IProjectsSection extends IEditorProps {
+export interface IProjectsSection {
   projects: Project[];
 }
 
-const Projects = ({ projects, editorProps }: IProjectsSection) => {
+const Projects = ({ projects }: IProjectsSection) => {
   const { isDarkMode } = useThemeContext();
   const {
     titleColor,
@@ -35,7 +35,8 @@ const Projects = ({ projects, editorProps }: IProjectsSection) => {
     primaryAccent,
   } = getSectionPalette(isDarkMode);
 
-  const { onAddAction } = editorProps || {};
+  const editor = useEditor();
+  const { onAddAction } = editor || {};
 
   // Memoize projects to avoid unnecessary re-renders
   const memoizedProjects = useMemo(
@@ -46,10 +47,9 @@ const Projects = ({ projects, editorProps }: IProjectsSection) => {
           {...project}
           inlineSection="projects"
           itemIndex={index}
-          editorProps={editorProps}
         />
       )) || [],
-    [projects, editorProps],
+    [projects],
   );
 
   return (
@@ -120,7 +120,7 @@ const Projects = ({ projects, editorProps }: IProjectsSection) => {
 
       {/* Add Project Button */}
       {onAddAction && (
-        <AddButton targetSectionId="projects" editorProps={editorProps}>
+        <AddButton targetSectionId="projects">
           <Typography
             sx={{
               color: primaryAccent,

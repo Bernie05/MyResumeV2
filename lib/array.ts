@@ -93,7 +93,7 @@ export const unique = <T>(arr: T[], key?: keyof T): T[] => {
 
   const seen = new Set<unknown>();
   return arr.filter((item) => {
-    const value = (item as Record<string, unknown>)[key];
+    const value = item[key];
     if (seen.has(value)) {
       return false;
     }
@@ -106,7 +106,7 @@ export const unique = <T>(arr: T[], key?: keyof T): T[] => {
  * Flattens a nested array
  */
 export const flatten = <T>(arr: (T | T[])[]): T[] => {
-  return arr.reduce((acc, item) => {
+  return arr.reduce<T[]>((acc, item) => {
     if (Array.isArray(item)) {
       acc.push(...flatten(item as (T | T[])[]));
     } else {

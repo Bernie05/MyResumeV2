@@ -72,9 +72,7 @@ import {
   PREVIEW_SECTION_TO_EDITOR_SECTION,
 } from "./constants/constant";
 import { CustomPopover } from "../component/CustomPopover";
-
-const STORAGE_KEY = "resume-secret-draft";
-const LEGACY_DRAFT_STORAGE_KEY = "resume-studio-draft";
+import { EditorProvider } from "@/context/EditorContext";
 
 export type EditorSection = (typeof EDITOR_SECTIONS)[number]["value"];
 
@@ -157,7 +155,8 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Use the resume editor hook for all draft management
-  const { draft, setDraft, hasChanges } = useResumeEditor();
+  const { draft, hasDraft, setDraft, hasChanges } = useResumeEditor();
+  const hasUnsavedChanges = hasChanges;
 
   const [activeSection, setActiveSection] =
     useState<EditorSection>("personalInfo");
@@ -171,10 +170,13 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    // Initialize Redux with the initial resume data
+    if (hasDraft) {
+      setIsHydrated(true);
+      return;
+    }
+
     mainDispatch(loadResumeDataSuccess(initialResume));
-    setIsHydrated(true);
-  }, [initialResume, mainDispatch]);
+  }, [hasDraft, initialResume, mainDispatch]);
 
   const updateStatsField = (field: keyof ResumeStats, value: string) => {
     setDraft((current) => ({
@@ -194,13 +196,12 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
   };
 
   const handleDiscardChangesClick = () => {
-    setDraft(() => cloneResumeData(initialResume));
+    mainDispatch(reduxDiscardChanges(cloneResumeData(initialResume)));
     setNotice("Unsaved changes discarded.");
   };
 
   const handleResetToBaselineClick = () => {
     mainDispatch(reduxResetToBaseline(cloneResumeData(initialResume)));
-    setDraft(() => cloneResumeData(initialResume));
     setNotice("Draft reset to the static resume baseline.");
   };
 
@@ -453,118 +454,112 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
 
       if (socialMatch) {
         const socialInfo = draft.personalInfo.social ?? [];
-        console.log("socialInfo: ", socialInfo);
         return (
           <Stack spacing={1.25} sx={{ mt: 1.5 }}>
             <Typography variant="caption" color="text.secondary">
               Social links (label : url)
             </Typography>
-            {socialInfo.map(
-              (
-                s: { label: string; url: string; icon?: string },
-                idx: number,
-              ) => (
-                <Stack key={idx} spacing={1}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <TextField
-                      size="small"
-                      label="Label"
-                      value={s.label}
-                      sx={{ flex: 1 }}
-                      onChange={(event) => {
-                        const next = [...socialInfo];
-                        next[idx] = { ...next[idx], label: event.target.value };
-                        setDraft((current) => ({
-                          ...current,
-                          personalInfo: {
-                            ...current.personalInfo,
-                            social: next,
-                          },
-                        }));
-                      }}
-                    />
-                    <TextField
-                      size="small"
-                      label="URL"
-                      value={s.url}
-                      sx={{ flex: 2 }}
-                      onChange={(event) => {
-                        const next = [...socialInfo];
-                        next[idx] = { ...next[idx], url: event.target.value };
-                        setDraft((current) => ({
-                          ...current,
-                          personalInfo: {
-                            ...current.personalInfo,
-                            social: next,
-                          },
-                        }));
-                      }}
-                    />
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        const next = socialInfo.filter(
-                          (_: unknown, i: number) => i !== idx,
-                        );
-                        setDraft((current) => ({
-                          ...current,
-                          personalInfo: {
-                            ...current.personalInfo,
-                            social: next,
-                          },
-                        }));
-                      }}
-                    >
-                      <DeleteOutlineIcon fontSize="small" />
-                    </IconButton>
-                  </Stack>
-                  <Typography variant="caption" color="text.secondary">
-                    Icon
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fill, 36px)",
-                      gap: 0.5,
+            {socialInfo.map((s, idx) => (
+              <Stack key={idx} spacing={1}>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <TextField
+                    size="small"
+                    label="Label"
+                    value={s.label}
+                    sx={{ flex: 1 }}
+                    onChange={(event) => {
+                      const next = [...socialInfo];
+                      next[idx] = { ...next[idx], label: event.target.value };
+                      setDraft((current) => ({
+                        ...current,
+                        personalInfo: {
+                          ...current.personalInfo,
+                          social: next,
+                        },
+                      }));
+                    }}
+                  />
+                  <TextField
+                    size="small"
+                    label="URL"
+                    value={s.url ?? ""}
+                    sx={{ flex: 2 }}
+                    onChange={(event) => {
+                      const next = [...socialInfo];
+                      next[idx] = { ...next[idx], url: event.target.value };
+                      setDraft((current) => ({
+                        ...current,
+                        personalInfo: {
+                          ...current.personalInfo,
+                          social: next,
+                        },
+                      }));
+                    }}
+                  />
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      const next = socialInfo.filter(
+                        (_: unknown, i: number) => i !== idx,
+                      );
+                      setDraft((current) => ({
+                        ...current,
+                        personalInfo: {
+                          ...current.personalInfo,
+                          social: next,
+                        },
+                      }));
                     }}
                   >
-                    {ICON_NAMES.map((iconKey) => {
-                      const Icon = ICON_MAP[iconKey];
-                      return (
-                        <IconButton
-                          key={iconKey}
-                          size="small"
-                          onClick={() => {
-                            const next = [...socialInfo];
-                            next[idx] = { ...next[idx], icon: iconKey };
-                            setDraft((current) => ({
-                              ...current,
-                              personalInfo: {
-                                ...current.personalInfo,
-                                social: next,
-                              },
-                            }));
-                          }}
-                          sx={{
-                            border: "1px solid",
-                            borderColor:
-                              s.icon === iconKey ? "primary.main" : "divider",
-                            backgroundColor:
-                              s.icon === iconKey
-                                ? "action.selected"
-                                : "transparent",
-                            borderRadius: 1,
-                          }}
-                        >
-                          <Icon sx={{ fontSize: 18 }} />
-                        </IconButton>
-                      );
-                    })}
-                  </Box>
-                  <Divider />
+                    <DeleteOutlineIcon fontSize="small" />
+                  </IconButton>
                 </Stack>
-              ),
-            )}
+                <Typography variant="caption" color="text.secondary">
+                  Icon
+                </Typography>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, 36px)",
+                    gap: 0.5,
+                  }}
+                >
+                  {ICON_NAMES.map((iconKey) => {
+                    const Icon = ICON_MAP[iconKey];
+                    return (
+                      <IconButton
+                        key={iconKey}
+                        size="small"
+                        onClick={() => {
+                          const next = [...socialInfo];
+                          next[idx] = { ...next[idx], icon: iconKey };
+                          setDraft((current) => ({
+                            ...current,
+                            personalInfo: {
+                              ...current.personalInfo,
+                              social: next,
+                            },
+                          }));
+                        }}
+                        sx={{
+                          border: "1px solid",
+                          borderColor:
+                            s.icon === iconKey ? "primary.main" : "divider",
+                          backgroundColor:
+                            s.icon === iconKey
+                              ? "action.selected"
+                              : "transparent",
+                          borderRadius: 1,
+                        }}
+                      >
+                        <Icon sx={{ fontSize: 18 }} />
+                      </IconButton>
+                    );
+                  })}
+                </Box>
+                <Divider />
+              </Stack>
+            ))}
             <Button
               size="small"
               variant="outlined"
@@ -3529,168 +3524,181 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     }
   };
 
-  if (!isHydrated) {
+  if (!isHydrated || !hasDraft) {
     return <SecretEditorSkeleton isDarkMode={isDarkMode} />;
   }
 
+  const editorProps = {
+    isEditMode: true,
+    onInlineFieldClick: handleInlineFieldClick,
+    activeInlineFieldId: selectedInlineFieldId,
+    onSectionClick: handlePreviewSectionClick,
+    activeSectionId: selectedPreviewSection,
+    onAddAction: handleAddAction,
+    onDeleteAction: handleDeleteAction,
+    onDelete: handleDeleteAction,
+  };
+
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: isDarkMode
-          ? "linear-gradient(180deg, #020617 0%, #0f172a 100%)"
-          : "linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)",
-      }}
-    >
+    <EditorProvider value={editorProps}>
       <Box
         sx={{
-          position: "sticky",
-          top: 0,
-          zIndex: 30,
-          backdropFilter: "blur(16px)",
-          borderBottom: "1px solid",
-          borderColor: isDarkMode
-            ? "rgba(51, 65, 85, 0.8)"
-            : "rgba(203, 213, 225, 0.9)",
-          backgroundColor: isDarkMode
-            ? "rgba(2, 6, 23, 0.88)"
-            : "rgba(248, 250, 252, 0.92)",
+          minHeight: "100vh",
+          background: isDarkMode
+            ? "linear-gradient(180deg, #020617 0%, #0f172a 100%)"
+            : "linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)",
         }}
       >
-        <Stack spacing={2} sx={{ px: { xs: 2, md: 3 }, py: 2 }}>
-          <Stack
-            direction={{ xs: "column", xl: "row" }}
-            justifyContent="space-between"
-            spacing={2}
-          >
-            <Stack spacing={0.75}>
-              <Typography
-                variant="overline"
-                sx={{ color: isDarkMode ? "#67e8f9" : "#0f766e" }}
-              >
-                Owner-only access
-              </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800 }}>
-                Private Resume Editor
-              </Typography>
-              <Typography sx={{ color: isDarkMode ? "#94a3b8" : "#475569" }}>
-                Edit the local draft, preview the live resume UI, and keep the
-                public site pinned to the static data source.
-              </Typography>
-            </Stack>
-
+        <Box
+          sx={{
+            position: "sticky",
+            top: 0,
+            zIndex: 30,
+            backdropFilter: "blur(16px)",
+            borderBottom: "1px solid",
+            borderColor: isDarkMode
+              ? "rgba(51, 65, 85, 0.8)"
+              : "rgba(203, 213, 225, 0.9)",
+            backgroundColor: isDarkMode
+              ? "rgba(2, 6, 23, 0.88)"
+              : "rgba(248, 250, 252, 0.92)",
+          }}
+        >
+          <Stack spacing={2} sx={{ px: { xs: 2, md: 3 }, py: 2 }}>
             <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1.25}
-              alignItems={{ sm: "center" }}
+              direction={{ xs: "column", xl: "row" }}
+              justifyContent="space-between"
+              spacing={2}
             >
-              {/* Unsaved changes indicator */}
-              <Chip
-                label={
-                  hasUnsavedChanges
-                    ? "Unsaved changes"
-                    : "Draft matches saved local copy"
-                }
-                color={hasUnsavedChanges ? "warning" : "success"}
-                variant={hasUnsavedChanges ? "filled" : "outlined"}
-              />
-              <Button
-                variant="contained"
-                startIcon={<SaveOutlinedIcon />}
-                disabled={hasUnsavedChanges}
-                onClick={handlePreviewClick}
-                sx={{ textTransform: "none", fontWeight: 700 }}
+              <Stack spacing={0.75}>
+                <Typography
+                  variant="overline"
+                  sx={{ color: isDarkMode ? "#67e8f9" : "#0f766e" }}
+                >
+                  Owner-only access
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                  Private Resume Editor
+                </Typography>
+                <Typography sx={{ color: isDarkMode ? "#94a3b8" : "#475569" }}>
+                  Edit the local draft, preview the live resume UI, and keep the
+                  public site pinned to the static data source.
+                </Typography>
+              </Stack>
+
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1.25}
+                alignItems={{ sm: "center" }}
               >
-                Preview
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<SaveOutlinedIcon />}
-                onClick={handleSaveDraft}
-                sx={{ textTransform: "none", fontWeight: 700 }}
-              >
-                Save draft
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<RefreshIcon />}
-                onClick={handleDiscardChangesClick}
-                disabled={!hasChanges}
-                sx={{ textTransform: "none" }}
-              >
-                Discard changes
-              </Button>
-              <Button
-                variant="outlined"
-                color="warning"
-                startIcon={<SettingsBackupRestoreIcon />}
-                onClick={handleResetToBaselineClick}
-                sx={{ textTransform: "none" }}
-              >
-                Reset to baseline
-              </Button>
-              <Button
-                variant="text"
-                color="inherit"
-                startIcon={<LogoutIcon />}
-                onClick={handleLogout}
-                disabled={isLoggingOut}
-                sx={{ textTransform: "none" }}
-              >
-                Logout
-              </Button>
+                {/* Unsaved changes indicator */}
+                <Chip
+                  label={
+                    hasUnsavedChanges
+                      ? "Unsaved changes"
+                      : "Draft matches saved local copy"
+                  }
+                  color={hasUnsavedChanges ? "warning" : "success"}
+                  variant={hasUnsavedChanges ? "filled" : "outlined"}
+                />
+                <Button
+                  variant="contained"
+                  startIcon={<SaveOutlinedIcon />}
+                  disabled={hasUnsavedChanges}
+                  onClick={handlePreviewClick}
+                  sx={{ textTransform: "none", fontWeight: 700 }}
+                >
+                  Preview
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<SaveOutlinedIcon />}
+                  onClick={handleSaveDraft}
+                  sx={{ textTransform: "none", fontWeight: 700 }}
+                >
+                  Save draft
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<RefreshIcon />}
+                  onClick={handleDiscardChangesClick}
+                  disabled={!hasChanges}
+                  sx={{ textTransform: "none" }}
+                >
+                  Discard changes
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  startIcon={<SettingsBackupRestoreIcon />}
+                  onClick={handleResetToBaselineClick}
+                  sx={{ textTransform: "none" }}
+                >
+                  Reset to baseline
+                </Button>
+                <Button
+                  variant="text"
+                  color="inherit"
+                  startIcon={<LogoutIcon />}
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  sx={{ textTransform: "none" }}
+                >
+                  Logout
+                </Button>
+              </Stack>
             </Stack>
           </Stack>
-        </Stack>
-      </Box>
+        </Box>
 
-      <Box>
-        <ResumePage
-          resume={draft}
-          position="static"
-          editorProps={{
-            isEditMode: true,
-            // section and fieldId
-            activeSectionId: selectedPreviewSection,
-            activeInlineFieldId: selectedInlineFieldId,
-            onSectionClick: handlePreviewSectionClick,
-            onInlineFieldClick: handleInlineFieldClick,
-            onAddAction: handleAddAction,
-            onDeleteAction: handleDeleteAction,
-          }}
+        <Box>
+          <ResumePage
+            resume={draft}
+            position="static"
+            editorProps={{
+              isEditMode: true,
+              // section and fieldId
+              activeSectionId: selectedPreviewSection,
+              activeInlineFieldId: selectedInlineFieldId,
+              onSectionClick: handlePreviewSectionClick,
+              onInlineFieldClick: handleInlineFieldClick,
+              onAddAction: handleAddAction,
+              onDeleteAction: handleDeleteAction,
+            }}
+          />
+        </Box>
+
+        {/* Popover */}
+        <CustomPopover
+          anchorEl={anchorEl}
+          selectedInlineFieldId={selectedInlineFieldId}
+          handleCloseInlineEditor={handleCloseInlineEditor}
+          getInlineFieldLabel={getInlineFieldLabel}
+          renderInlineFieldToolbox={renderInlineFieldToolbox}
         />
-      </Box>
 
-      {/* Popover */}
-      <CustomPopover
-        anchorEl={anchorEl}
-        selectedInlineFieldId={selectedInlineFieldId}
-        handleCloseInlineEditor={handleCloseInlineEditor}
-        getInlineFieldLabel={getInlineFieldLabel}
-        renderInlineFieldToolbox={renderInlineFieldToolbox}
-      />
-
-      <Snackbar
-        open={Boolean(notice) || Boolean(error)}
-        autoHideDuration={4000}
-        onClose={() => {
-          setNotice(null);
-          setError(null);
-        }}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          severity={error ? "error" : "success"}
+        <Snackbar
+          open={Boolean(notice) || Boolean(error)}
+          autoHideDuration={4000}
           onClose={() => {
             setNotice(null);
             setError(null);
           }}
-          sx={{ width: "100%" }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         >
-          {error ?? notice}
-        </Alert>
-      </Snackbar>
-    </Box>
+          <Alert
+            severity={error ? "error" : "success"}
+            onClose={() => {
+              setNotice(null);
+              setError(null);
+            }}
+            sx={{ width: "100%" }}
+          >
+            {error ?? notice}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </EditorProvider>
   );
 };
 
