@@ -1,22 +1,22 @@
 import React from "react";
-import { Typography, TypographyProps } from "@mui/material";
+import { CardMedia, CardMediaProps } from "@mui/material";
 import { useThemeContext } from "../../context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import { withEditableField } from "../hoc/withEditableField";
 
-interface CustomTypographyProps extends TypographyProps {
+interface CustomCardMedia extends CardMediaProps {
   children: React.ReactNode;
   targetSectionId?: any;
   targetFieldId?: any;
 }
 
-const BaseBox = React.forwardRef<HTMLDivElement, CustomTypographyProps>(
+const BaseCardMedia = React.forwardRef<HTMLDivElement, CustomCardMedia>(
   ({ sx, ...props }, ref) => {
     const theme = useThemeContext();
     const { buttonHoverGradient } = getSectionPalette(theme.isDarkMode);
 
     return (
-      <Typography
+      <CardMedia
         ref={ref}
         sx={{
           ...sx,
@@ -30,4 +30,4 @@ const BaseBox = React.forwardRef<HTMLDivElement, CustomTypographyProps>(
   },
 );
 
-export const CustomBox = withEditableField(BaseBox);
+export const CustomCardMedia = withEditableField(BaseCardMedia);

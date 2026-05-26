@@ -8,25 +8,31 @@ import {
 } from "../secret/utils/componentUtil";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "@/theme/sectionPalette";
-import { IEditorProps } from "../secret/SecretResumeEditor";
-import { ResumeEditableSection } from "@/components/resume/ResumePage";
+import {
+  useEditor,
+  useIsEditMode,
+  useActiveField,
+  useOnFieldClick,
+} from "@/hook/useEditor";
 
-interface ICustomStatsProps extends IEditorProps {
+interface ICustomStatsProps {
   stats: HeroStats;
 }
 
-export const CustomStats = ({ stats, editorProps }: ICustomStatsProps) => {
+export const CustomStats = ({ stats }: ICustomStatsProps) => {
   const { isDarkMode } = useThemeContext();
   const { primaryAccent } = getSectionPalette(isDarkMode);
-  const { activeInlineFieldId, onInlineFieldClick, isEditMode, onAddAction } =
-    editorProps || {};
+  const editor = useEditor();
+  const isEditMode = useIsEditMode();
+  const activeFieldId = useActiveField();
+  const onFieldClick = useOnFieldClick();
+
+  const { onAddAction } = editor || {};
+  const activeInlineFieldId = activeFieldId;
+  const onInlineFieldClick = onFieldClick;
 
   const inlineFieldClick = onInlineFieldClick as
-    | ((
-        section: ResumeEditableSection,
-        fieldId: string,
-        anchor?: HTMLElement,
-      ) => void)
+    | ((section: string, fieldId: string, anchor?: HTMLElement) => void)
     | undefined;
 
   return (
