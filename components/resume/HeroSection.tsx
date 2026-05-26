@@ -15,7 +15,12 @@ import {
   getInlineFieldSxV2,
 } from "../secret/utils/componentUtil";
 import { SocialLink, SocialMediaBtn } from "../component/CustomSocialMediaBtn";
-import { IEditorProps } from "../secret/SecretResumeEditor";
+import {
+  useEditor,
+  useIsEditMode,
+  useActiveField,
+  useOnFieldClick,
+} from "@/hook/useEditor";
 import { CustomStats } from "../component/CustomStats";
 import { CustomAvatar } from "../component/CustomAvatar";
 import { CustomBox } from "../component/CustomBox";
@@ -59,19 +64,18 @@ export interface StatsItems {
   suffix?: string;
 }
 
-export interface HeroSectionProps extends IEditorProps {
+export interface HeroSectionProps {
   personalInfo: PersonalInfo;
   stats?: HeroStats;
 }
 
-const HeroSection = ({
-  personalInfo,
-  stats,
-  editorProps,
-}: HeroSectionProps) => {
+const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
   const sectionId = "about";
-  const { isEditMode, onInlineFieldClick, onAddAction, activeInlineFieldId } =
-    editorProps || {};
+
+  const isEditMode = useIsEditMode();
+  const activeInlineFieldId = useActiveField();
+  const onInlineFieldClick = useOnFieldClick();
+
   const { isDarkMode } = useThemeContext();
   const theme = getSectionPalette(isDarkMode);
 
@@ -99,31 +103,30 @@ const HeroSection = ({
       id={`${heroSectionId}-main-container`}
       sx={{ position: "relative", width: "100%" }}
     >
+      {/* Background Container */}
       <CustomBox
+        id={`${heroSectionId}-background-container`}
         targetFieldId="personalInfo.backgroundUrl"
-        props={{
-          id: `${heroSectionId}-editable-container`,
-          ...personalInfoFields.backgroundUrl,
-          sx: {
-            position: "relative",
-            minHeight: { xs: "100vh", md: 640 },
-            display: "flex",
-            alignItems: "center",
-            overflow: "hidden",
-            backgroundImage: `url('${personalInfo.backgroundUrl}')`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              background: isDarkMode
-                ? "rgba(2, 6, 23, 0.78)"
-                : "linear-gradient(90deg, rgba(15, 23, 42, 0.78) 0%, rgba(30, 41, 59, 0.48) 45%, rgba(30, 64, 175, 0.18) 100%)",
-            },
+        targetSectionId={sectionId}
+        {...personalInfoFields.backgroundUrl}
+        sx={{
+          position: "relative",
+          minHeight: { xs: "100vh", md: 640 },
+          display: "flex",
+          alignItems: "center",
+          overflow: "hidden",
+          backgroundImage: `url('${personalInfo.backgroundUrl}')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            background: isDarkMode
+              ? "rgba(2, 6, 23, 0.78)"
+              : "linear-gradient(90deg, rgba(15, 23, 42, 0.78) 0%, rgba(30, 41, 59, 0.48) 45%, rgba(30, 64, 175, 0.18) 100%)",
           },
         }}
-        editorProps={editorProps}
       >
         {/* Content Container */}
         <Container
@@ -163,23 +166,20 @@ const HeroSection = ({
 
               {/* Avatar */}
               <CustomAvatar
+                id={`${heroSectionId}-avatar`}
                 targetFieldId="personalInfo.photoUrl"
-                editorProps={editorProps}
-                photoURL={personalInfo.photoUrl}
-                props={{
-                  id: `${heroSectionId}-avatar`,
-                  alt: personalInfo.name,
-                  src: personalInfo.photoUrl,
-                  sx: {
-                    width: { xs: 160, md: 192 },
-                    height: { xs: 160, md: 192 },
-                    border: "4px solid",
-                    borderColor: primaryAccent,
-                    boxShadow: `0 24px 60px ${accentGlow}`,
-                    position: "relative",
-                    borderRadius: 1,
-                    outlineOffset: 2,
-                  },
+                targetSectionId="about"
+                alt={personalInfo.name}
+                src={personalInfo.photoUrl}
+                sx={{
+                  width: { xs: 160, md: 192 },
+                  height: { xs: 160, md: 192 },
+                  border: "4px solid",
+                  borderColor: primaryAccent,
+                  boxShadow: `0 24px 60px ${accentGlow}`,
+                  position: "relative",
+                  borderRadius: 1,
+                  outlineOffset: 2,
                 }}
               />
             </Box>
@@ -191,17 +191,14 @@ const HeroSection = ({
               alignItems="center"
             >
               <CustomTypography
-                targetSectionId="about"
+                targetSectionId={sectionId}
                 targetFieldId="personalInfo.name"
-                editorProps={editorProps}
-                props={{
-                  component: "h1",
-                  color: "common.white",
-                  fontWeight: 800,
-                  letterSpacing: "-0.04em",
-                  fontSize: { xs: "2.75rem", sm: "4rem", md: "5.25rem" },
-                  lineHeight: 0.96,
-                }}
+                component="h1"
+                color="common.white"
+                fontWeight="800"
+                letterSpacing="-0.04em"
+                fontSize={{ xs: "2.75rem", sm: "4rem", md: "5.25rem" }}
+                lineHeight="0.96"
               >
                 {personalInfo.name}
               </CustomTypography>
@@ -210,14 +207,11 @@ const HeroSection = ({
               <CustomTypography
                 targetSectionId="about"
                 targetFieldId="personalInfo.title"
-                editorProps={editorProps}
-                props={{
-                  color: "common.white",
-                  fontWeight: 700,
-                  letterSpacing: "0.24em",
-                  textTransform: "uppercase",
-                  fontSize: { xs: "0.8rem", md: "0.95rem" },
-                }}
+                color="common.white"
+                fontWeight="700"
+                letterSpacing="0.24em"
+                textTransform="uppercase"
+                fontSize={{ xs: "0.8rem", md: "0.95rem" }}
               >
                 {personalInfo.title}
               </CustomTypography>
@@ -227,14 +221,11 @@ const HeroSection = ({
                 <CustomTypography
                   targetSectionId="about"
                   targetFieldId="personalInfo.summary"
-                  editorProps={editorProps}
-                  props={{
-                    color: "common.white",
-                    fontWeight: 700,
-                    letterSpacing: "0.24em",
-                    textTransform: "uppercase",
-                    fontSize: { xs: "0.8rem", md: "0.95rem" },
-                  }}
+                  color="common.white"
+                  fontWeight="700"
+                  letterSpacing="0.24em"
+                  textTransform="uppercase"
+                  fontSize={{ xs: "0.8rem", md: "0.95rem" }}
                 >
                   {personalInfo.summary}
                 </CustomTypography>
@@ -251,31 +242,13 @@ const HeroSection = ({
               <CustomButton
                 targetSectionId="about"
                 targetFieldId="personalInfo.hireButtonText"
-                editorProps={editorProps}
-                props={{
-                  variant: "contained",
-                  component: "a",
-                  href: personalInfo.email
+                variant="contained"
+                component="a"
+                href={
+                  personalInfo.email
                     ? `mailto:${personalInfo.email}`
-                    : "#contact",
-                  sx: {
-                    px: 4,
-                    py: 1.5,
-                    textTransform: "none",
-                    fontWeight: 700,
-                    color: accentText,
-                    background: buttonGradient,
-                    boxShadow: `0 18px 45px ${accentGlow}`,
-                    borderRadius: 999,
-                    outline:
-                      activeInlineFieldId === "personalInfo.hireButtonText"
-                        ? "2px solid rgba(20, 184, 166, 0.9)"
-                        : "2px solid transparent",
-                    outlineOffset: 2,
-                    transition:
-                      "outline-color 160ms ease, box-shadow 160ms ease",
-                  },
-                }}
+                    : "#contact"
+                }
               >
                 {personalInfo.hireButtonText || "Hire Me"}
               </CustomButton>
@@ -284,24 +257,8 @@ const HeroSection = ({
               <CustomButton
                 targetSectionId="about"
                 targetFieldId="personalInfo.downloadButtonText"
-                editorProps={editorProps}
-                props={{
-                  variant: "outlined",
-                  startIcon: <DownloadIcon />,
-                  sx: {
-                    px: 4,
-                    py: 1.5,
-                    textTransform: "none",
-                    fontWeight: 700,
-                    color: "common.white",
-                    borderColor: "rgba(255,255,255,0.7)",
-                    backdropFilter: "blur(8px)",
-                    borderRadius: 999,
-                    outlineOffset: 2,
-                    transition:
-                      "outline-color 160ms ease, box-shadow 160ms ease",
-                  },
-                }}
+                variant="outlined"
+                startIcon={<DownloadIcon />}
               >
                 {personalInfo.downloadButtonText || "Download CV"}
               </CustomButton>
@@ -314,7 +271,6 @@ const HeroSection = ({
               <SocialMediaBtn
                 defaultLinks={socialLinks as SocialLink[]}
                 newLinks={personalInfo.social ?? []}
-                editorProps={editorProps}
               />
             </Stack>
           </Stack>
@@ -399,7 +355,7 @@ const HeroSection = ({
                 ))}
 
               {/* Render of the Custom Stats + */}
-              <CustomStats stats={stats} editorProps={editorProps} />
+              <CustomStats stats={stats} />
             </Box>
           </Container>
         </Box>

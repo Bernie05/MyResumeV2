@@ -8,6 +8,7 @@ import { resumeData } from "@/data/resume";
 const MainView = () => {
   // Hooks to interact with resume data in Redux store
   const { loadResume } = useResumeOperations();
+
   // Get resume data from Redux store
   const storedResumeData = useResumeData();
 

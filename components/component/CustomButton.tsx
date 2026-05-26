@@ -1,11 +1,12 @@
 import React from "react";
-import { Button, ButtonProps } from "@mui/material";
+import { Button, ButtonProps, SxProps } from "@mui/material";
 
 import { getSectionPalette } from "../../theme/sectionPalette";
 import { withEditableField } from "../hoc/withEditableField";
 import { useThemeContext } from "../../context/ThemeContext";
 
-interface CustomButtonProps extends ButtonProps {
+interface CustomButtonProps extends Omit<ButtonProps, "sx"> {
+  sx?: SxProps;
   children: React.ReactNode;
   targetSectionId?: any;
   targetFieldId?: any;
@@ -13,17 +14,11 @@ interface CustomButtonProps extends ButtonProps {
 
 const BaseButton = React.forwardRef<HTMLButtonElement, CustomButtonProps>(
   ({ sx, ...props }, ref) => {
-    const theme = useThemeContext();
-    const { buttonHoverGradient } = getSectionPalette(theme.isDarkMode);
-
     return (
       <Button
         ref={ref}
         sx={{
           ...sx,
-          "&:hover": {
-            background: buttonHoverGradient,
-          },
         }}
         {...props}
       />

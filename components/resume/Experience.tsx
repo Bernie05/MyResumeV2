@@ -22,7 +22,7 @@ import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 import { AddButton } from "../component/static/AddButton";
-import { IEditorProps } from "../secret/SecretResumeEditor";
+import { useEditor, useActiveField, useOnFieldClick } from "@/hook/useEditor";
 import { useMemo } from "react";
 
 interface Job {
@@ -34,11 +34,11 @@ interface Job {
   description: string[];
 }
 
-interface IExperience extends IEditorProps {
+interface IExperience {
   experience: Job[];
 }
 
-const Experience = ({ experience, editorProps }: IExperience) => {
+const Experience = ({ experience }: IExperience) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -55,12 +55,11 @@ const Experience = ({ experience, editorProps }: IExperience) => {
     hoverShadow,
   } = getSectionPalette(isDarkMode);
 
-  const {
-    activeInlineFieldId,
-    onInlineFieldClick,
-    onDeleteAction,
-    onAddAction,
-  } = editorProps || {};
+  const editor = useEditor();
+  const activeInlineFieldId = useActiveField();
+  const onInlineFieldClick = useOnFieldClick();
+
+  const { onDeleteAction, onAddAction } = editor || {};
 
   const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
     targetSection: "experience",
@@ -307,7 +306,7 @@ const Experience = ({ experience, editorProps }: IExperience) => {
 
         {/* Add Experience Button */}
         {onAddAction && (
-          <AddButton targetSectionId="experience" editorProps={editorProps}>
+          <AddButton targetSectionId="experience">
             <Typography
               sx={{ color: primaryAccent, fontWeight: 600, fontSize: "1rem" }}
             >

@@ -1,11 +1,16 @@
 import React, { useCallback, useMemo } from "react";
-import { IEditorProps } from "@/components/secret/SecretResumeEditor";
 import { getSectionPalette } from "@/theme/sectionPalette";
 import { IconButton, Stack, SxProps, Theme } from "@mui/material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getInlineFieldSxV2 } from "../secret/utils/componentUtil";
 import { ICON_MAP } from "../resume/ServicesSection";
 import LinkIcon from "@mui/icons-material/Link";
+import {
+  useEditor,
+  useIsEditMode,
+  useActiveField,
+  useOnFieldClick,
+} from "@/hook/useEditor";
 
 export interface SocialLink {
   icon?: React.ReactNode | string;
@@ -14,20 +19,29 @@ export interface SocialLink {
   url?: string;
 }
 
-interface SocialMediaBtnProps extends IEditorProps {
+interface SocialMediaBtnProps {
   defaultLinks: SocialLink[];
   newLinks?: SocialLink[];
 }
 
-const combineLinks = (defaultLinks: SocialLink[], newLinks: SocialLink[]) => {
-  const mergedLinks = [...defaultLinks, ...newLinks];
+/**
+ * Merges default and new social links, removing duplicates while preserving order
+ * @param defaultLinks - Default links provided
+ * @param newLinks - Newly added links
+ * @returns Merged array of unique links with stable keys
+ */
+const mergeAndDeduplicateLinks = (
+  defaultLinks: SocialLink[],
+  newLinks: SocialLink[],
+): (SocialLink & { key: string })[] => {
+  const mergedLinks = [...defaultLinks, ...(newLinks || [])];
 
   const uniqueLinks = mergedLinks.reduce(
-    (acc, link) => {
-      // create a unique key using label and current length of acc
-      const key = `${link.label}-${acc.length}`;
+    (acc, link, index) => {
+      // Use label + index as key to ensure uniqueness
+      const key = `${link.label}-${index}`;
+      // Check if this label already exists in accumulator
       if (!acc.some((l) => l.label === link.label)) {
-        // add the unique key to the link object
         acc.push({ ...link, key });
       }
       return acc;
@@ -111,7 +125,9 @@ const SocialMediaButton = React.memo(
         onClick={onInlineFieldClick ? handleClick : undefined}
         sx={buttonSx}
       >
-        {"+"}
+        {icon && ICON_MAP[icon as keyof typeof ICON_MAP]
+          ? React.createElement(ICON_MAP[icon as keyof typeof ICON_MAP])
+          : "+"}
       </IconButton>
     );
   },
@@ -122,111 +138,41 @@ SocialMediaButton.displayName = "SocialMediaButton";
 export const SocialMediaBtn = ({
   defaultLinks = [],
   newLinks = [],
-  editorProps,
 }: SocialMediaBtnProps) => {
   const { isDarkMode } = useThemeContext();
   const { primaryAccent } = getSectionPalette(isDarkMode);
-  const { onInlineFieldClick, activeInlineFieldId } = editorProps || {};
+  const editor = useEditor();
+  const isEditMode = useIsEditMode();
+  const activeFieldId = useActiveField();
+  const onFieldClick = useOnFieldClick();
 
-  console.log("activeInlineFieldId: ", activeInlineFieldId);
+  const { onInlineFieldClick, activeInlineFieldId } = editor || {};
 
-  const a = combineLinks(defaultLinks, newLinks);
+  // Merge default and new links, removing duplicates
+  const mergedLinks = useMemo(
+    () => mergeAndDeduplicateLinks(defaultLinks, newLinks),
+    [defaultLinks, newLinks],
+  );
 
-  console.log("combinedLinks: ", a);
-
-  const memoizedDefaultLinks = useMemo(() => {
-    return defaultLinks.map((s, idx) => (
-      <IconButton
-        key={`custom-social-${idx}`}
-        component="a"
-        href={onInlineFieldClick ? undefined : s.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={s.label || "Custom link"}
-        sx={{
-          width: 52,
-          height: 52,
-          color: "common.white",
-          backgroundColor: isDarkMode
-            ? "rgba(15, 23, 42, 0.78)"
-            : "rgba(255, 255, 255, 0.18)",
-          border: "1px solid rgba(255,255,255,0.16)",
-          backdropFilter: "blur(12px)",
-          ...getInlineFieldSxV2({
-            fieldId: `personalInfo.social.custom.${idx}`,
-            activeInlineFieldId,
-            // isEditMode: false, // default links are not editable
-          }),
-          transition:
-            "transform 0.25s ease, background-color 0.25s ease, outline-color 160ms ease, box-shadow 160ms ease",
-          "&:hover": {
-            transform: "translateY(-3px)",
-            backgroundColor: `${primaryAccent}`,
-            ...(onInlineFieldClick
-              ? {
-                  outlineColor: "rgba(20, 184, 166, 0.55)",
-                  boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-                }
-              : undefined),
-          },
-        }}
-        {...(onInlineFieldClick
-          ? {
-              onClick: (event: React.MouseEvent) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onInlineFieldClick(
-                  "about",
-                  `personalInfo.social.custom.${idx}`,
-                  event.currentTarget as HTMLElement,
-                );
-              },
-            }
-          : {})}
-      >
-        {s.icon && ICON_MAP[s.icon as keyof typeof ICON_MAP] ? (
-          React.createElement(ICON_MAP[s.icon as keyof typeof ICON_MAP])
-        ) : (
-          <LinkIcon />
-        )}
-      </IconButton>
-    ));
-  }, []);
-
-  // TODO: Make sure that the idx is the key
-  console.log("newLinks: ", newLinks);
-  const memoizedLinks = useMemo(
+  // Render all links (default + new + deduped)
+  const renderedLinks = useMemo(
     () =>
-      newLinks.map((link) => (
+      mergedLinks.map((link) => (
         <SocialMediaButton
-          key={link.label}
+          key={link.key}
           {...link}
           isDarkMode={isDarkMode}
           primaryAccent={primaryAccent}
-          onInlineFieldClick={onInlineFieldClick as any}
-          activeInlineFieldId={activeInlineFieldId ?? undefined}
+          onInlineFieldClick={onFieldClick as any}
+          activeInlineFieldId={activeFieldId ?? undefined}
         />
       )),
-    [
-      newLinks,
-      isDarkMode,
-      primaryAccent,
-      onInlineFieldClick,
-      activeInlineFieldId,
-    ],
+    [mergedLinks, isDarkMode, primaryAccent, onFieldClick, activeFieldId],
   );
-
-  // TODO: we need to create a function that merge the default and new added link after save.
 
   return (
     <Stack direction="row" spacing={1.5} flexWrap="wrap">
-      {/* Render Default Social Media Buttons */}
-      {/* Render of the buttons */}
-      {memoizedDefaultLinks}
-
-      {/* New Social Media Buttons */}
-      {/* Adding only of buttons */}
-      {memoizedLinks}
+      {renderedLinks}
     </Stack>
   );
 };

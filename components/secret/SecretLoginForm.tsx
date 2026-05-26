@@ -19,7 +19,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { signInUp } from "@/auth";

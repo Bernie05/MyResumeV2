@@ -7,14 +7,15 @@ import { ProjectCardComponent } from "./components/cards/ProjectCardComponent";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
-import { IEditorProps } from "../secret/SecretResumeEditor";
+import { useEditor } from "@/hook/useEditor";
 
-interface IPortfolioProps extends IEditorProps {
+interface IPortfolioProps {
   portfolio: IPortfolioItem[];
 }
 
-const Portfolio = ({ portfolio, editorProps }: IPortfolioProps) => {
-  const { onAddAction, onDeleteAction } = editorProps || {};
+const Portfolio = ({ portfolio }: IPortfolioProps) => {
+  const editor = useEditor();
+  const { onAddAction, onDeleteAction } = editor || {};
   const { isDarkMode } = useThemeContext();
   const {
     titleColor,
@@ -92,11 +93,6 @@ const Portfolio = ({ portfolio, editorProps }: IPortfolioProps) => {
             key={item.id}
             inlineSection="portfolio"
             {...item}
-            editorProps={{
-              ...editorProps,
-              onDelete: () =>
-                editorProps.onDeleteAction?.(`portfolio.${index}`),
-            }}
           />
         ))}
       </Box>

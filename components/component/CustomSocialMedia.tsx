@@ -2,25 +2,33 @@ import React from "react";
 
 import { IconButton, Box } from "@mui/material";
 import LinkIcon from "@mui/icons-material/Link";
-import { IEditorProps } from "../secret/SecretResumeEditor";
 import { getInlineFieldSxV2 } from "../secret/utils/componentUtil";
 import { ICON_MAP } from "@/components/resume/ServicesSection";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "@/theme/sectionPalette";
+import {
+  useEditor,
+  useIsEditMode,
+  useActiveField,
+  useOnFieldClick,
+} from "@/hook/useEditor";
 import { SocialLink } from "./CustomSocialMediaBtn";
 
-interface ICustomStatsProps extends IEditorProps {
+interface ICustomSocialMediaProps {
   socialLinks: SocialLink[];
 }
 
-export const CustomSocialMedia = ({
-  socialLinks,
-  editorProps,
-}: ICustomStatsProps) => {
-  const { isEditMode, activeInlineFieldId, onInlineFieldClick, onAddAction } =
-    editorProps || {};
+export const CustomSocialMedia = ({ socialLinks }: ICustomSocialMediaProps) => {
   const { isDarkMode } = useThemeContext();
   const { primaryAccent } = getSectionPalette(isDarkMode);
+  const editor = useEditor();
+  const isEditMode = useIsEditMode();
+  const activeFieldId = useActiveField();
+  const onFieldClick = useOnFieldClick();
+
+  const { onAddAction } = editor || {};
+  const activeInlineFieldId = activeFieldId;
+  const onInlineFieldClick = onFieldClick;
 
   return (
     <>

@@ -4,6 +4,7 @@ import {
   useIsEditMode,
   useActiveField,
   useOnFieldClick,
+  useFieldEditorState,
 } from "../../hook/useEditor";
 
 import type {
@@ -26,38 +27,42 @@ export const withEditableField = <P extends WithEditableFieldProps>(
   Component: React.ComponentType<P>,
   defaultSx?: SxProps,
 ) => {
+  // determine if active or not 3 condiotion
+
   const WithEditableComponent = React.memo(
     ({ targetFieldId, targetSectionId, sx, onClick, ...props }: P) => {
+      console.log(
+        " targetFieldId, targetSectionId",
+        targetFieldId,
+        targetSectionId,
+      );
+
+      console.log("sx: ", sx);
+
       // Hooks to access editor state and interactions
       const isEditMode = useIsEditMode();
       const activeFieldId = useActiveField();
       const onFieldClick = useOnFieldClick();
+      const {
+        outline,
+        cursor,
+        hover: { outlineColor, boxShadow },
+      } = useFieldEditorState(targetFieldId || "");
 
       // Memoize the combined styles to avoid unnecessary re-renders
       const combinedSx = useMemo(
         () => ({
           ...defaultSx,
           // Core Editable field styles
-          outline:
-            activeFieldId === targetFieldId
-              ? "2px solid rgba(20, 184, 166, 0.9)"
-              : "2px solid transparent",
-          cursor: isEditMode ? "pointer" : "inherit",
+          outline,
+          cursor,
           transition: "outline-color 160ms ease, box-shadow 160ms ease",
           outlineOffset: 2,
 
           // hover state
           "&:hover": {
-            outlineColor:
-              activeFieldId === targetFieldId
-                ? "rgba(20, 184, 166, 0.9)"
-                : isEditMode
-                  ? "rgba(20, 184, 166, 0.4)"
-                  : "inherit",
-            boxShadow:
-              activeFieldId === targetFieldId && isEditMode
-                ? "0 0 0 4px rgba(20, 184, 166, 0.2)"
-                : "none",
+            outlineColor,
+            boxShadow,
           },
 
           // Merge with Component styles
