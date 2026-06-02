@@ -4,24 +4,24 @@ import {
 } from "../context/EditorContext";
 
 // This file defines custom hooks that provide convenient access to the EditorContext.
-export const useEditor = (): EditorContextValue | null => {
+export const useEditor = (): EditorContextValue => {
   return useEditorContext();
 };
 
 // useIsEditMode is a custom hook that checks if the editor is currently in edit mode.
 export const useIsEditMode = (): boolean => {
-  return useEditorContext()?.isEditMode ?? false;
+  return useEditorContext().isEditMode ?? false;
 };
 
 // FIELD LEVEL INTERACTIONS
 // useActiveField is a custom hook that retrieves the active inline field ID from the editor context.
 export const useActiveField = () => {
-  return useEditorContext()?.activeInlineFieldId;
+  return useEditorContext().activeInlineFieldId;
 };
 
 // useActiveSection is a custom hook that retrieves the active section from the editor context.
 export const useOnFieldClick = () => {
-  return useEditorContext()?.onInlineFieldClick;
+  return useEditorContext().onInlineFieldClick;
 };
 
 // useIsFieldActive is a custom hook that checks if a given field ID matches the active inline field ID from the editor context.
@@ -36,14 +36,15 @@ export const useFieldEditorState = (targetFieldId: string) => {
   const activeFieldId = useActiveField();
   const onFieldClick = useOnFieldClick();
 
-  console.log({ isEditMode, targetFieldId, activeFieldId });
+  console.log(
+    "targetFieldId: ",
+    targetFieldId,
+    "activeFieldId: ",
+    activeFieldId,
+  );
 
   // Determine if the target field is currently active
   const isActive = isEditMode && activeFieldId === targetFieldId;
-
-  console.log("hook: ", isActive);
-
-  // We need to identify what component is used.
 
   return {
     isEditMode,
@@ -70,10 +71,20 @@ export const useFieldEditorState = (targetFieldId: string) => {
 // SECTION LEVEL INTERACTIONS
 // useActiveSection is a custom hook that retrieves the active section from the editor context.
 export const useActiveSection = () => {
-  return useEditorContext()?.activeSection ?? null;
+  return useEditorContext().activeSection ?? null;
 };
 
 // useOnSectionClick is a custom hook that retrieves the onSectionClick handler from the editor context.
 export const useOnSectionClick = () => {
-  return useEditorContext()?.onSectionClick;
+  return useEditorContext().onSectionClick;
+};
+
+// useSetActiveFieldId is a custom hook that sets the currently clicked field ID.
+export const useSetActiveFieldId = () => {
+  return useEditorContext().setActiveInlineFieldId;
+};
+
+// useSetActiveSection is a custom hook that sets the currently clicked section.
+export const useSetActiveSection = () => {
+  return useEditorContext().setActiveSection;
 };

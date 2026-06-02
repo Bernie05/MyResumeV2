@@ -27,49 +27,62 @@ export const withEditableField = <P extends WithEditableFieldProps>(
   Component: React.ComponentType<P>,
   defaultSx?: SxProps,
 ) => {
-  // determine if active or not 3 condiotion
-
   const WithEditableComponent = React.memo(
     ({ targetFieldId, targetSectionId, sx, onClick, ...props }: P) => {
-      console.log(
-        " targetFieldId, targetSectionId",
-        targetFieldId,
-        targetSectionId,
-      );
-
-      console.log("sx: ", sx);
-
       // Hooks to access editor state and interactions
       const isEditMode = useIsEditMode();
       const activeFieldId = useActiveField();
-      const onFieldClick = useOnFieldClick();
+      const onFieldClickHandler = useOnFieldClick();
       const {
         outline,
         cursor,
         hover: { outlineColor, boxShadow },
       } = useFieldEditorState(targetFieldId || "");
 
-      // Memoize the combined styles to avoid unnecessary re-renders
-      const combinedSx = useMemo(
-        () => ({
-          ...defaultSx,
-          // Core Editable field styles
-          outline,
-          cursor,
-          transition: "outline-color 160ms ease, box-shadow 160ms ease",
-          outlineOffset: 2,
+      console.log("Edit Mode:", { isEditMode, targetFieldId, activeFieldId });
 
-          // hover state
+      // Memoize the combined styles to avoid unnecessary re-renders
+      const combinedSx = useMemo(() => {
+        // In read mode, keep original styles without hover effects
+        if (!isEditMode) {
+          return {
+            ...defaultSx,
+            ...sx,
+            cursor: "auto",
+          };
+        }
+
+        // In edit mode, show outline on hover for all fields
+        return {
+          ...defaultSx,
+          cursor: "pointer",
+          transition: "outline-color 160ms ease, box-shadow 160ms ease",
+          // Show outline on hover
           "&:hover": {
+            outline,
             outlineColor,
             boxShadow,
+            outlineOffset: 2,
           },
-
+          // Show outline for active field (clicked)
+          ...(activeFieldId === targetFieldId && {
+            outline,
+            outlineColor,
+            outlineOffset: 2,
+          }),
           // Merge with Component styles
           ...sx,
-        }),
-        [activeFieldId, targetFieldId, isEditMode, sx],
-      );
+        };
+      }, [
+        activeFieldId,
+        targetFieldId,
+        isEditMode,
+        sx,
+        defaultSx,
+        outline,
+        outlineColor,
+        boxShadow,
+      ]);
 
       const handleClick = (event: React.MouseEvent<any>) => {
         // Call custom onClick handler first
@@ -77,12 +90,19 @@ export const withEditableField = <P extends WithEditableFieldProps>(
           onClick(event);
         }
 
-        // Then trigger inline field
-        if (onFieldClick && targetFieldId && isEditMode) {
-          event.stopPropagation(); // Prevent event bubbling to parent sections
-          onFieldClick(
-            targetFieldId,
+        // Only allow click handling in edit mode
+        if (!isEditMode) {
+          return;
+        }
+
+        event.stopPropagation(); // Prevent event bubbling to parent sections
+
+        // Trigger the onFieldClick callback which will open the modal
+        // and update the editor context (selectedInlineFieldId, selectedPreviewSection, anchorEl)
+        if (onFieldClickHandler && targetFieldId) {
+          onFieldClickHandler(
             targetSectionId,
+            targetFieldId,
             event.currentTarget as HTMLElement,
           );
         }

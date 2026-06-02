@@ -17,23 +17,12 @@ interface CustomTypographyProps extends Omit<TypographyProps, "sx"> {
 const BaseTypography = React.forwardRef<HTMLDivElement, CustomTypographyProps>(
   ({ sx, ...props }, ref) => {
     const theme = useThemeContext();
-    const { buttonHoverGradient } = getSectionPalette(theme.isDarkMode);
-    const isActive = useIsEditMode();
-    console.log("props: targetfield", props.targetFieldId);
-    const {
-      hover: { outlineColor, boxShadow },
-    } = useFieldEditorState(props.targetFieldId || "");
-
-    console.log("on hover: ", outlineColor, boxShadow);
 
     return (
       <Typography
         ref={ref}
         sx={{
           ...sx,
-          "&:hover": {
-            background: buttonHoverGradient,
-          },
         }}
         {...props}
       />
