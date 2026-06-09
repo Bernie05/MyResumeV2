@@ -1,9 +1,7 @@
 import React from "react";
 import { Button, ButtonProps, SxProps } from "@mui/material";
 
-import { getSectionPalette } from "../../theme/sectionPalette";
 import { withEditableField } from "../hoc/withEditableField";
-import { useThemeContext } from "../../context/ThemeContext";
 
 interface CustomButtonProps extends Omit<ButtonProps, "sx"> {
   sx?: SxProps;

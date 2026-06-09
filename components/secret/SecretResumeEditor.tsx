@@ -3533,7 +3533,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     onInlineFieldClick: handleInlineFieldClick,
     activeInlineFieldId: selectedInlineFieldId,
     onSectionClick: handlePreviewSectionClick,
-    activeSectionId: selectedPreviewSection,
+    activeSection: selectedPreviewSection,
     onAddAction: handleAddAction,
     onDeleteAction: handleDeleteAction,
     onDelete: handleDeleteAction,
@@ -3652,20 +3652,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
         </Box>
 
         <Box>
-          <ResumePage
-            resume={draft}
-            position="static"
-            editorProps={{
-              isEditMode: true,
-              // section and fieldId
-              activeSectionId: selectedPreviewSection,
-              activeInlineFieldId: selectedInlineFieldId,
-              onSectionClick: handlePreviewSectionClick,
-              onInlineFieldClick: handleInlineFieldClick,
-              onAddAction: handleAddAction,
-              onDeleteAction: handleDeleteAction,
-            }}
-          />
+          <ResumePage resume={draft} position="static" />
         </Box>
 
         {/* Popover */}

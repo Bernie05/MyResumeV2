@@ -1,7 +1,7 @@
 import type { ResumeData } from "@/types/resume";
 
-import { ResumeEditableSection } from "@/components/resume/ResumePage";
-import { EditorSection } from "../SecretResumeEditor";
+import type { ResumeEditableSection } from "@/components/resume/ResumePage";
+import type { EditorSection } from "../SecretResumeEditor";
 
 export const EDITOR_SECTIONS = [
   { value: "personalInfo", label: "Personal Info" },

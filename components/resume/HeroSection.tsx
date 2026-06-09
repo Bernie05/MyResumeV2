@@ -76,6 +76,11 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
   const activeInlineFieldId = useActiveField();
   const onInlineFieldClick = useOnFieldClick();
 
+  console.log("HeroSection render: ", {
+    isEditMode,
+    activeInlineFieldId,
+  });
+
   const { isDarkMode } = useThemeContext();
   const theme = getSectionPalette(isDarkMode);
 
@@ -190,11 +195,11 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
               spacing={1.5}
               alignItems="center"
             >
+              {/* Your Name */}
               <CustomTypography
                 targetSectionId={sectionId}
                 targetFieldId="personalInfo.name"
                 component="h1"
-                color="common.white"
                 fontWeight="800"
                 letterSpacing="-0.04em"
                 fontSize={{ xs: "2.75rem", sm: "4rem", md: "5.25rem" }}
@@ -207,7 +212,6 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
               <CustomTypography
                 targetSectionId="about"
                 targetFieldId="personalInfo.title"
-                color="common.white"
                 fontWeight="700"
                 letterSpacing="0.24em"
                 textTransform="uppercase"
