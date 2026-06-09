@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState } from "react";
-import type {
-  OnInlineFieldClickHandler,
-  ResumeEditableSection,
-  InlineEditableFieldId,
-} from "./../components/secret/SecretResumeEditor";
+import type { ResumeEditableSection } from "../components/resume/ResumePage";
+import type { InlineEditableFieldId } from "../components/secret/constants/constant";
 
-// @/components/secret/SecretResumeEditor
+export type OnInlineFieldClickHandler = (
+  section: ResumeEditableSection,
+  fieldId: InlineEditableFieldId,
+  anchor?: HTMLElement,
+) => void;
 
 export type OnSectionClick = (section: ResumeEditableSection) => void;
 
@@ -22,7 +23,7 @@ export interface EditorContextValue {
   onAddAction?: (action: string, anchor: HTMLElement) => void;
   onDeleteAction?: (actionId: string) => void;
   isEditMode: boolean;
-  onDelete?: () => void;
+  onDelete?: (actionId: string) => void;
 
   // Currently clicked tracking
   setActiveInlineFieldId?: (fieldId: InlineEditableFieldId) => void | null;

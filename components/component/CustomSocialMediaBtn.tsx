@@ -157,9 +157,9 @@ export const SocialMediaBtn = ({
   // Render all links (default + new + deduped)
   const renderedLinks = useMemo(
     () =>
-      mergedLinks.map((link) => (
+      mergedLinks.map(({ key: linkKey, ...link }) => (
         <SocialMediaButton
-          key={link.key}
+          key={linkKey}
           {...link}
           isDarkMode={isDarkMode}
           primaryAccent={primaryAccent}

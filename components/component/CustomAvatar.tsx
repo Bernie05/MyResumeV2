@@ -1,9 +1,6 @@
-import React, { useCallback, useMemo } from "react";
+import React from "react";
 import { Avatar, AvatarProps, SxProps } from "@mui/material";
-import { useThemeContext } from "../../context/ThemeContext";
-import { getSectionPalette } from "../../theme/sectionPalette";
 import { withEditableField } from "../hoc/withEditableField";
-
 interface CustomAvatarProps extends Omit<AvatarProps, "sx"> {
   sx?: SxProps;
   children?: React.ReactNode;

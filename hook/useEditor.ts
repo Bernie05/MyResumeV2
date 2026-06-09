@@ -1,3 +1,4 @@
+import { useThemeContext } from "@/context/ThemeContext";
 import {
   useEditor as useEditorContext,
   type EditorContextValue,
@@ -30,43 +31,51 @@ export const useIsFieldActive = (fieldId: string): boolean => {
 };
 
 // TODO, we need to have a listener for the hover.
-export const useFieldEditorState = (targetFieldId: string) => {
-  // Hooks to access editor state and interactions
-  const isEditMode = useIsEditMode();
-  const activeFieldId = useActiveField();
-  const onFieldClick = useOnFieldClick();
+// export const useFieldEditorState = (targetFieldId: string) => {
+//   // Hooks to access editor state and interactions
+//   const isEditMode = useIsEditMode();
+//   const activeFieldId = useActiveField();
+//   const onFieldClick = useOnFieldClick();
 
-  console.log(
-    "targetFieldId: ",
-    targetFieldId,
-    "activeFieldId: ",
-    activeFieldId,
-  );
+//   // Access the pallate here
+//   const theme = useThemeContext();
+//   const palette =
 
-  // Determine if the target field is currently active
-  const isActive = isEditMode && activeFieldId === targetFieldId;
+//   // console.log(
+//   //   "targetFieldId: ",
+//   //   targetFieldId,
+//   //   "activeFieldId: ",
+//   //   activeFieldId,
+//   // );
 
-  return {
-    isEditMode,
-    isActive,
-    onFieldClick,
-    // cursor should be pointer if in edit mode, otherwise inherit
-    cursor: isEditMode ? "pointer" : "inherit",
+//   // Determine if the target field is currently active
+//   const isActive = isEditMode && activeFieldId === targetFieldId;
 
-    // outline should be visible if active, otherwise transparent
-    outline: isActive
-      ? "2px solid rgba(20, 184, 166, 0.9)" // need to update depend on the theme
-      : "",
+//   return {
+//     isEditMode,
+//     isActive,
+//     onFieldClick,
 
-    // hover styles will be handled in the component's sx using onFieldClick and isActive
-    hover: {
-      outlineColor: isActive
-        ? "2px solid rgba(20, 184, 166, 0.9)" // need to update depend on the theme
-        : "inherit",
-      boxShadow: isActive ? "0 0 0 4px rgba(20, 184, 166, 0.2)" : "none",
-    },
-  };
-};
+//     // color
+//     color: isEditMode ? "red" : "blue",
+
+//     // cursor should be pointer if in edit mode, otherwise inherit
+//     cursor: isEditMode ? "pointer" : "inherit",
+
+//     // outline should be visible if active, otherwise transparent
+//     outline: isActive
+//       ? "2px solid rgba(20, 184, 166, 0.9)" // need to update depend on the theme
+//       : "",
+
+//     // hover styles will be handled in the component's sx using onFieldClick and isActive
+//     hover: {
+//       outlineColor: isActive
+//         ? "2px solid rgba(20, 184, 166, 0.9)" // need to update depend on the theme
+//         : "inherit",
+//       boxShadow: isActive ? "0 0 0 4px rgba(20, 184, 166, 0.2)" : "none",
+//     },
+//   };
+// };
 
 // SECTION LEVEL INTERACTIONS
 // useActiveSection is a custom hook that retrieves the active section from the editor context.

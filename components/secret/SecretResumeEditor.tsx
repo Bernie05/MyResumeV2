@@ -3533,7 +3533,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     onInlineFieldClick: handleInlineFieldClick,
     activeInlineFieldId: selectedInlineFieldId,
     onSectionClick: handlePreviewSectionClick,
-    activeSectionId: selectedPreviewSection,
+    activeSection: selectedPreviewSection,
     onAddAction: handleAddAction,
     onDeleteAction: handleDeleteAction,
     onDelete: handleDeleteAction,

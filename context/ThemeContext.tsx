@@ -37,7 +37,9 @@ const createAppTheme = (isDarkMode: boolean) =>
         paper: isDarkMode ? "#1a1f2e" : "#ffffff",
       },
       text: {
-        primary: isDarkMode ? "#e0e0e0" : "#1a1a1a",
+        primary: isDarkMode
+          ? "rgba(0, 190, 168, 0.9)"
+          : "rgba(255, 255, 255, 0.9)",
         secondary: isDarkMode ? "#b0b0b0" : "#666666",
       },
     },
@@ -105,6 +107,7 @@ export const ThemeContextProvider = ({ children }: { children: ReactNode }) => {
 
 export const useThemeContext = () => {
   const context = useContext(ThemeContext);
+  console.log("useThemeContext: ", context);
   if (context === undefined) {
     return DEFAULT_THEME_CONTEXT;
   }
