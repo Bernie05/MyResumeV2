@@ -82,6 +82,12 @@ export const authOptions: NextAuthOptions = {
   ],
 };
 
-export const signInUp = async (props: any) => {
+interface OwnerSignInOptions {
+  callbackUrl?: string;
+  password: string;
+  redirect?: boolean;
+}
+
+export const signInUp = async (props: OwnerSignInOptions) => {
   return await signIn("credentials", { ...props, redirect: false });
 };

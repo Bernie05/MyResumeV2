@@ -45,6 +45,9 @@ import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import { IEditorProps } from "../secret/SecretResumeEditor";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
+import { CustomTypography } from "../component/CustomTypography";
+import { CustomCard } from "../component/CustomCard";
+import { CustomBox } from "../component/CustomBox";
 
 interface SkillItem {
   name: string;
@@ -252,32 +255,23 @@ const ServicesSection = ({
         >
           Services
         </Box>
-        <Typography
+        <CustomTypography
           variant="h3"
-          sx={{
-            fontWeight: 800,
-            fontSize: { xs: "2rem", md: "2.5rem" },
-            color: titleColor,
-            mb: 2,
-            ...getInlineFieldSx("servicesTitle"),
-          }}
-          {...createInlineFieldProps("servicesTitle")}
+          // sx={{
+          //   fontWeight: 800,
+          //   fontSize: { xs: "2rem", md: "2.5rem" },
+          //   color: titleColor,
+          //   mb: 2,
+          //   ...getInlineFieldSx("servicesTitle"),
+          // }}
+          // {...createInlineFieldProps("servicesTitle")}
         >
           {servicesTitle || "What I Offer"}
-        </Typography>
-        <Typography
-          variant="h6"
-          sx={{
-            fontSize: "1.125rem",
-            color: mutedColor,
-            fontWeight: 400,
-            ...getInlineFieldSx("servicesSubtitle"),
-          }}
-          {...createInlineFieldProps("servicesSubtitle")}
-        >
+        </CustomTypography>
+        <CustomTypography variant="h6">
           {servicesSubtitle ||
             "Professional services tailored to your project needs"}
-        </Typography>
+        </CustomTypography>
       </Box>
 
       {/* Services Grid */}
@@ -346,6 +340,7 @@ const ServicesSection = ({
                   mb: 4,
                 }}
               >
+                {/* Icon */}
                 <Box
                   sx={{
                     p: 2,
@@ -369,44 +364,38 @@ const ServicesSection = ({
                     },
                   )}
                 </Box>
+                {/* Title and Subtitle */}
                 <Box>
-                  <Typography
+                  <CustomTypography
                     variant="h5"
                     sx={{
                       fontWeight: 700,
                       fontSize: "1.5rem",
                       color: titleColor,
-                      ...getInlineFieldSx(`skills.${categoryIndex}.category`),
                     }}
-                    {...createInlineFieldProps(
-                      `skills.${categoryIndex}.category`,
-                    )}
                   >
                     {category.category} Development
-                  </Typography>
-                  <Typography
+                  </CustomTypography>
+                  <CustomTypography
                     variant="caption"
                     sx={{
                       fontSize: "0.875rem",
                       color: mutedColor,
                       display: "block",
                       mt: 0.5,
-                      ...getInlineFieldSx(`skills.${categoryIndex}.subtitle`),
                     }}
-                    {...createInlineFieldProps(
-                      `skills.${categoryIndex}.subtitle`,
-                    )}
                   >
                     {category.subtitle ||
                       `Expert ${category.category.toLowerCase()} solutions`}
-                  </Typography>
+                  </CustomTypography>
                 </Box>
               </Box>
 
               {/* Skills List */}
               <List sx={{ p: 0, m: 0 }}>
-                {category.items.slice(0, 4).map((skill, itemIndex) => {
+                {category.items.map((skill, itemIndex) => {
                   const IconComponent = getIconForSkill(skill.name, skill.icon);
+                  // TODO: create ListItem, ListItemIcon, ListItemText, and Chip with inline editing capabilities
                   return (
                     <ListItem
                       key={`${skill.name}-${itemIndex}`}
@@ -423,6 +412,7 @@ const ServicesSection = ({
                         `skills.${categoryIndex}.${itemIndex}.name`,
                       )}
                     >
+                      {/* Icon */}
                       <ListItemIcon
                         sx={{
                           minWidth: "32px",
@@ -443,6 +433,8 @@ const ServicesSection = ({
                       >
                         <IconComponent sx={{ fontSize: "1.25rem" }} />
                       </ListItemIcon>
+
+                      {/* Skill Name */}
                       <ListItemText
                         primary={skill.name}
                         primaryTypographyProps={{
@@ -453,24 +445,12 @@ const ServicesSection = ({
                           },
                         }}
                       />
+                      {/* Proficiency Chip */}
                       <Box
                         sx={{
                           ml: "auto",
-                          ...getInlineFieldSx(
-                            `skills.${categoryIndex}.${itemIndex}.proficiency`,
-                          ),
                           cursor: "pointer",
                           borderRadius: "16px",
-                        }}
-                        {...createInlineFieldProps(
-                          `skills.${categoryIndex}.${itemIndex}.proficiency`,
-                        )}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const props = createInlineFieldProps(
-                            `skills.${categoryIndex}.${itemIndex}.proficiency`,
-                          );
-                          if (props.onClick) props.onClick(e as any);
                         }}
                       >
                         <Chip

@@ -36,30 +36,6 @@ export const withEditableField = <P extends WithEditableFieldProps>(
       const onFieldClickHandler = useOnFieldClick();
       const isActiveField = activeFieldId === targetFieldId;
 
-      // Theme Access
-      // const c = theme.palette.text.primary;
-      // const {
-      //   primaryAccent,
-      //   secondaryAccent,
-      //   accentText,
-      //   titleColor,
-      //   mutedColor,
-      //   sectionBackground,
-      //   surfaceBackground,
-      //   softBackground,
-      //   outline,
-      //   divider,
-      //   buttonGradient,
-      //   hoverShadow,
-      // } = getSectionPalette(isDarkMode);
-
-      // const {
-      //   outline,
-      //   cursor,
-      //   color,
-      //   hover: { outlineColor, boxShadow },
-      // } = useFieldEditorState(targetFieldId || "");
-
       // Memoize the combined styles to avoid unnecessary re-renders
       const combinedSx = useMemo(() => {
         const color = theme.palette.text.primary;
@@ -83,30 +59,25 @@ export const withEditableField = <P extends WithEditableFieldProps>(
 
         if (isEditMode) {
           css = {
+            // Apply editable styles only in edit mode
             color,
             cursor,
-            // transition: "outline-color 160ms ease, box-shadow 160ms ease",
-            // Show outline on hover, this hover is not takeEffect
-            // "&:hover": {
-            //   outline,
-            //   outlineColor,
-            //   boxShadow,
-            //   outlineOffset: 2,
-            // },
             // Show outline for active field (clicked)
             ...(isActiveField && {
               outline,
               outlineColor,
               outlineOffset: 2,
             }),
-            // Merge with Component styles
+            // Merge user sx with default editable styles, allowing user to override if needed
             ...sx,
             ...defaultSx,
           };
         } else {
           css = {
+            // In view mode, we don't want any editable styles, but we still want to allow user sx to apply
             cursor,
             color,
+            // In view mode, we don't want any editable styles, but we still want to allow user sx to apply
             ...defaultSx,
             ...sx,
           };
@@ -115,56 +86,65 @@ export const withEditableField = <P extends WithEditableFieldProps>(
         return css;
       }, [activeFieldId, targetFieldId, isEditMode, sx, defaultSx, theme]);
 
-      const handleClick = (event: React.MouseEvent<any>) => {
-        // Call custom onClick handler first
-        if (onClick) {
-          onClick(event);
-        }
+      const handleClick = React.useCallback(
+        (event: React.MouseEvent<any>) => {
+          // Call custom onClick handler first
+          if (onClick) {
+            onClick(event);
+          }
 
-        // Only allow click handling in edit mode
-        if (!isEditMode) {
-          return;
-        }
+          // Only allow click handling in edit mode
+          if (!isEditMode) {
+            return;
+          }
 
-        event.stopPropagation(); // Prevent event bubbling to parent sections
+          event.stopPropagation(); // Prevent event bubbling to parent sections
 
-        // Trigger the onFieldClick callback which will open the modal
-        // and update the editor context (selectedInlineFieldId, selectedPreviewSection, anchorEl)
-        if (onFieldClickHandler && targetFieldId && targetSectionId) {
-          onFieldClickHandler(
-            targetSectionId,
-            targetFieldId,
-            event.currentTarget as HTMLElement,
-          );
-        }
-      };
+          // Trigger the onFieldClick callback which will open the modal
+          // and update the editor context (selectedInlineFieldId, selectedPreviewSection, anchorEl)
+          if (onFieldClickHandler && targetFieldId && targetSectionId) {
+            onFieldClickHandler(
+              targetSectionId,
+              targetFieldId,
+              event.currentTarget as HTMLElement,
+            );
+          }
+        },
+        [isEditMode, onFieldClickHandler, targetFieldId, targetSectionId],
+      );
 
-      const handleMouseEnter = (event: React.MouseEvent<any>) => {
-        // Only allow hover effects in edit mode
-        if (!isEditMode) {
-          return;
-        }
+      const handleMouseEnter = React.useCallback(
+        (event: React.MouseEvent<any>) => {
+          // Only allow hover effects in edit mode
+          if (!isEditMode) {
+            return;
+          }
 
-        // apply css in sx for hover effect, this is not takeEffect
-        const hoverStyles = {
-          outline: "2px solid rgb(0, 255, 225)",
-          boxShadow: "0 0 0 2px rgb(0, 255, 225)",
-        };
-        // Apply hover styles directly to the element
-        const target = event.currentTarget as HTMLElement;
-        Object.assign(target.style, hoverStyles);
-      };
+          // apply css in sx for hover effect, this is not takeEffect
+          const hoverStyles = {
+            outline: "2px solid rgb(0, 255, 225)",
+            boxShadow: "0 0 0 2px rgb(0, 255, 225)",
+          };
+          // Apply hover styles directly to the element
+          const target = event.currentTarget as HTMLElement;
+          Object.assign(target.style, hoverStyles);
+        },
+        [isEditMode],
+      );
 
-      const handleMouseLeave = (event: React.MouseEvent<any>) => {
-        if (!isEditMode) {
-          return;
-        }
+      const handleMouseLeave = React.useCallback(
+        (event: React.MouseEvent<any>) => {
+          if (!isEditMode) {
+            return;
+          }
 
-        // Remove hover styles when mouse leaves
-        const target = event.currentTarget as HTMLElement;
-        target.style.outline = "";
-        target.style.boxShadow = "";
-      };
+          // Remove hover styles when mouse leaves
+          const target = event.currentTarget as HTMLElement;
+          target.style.outline = "";
+          target.style.boxShadow = "";
+        },
+        [isEditMode],
+      );
 
       // Render the wrapped component with combined styles and click handler
       return (

@@ -22,6 +22,7 @@ import {
 } from "../../hook/useEditor";
 import { createSectionProps } from "../secret/utils/componentUtil";
 import { isAuthenticated } from "./util/authUtil";
+import Footer from "./components/footer";
 
 export type NavbarPosition =
   | "fixed"
@@ -105,6 +106,7 @@ const ResumePage = ({
         id={domId}
         component={component}
         sx={getSectionSx(sectionId)}
+        // Editable section props for interactivity in edit mode
         {...createSectionProps(
           sectionsAreInteractive,
           sectionId,
@@ -137,7 +139,7 @@ const ResumePage = ({
         ),
       })}
 
-      {/* <Container
+      <Container
         maxWidth="xl"
         sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, sm: 3, lg: 4 } }}
       >
@@ -153,44 +155,44 @@ const ResumePage = ({
             ),
           })}
 
-          {renderSection({
+          {/* {renderSection({
             sectionId: "experience",
             component: "section",
             children: <Experience experience={resume.experience} />,
-          })}
+          })} */}
 
-          {renderSection({
+          {/* {renderSection({
             sectionId: "portfolio",
             component: "section",
             children: <Portfolio portfolio={resume.portfolio} />,
-          })}
+          })} */}
 
-          {renderSection({
+          {/* {renderSection({
             sectionId: "projects",
             children: <Projects projects={resume.projects} />,
-          })}
+          })} */}
 
-          {renderSection({
+          {/* {renderSection({
             sectionId: "education",
             children: <Education education={resume.education} />,
-          })}
+          })} */}
 
-          {renderSection({
+          {/* {renderSection({
             sectionId: "skills",
             component: "section",
             children: <Skills skills={resume.skills} />,
-          })}
+          })} */}
 
-          {renderSection({
+          {/* {renderSection({
             sectionId: "certifications",
             children: <Certifications certifications={resume.certifications} />,
-          })}
+          })} */}
 
-          {renderSection({
+          {/* {renderSection({
             sectionId: "contact",
             component: "section",
             children: <ContactSection personalInfo={resume.personalInfo} />,
-          })}
+          })} */}
 
           <Box
             component="footer"
@@ -203,13 +205,10 @@ const ResumePage = ({
               borderColor: footerBorderColor,
             }}
           >
-            <Typography variant="body2" sx={{ color: footerTextColor }}>
-              {new Date().getFullYear()} © {resume.personalInfo.name}. All
-              rights reserved.
-            </Typography>
+            {Footer(resume, { color: footerTextColor })}
           </Box>
         </Stack>
-      </Container> */}
+      </Container>
     </Box>
   );
 };
