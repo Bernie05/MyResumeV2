@@ -4,10 +4,13 @@ import storage from "redux-persist/lib/storage";
 import authReducer from "./slices/authSlice";
 import resumeDataReducer from "./slices/resumeDataSlice";
 
+// persistReducer wraps the resumeData slice reducer directly (not a combined
+// root reducer), so only this slice is ever persisted — `auth` is excluded
+// simply by not being wrapped. A `whitelist` option here would be a no-op
+// since whitelisting only applies when persisting a combined reducer.
 const persistConfig = {
   key: "resume-editor",
   storage: storage,
-  whitelist: ["resumeData"], // Only persist resumeData slice
   version: 1,
 };
 

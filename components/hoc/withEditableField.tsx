@@ -84,7 +84,7 @@ export const withEditableField = <P extends WithEditableFieldProps>(
         }
 
         return css;
-      }, [activeFieldId, targetFieldId, isEditMode, sx, defaultSx, theme]);
+      }, [isActiveField, isEditMode, sx, theme]);
 
       const handleClick = React.useCallback(
         (event: React.MouseEvent<any>) => {
@@ -110,7 +110,7 @@ export const withEditableField = <P extends WithEditableFieldProps>(
             );
           }
         },
-        [isEditMode, onFieldClickHandler, targetFieldId, targetSectionId],
+        [isEditMode, onFieldClickHandler, targetFieldId, targetSectionId, onClick],
       );
 
       const handleMouseEnter = React.useCallback(

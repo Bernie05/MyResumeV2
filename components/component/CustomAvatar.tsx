@@ -21,5 +21,6 @@ const BaseAvatar = React.forwardRef<HTMLDivElement, CustomAvatarProps>(
     );
   },
 );
+BaseAvatar.displayName = "BaseAvatar";
 
 export const CustomAvatar = withEditableField(BaseAvatar);

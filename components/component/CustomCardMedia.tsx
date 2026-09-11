@@ -30,5 +30,6 @@ const BaseCardMedia = React.forwardRef<HTMLDivElement, CustomCardMedia>(
     );
   },
 );
+BaseCardMedia.displayName = "BaseCardMedia";
 
 export const CustomCardMedia = withEditableField(BaseCardMedia);

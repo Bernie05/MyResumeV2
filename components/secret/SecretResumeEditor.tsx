@@ -38,7 +38,7 @@ import {
 } from "@mui/material";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   loadResumeDataSuccess,
@@ -234,28 +234,34 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     router.refresh();
   };
 
-  const handlePreviewSectionClick = (section: ResumeEditableSection) => {
-    setSelectedPreviewSection(section);
-    setSelectedInlineFieldId(null);
-    setActiveSection(PREVIEW_SECTION_TO_EDITOR_SECTION[section]);
-  };
+  const handlePreviewSectionClick = useCallback(
+    (section: ResumeEditableSection) => {
+      setSelectedPreviewSection(section);
+      setSelectedInlineFieldId(null);
+      setActiveSection(PREVIEW_SECTION_TO_EDITOR_SECTION[section]);
+    },
+    [],
+  );
 
-  const handleInlineFieldClick = (
-    section: ResumeEditableSection,
-    fieldId: InlineEditableFieldId,
-    anchor?: HTMLElement,
-  ) => {
-    setSelectedPreviewSection(section);
-    setSelectedInlineFieldId(fieldId);
-    setAnchorEl(anchor ?? null);
-  };
+  const handleInlineFieldClick = useCallback(
+    (
+      section: ResumeEditableSection,
+      fieldId: InlineEditableFieldId,
+      anchor?: HTMLElement,
+    ) => {
+      setSelectedPreviewSection(section);
+      setSelectedInlineFieldId(fieldId);
+      setAnchorEl(anchor ?? null);
+    },
+    [],
+  );
 
   const handleCloseInlineEditor = () => {
     setAnchorEl(null);
     setSelectedInlineFieldId(null);
   };
 
-  const handleAddAction = (action: string, anchor: HTMLElement) => {
+  const handleAddAction = useCallback((action: string, anchor: HTMLElement) => {
     if (action === "experience") {
       setDraft((current) => ({
         ...current,
@@ -411,9 +417,9 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       }
       return;
     }
-  };
+  }, [draft, setDraft]);
 
-  const handleDeleteAction = (action: string) => {
+  const handleDeleteAction = useCallback((action: string) => {
     const projectMatch = action.match(/^projects\.(\d+)$/);
     if (projectMatch) {
       const index = Number(projectMatch[1]);
@@ -435,13 +441,9 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       setNotice("Portfolio item removed.");
       return;
     }
-  };
+  }, [setDraft]);
 
   const renderInlineFieldToolbox = () => {
-    console.log(
-      "Rendering inline field toolbox for fieldId: ",
-      selectedInlineFieldId,
-    );
     if (!selectedInlineFieldId) {
       return null;
     }
@@ -3524,20 +3526,30 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     }
   };
 
+  const editorProps = useMemo(
+    () => ({
+      isEditMode: true,
+      onInlineFieldClick: handleInlineFieldClick,
+      activeInlineFieldId: selectedInlineFieldId,
+      onSectionClick: handlePreviewSectionClick,
+      activeSection: selectedPreviewSection,
+      onAddAction: handleAddAction,
+      onDeleteAction: handleDeleteAction,
+      onDelete: handleDeleteAction,
+    }),
+    [
+      handleInlineFieldClick,
+      selectedInlineFieldId,
+      handlePreviewSectionClick,
+      selectedPreviewSection,
+      handleAddAction,
+      handleDeleteAction,
+    ],
+  );
+
   if (!isHydrated || !hasDraft) {
     return <SecretEditorSkeleton isDarkMode={isDarkMode} />;
   }
-
-  const editorProps = {
-    isEditMode: true,
-    onInlineFieldClick: handleInlineFieldClick,
-    activeInlineFieldId: selectedInlineFieldId,
-    onSectionClick: handlePreviewSectionClick,
-    activeSection: selectedPreviewSection,
-    onAddAction: handleAddAction,
-    onDeleteAction: handleDeleteAction,
-    onDelete: handleDeleteAction,
-  };
 
   return (
     <EditorProvider value={editorProps}>
