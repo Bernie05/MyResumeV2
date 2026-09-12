@@ -9,6 +9,7 @@ import type {
   EducationItem,
   ResumeData,
   ResumeStats,
+  TestimonialItem,
 } from "@/types/resume";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -17,6 +18,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import { ICON_MAP, ICON_NAMES } from "@/components/resume/ServicesSection";
+import { TECH_ICON_OPTIONS } from "@/components/resume/constants/techIcons";
 import { SecretEditorSkeleton } from "@/components/secret/SecretSkeletons";
 import {
   Alert,
@@ -58,6 +60,7 @@ import {
   createEmptyProjectItem,
   createEmptySkillCategory,
   createEmptySkillItem,
+  createEmptyTestimonialItem,
   csvToText,
   linesToText,
   removeItemAtIndex,
@@ -279,13 +282,20 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       const expIndex = Number(bulletMatch[1]);
       const item = draft.experience[expIndex];
       if (item) {
-        setDraft((current) => ({
-          ...current,
-          experience: replaceItemAtIndex(current.experience, expIndex, {
-            ...item,
-            description: [...item.description, ""],
-          }),
-        }));
+        setDraft((current) => {
+          const currentItem = current.experience[expIndex];
+          if (!currentItem) {
+            return current;
+          }
+
+          return {
+            ...current,
+            experience: replaceItemAtIndex(current.experience, expIndex, {
+              ...currentItem,
+              description: [...currentItem.description, ""],
+            }),
+          };
+        });
         const bulletIndex = item.description.length;
         const fieldId =
           `experience.${expIndex}.description.${bulletIndex}` as InlineEditableFieldId;
@@ -326,6 +336,38 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
         skills: [...current.skills, createEmptySkillCategory()],
       }));
       setNotice("New skill category added.");
+      return;
+    }
+
+    const skillItemMatch = action.match(/^skills\.(\d+)\.item$/);
+    if (skillItemMatch) {
+      const catIndex = Number(skillItemMatch[1]);
+      const category = draft.skills[catIndex];
+      if (category) {
+        const newItemIndex = category.items.length;
+        setDraft((current) => {
+          // Read the category fresh from `current` (not the outer `category`
+          // closure) so a rename that hasn't propagated back into `draft` yet
+          // isn't silently reverted by this merge.
+          const currentCategory = current.skills[catIndex];
+          if (!currentCategory) {
+            return current;
+          }
+
+          return {
+            ...current,
+            skills: replaceItemAtIndex(current.skills, catIndex, {
+              ...currentCategory,
+              items: [...currentCategory.items, createEmptySkillItem()],
+            }),
+          };
+        });
+        const fieldId =
+          `skills.${catIndex}.${newItemIndex}.name` as InlineEditableFieldId;
+        setSelectedPreviewSection("skills");
+        setSelectedInlineFieldId(fieldId);
+        setAnchorEl(anchor);
+      }
       return;
     }
 
@@ -382,18 +424,37 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       return;
     }
 
+    if (action === "testimonials") {
+      setDraft((current) => ({
+        ...current,
+        testimonials: [
+          ...current.testimonials,
+          createEmptyTestimonialItem(current.testimonials),
+        ],
+      }));
+      setNotice("New testimonial added.");
+      return;
+    }
+
     const portfolioResultMatch = action.match(/^portfolio\.(\d+)\.result$/);
     if (portfolioResultMatch) {
       const portIndex = Number(portfolioResultMatch[1]);
       const item = draft.portfolio[portIndex];
       if (item) {
-        setDraft((current) => ({
-          ...current,
-          portfolio: replaceItemAtIndex(current.portfolio, portIndex, {
-            ...item,
-            results: [...item.results, ""],
-          }),
-        }));
+        setDraft((current) => {
+          const currentItem = current.portfolio[portIndex];
+          if (!currentItem) {
+            return current;
+          }
+
+          return {
+            ...current,
+            portfolio: replaceItemAtIndex(current.portfolio, portIndex, {
+              ...currentItem,
+              results: [...currentItem.results, ""],
+            }),
+          };
+        });
         const resultIndex = item.results.length;
         const fieldId =
           `portfolio.${portIndex}.result.${resultIndex}` as InlineEditableFieldId;
@@ -439,6 +500,61 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
         portfolio: removeItemAtIndex(current.portfolio, index),
       }));
       setNotice("Portfolio item removed.");
+      return;
+    }
+
+    const experienceMatch = action.match(/^experience\.(\d+)$/);
+    if (experienceMatch) {
+      const index = Number(experienceMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        experience: removeItemAtIndex(current.experience, index),
+      }));
+      setNotice("Experience removed.");
+      return;
+    }
+
+    const educationMatch = action.match(/^education\.(\d+)$/);
+    if (educationMatch) {
+      const index = Number(educationMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        education: removeItemAtIndex(current.education, index),
+      }));
+      setNotice("Education removed.");
+      return;
+    }
+
+    const certificationMatch = action.match(/^certifications\.(\d+)$/);
+    if (certificationMatch) {
+      const index = Number(certificationMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        certifications: removeItemAtIndex(current.certifications, index),
+      }));
+      setNotice("Certification removed.");
+      return;
+    }
+
+    const testimonialMatch = action.match(/^testimonials\.(\d+)$/);
+    if (testimonialMatch) {
+      const index = Number(testimonialMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        testimonials: removeItemAtIndex(current.testimonials, index),
+      }));
+      setNotice("Testimonial removed.");
+      return;
+    }
+
+    const serviceCategoryMatch = action.match(/^services\.(\d+)$/);
+    if (serviceCategoryMatch) {
+      const index = Number(serviceCategoryMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        skills: removeItemAtIndex(current.skills, index),
+      }));
+      setNotice("Skill category removed.");
       return;
     }
   }, [setDraft]);
@@ -1818,11 +1934,10 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
           </Box>
           <Box>
             <Typography variant="caption" sx={{ fontWeight: 600, mb: 0.5 }}>
-              Icon
+              Technology Icon
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
-              {ICON_NAMES.map((key) => {
-                const Ic = ICON_MAP[key];
+              {TECH_ICON_OPTIONS.map(({ key, label, Icon: Ic }) => {
                 return (
                   <IconButton
                     key={key}
@@ -1853,9 +1968,9 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
                         item.icon === key ? "primary.main" : "transparent",
                       borderRadius: 1,
                     }}
-                    title={key}
+                    title={label}
                   >
-                    <Ic fontSize="small" />
+                    <Ic size={18} />
                   </IconButton>
                 );
               })}
@@ -1905,8 +2020,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
             {getInlineFieldLabel(selectedInlineFieldId)}
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-            {ICON_NAMES.map((key) => {
-              const Ic = ICON_MAP[key];
+            {TECH_ICON_OPTIONS.map(({ key, label, Icon: Ic }) => {
               return (
                 <IconButton
                   key={key}
@@ -1935,9 +2049,9 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
                       item.icon === key ? "primary.main" : "transparent",
                     borderRadius: 1,
                   }}
-                  title={key}
+                  title={label}
                 >
-                  <Ic fontSize="small" />
+                  <Ic size={18} />
                 </IconButton>
               );
             })}
@@ -2018,6 +2132,40 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
                   [key]: event.target.value,
                 },
               ),
+            }))
+          }
+        />
+      );
+    }
+
+    const testimonialMatch = selectedInlineFieldId.match(
+      /^testimonials\.(\d+)\.(quote|authorName|authorRole|authorCompany|photoUrl)$/,
+    );
+
+    if (testimonialMatch) {
+      const index = Number(testimonialMatch[1]);
+      const key = testimonialMatch[2] as keyof TestimonialItem;
+      const item = draft.testimonials[index];
+
+      if (!item) {
+        return null;
+      }
+
+      return (
+        <TextField
+          size="small"
+          sx={{ mt: 1.5 }}
+          label={getInlineFieldLabel(selectedInlineFieldId)}
+          multiline={key === "quote"}
+          minRows={key === "quote" ? 2 : undefined}
+          value={String(item[key] ?? "")}
+          onChange={(event) =>
+            setDraft((current) => ({
+              ...current,
+              testimonials: replaceItemAtIndex(current.testimonials, index, {
+                ...item,
+                [key]: event.target.value,
+              }),
             }))
           }
         />
@@ -3518,6 +3666,150 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
               }
             >
               Add certification
+            </Button>
+          </Stack>
+        );
+      case "testimonials":
+        return (
+          <Stack spacing={2.5}>
+            {draft.testimonials.map((item, index) => (
+              <Card key={item.id} variant="outlined">
+                <CardContent>
+                  <Stack spacing={2}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                        Testimonial #{index + 1}
+                      </Typography>
+                      <IconButton
+                        aria-label="Remove testimonial"
+                        onClick={() =>
+                          setDraft((current) => ({
+                            ...current,
+                            testimonials: removeItemAtIndex(
+                              current.testimonials,
+                              index,
+                            ),
+                          }))
+                        }
+                      >
+                        <DeleteOutlineIcon />
+                      </IconButton>
+                    </Stack>
+                    <TextField
+                      label="Quote"
+                      value={item.quote}
+                      multiline
+                      minRows={2}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          quote: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          testimonials: replaceItemAtIndex(
+                            current.testimonials,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                    <TextField
+                      label="Author name"
+                      value={item.authorName}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          authorName: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          testimonials: replaceItemAtIndex(
+                            current.testimonials,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                    <TextField
+                      label="Author role"
+                      value={item.authorRole}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          authorRole: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          testimonials: replaceItemAtIndex(
+                            current.testimonials,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                    <TextField
+                      label="Author company (optional)"
+                      value={item.authorCompany ?? ""}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          authorCompany: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          testimonials: replaceItemAtIndex(
+                            current.testimonials,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                    <TextField
+                      label="Photo URL (optional)"
+                      value={item.photoUrl ?? ""}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          photoUrl: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          testimonials: replaceItemAtIndex(
+                            current.testimonials,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                  </Stack>
+                </CardContent>
+              </Card>
+            ))}
+
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() =>
+                setDraft((current) => ({
+                  ...current,
+                  testimonials: [
+                    ...current.testimonials,
+                    createEmptyTestimonialItem(current.testimonials),
+                  ],
+                }))
+              }
+            >
+              Add testimonial
             </Button>
           </Stack>
         );

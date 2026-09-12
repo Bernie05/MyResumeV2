@@ -153,6 +153,35 @@ export const resumeData: ResumeData = {
       year: "2018",
     },
   ],
+  testimonials: [
+    {
+      id: 1,
+      quote:
+        "One of the most reliable engineers I've worked with — turned a messy legacy Salesforce setup into something the whole team could actually build on.",
+      authorName: "Maria Santos",
+      authorRole: "Engineering Manager",
+      authorCompany: "Acme Corp",
+      photoUrl: "",
+    },
+    {
+      id: 2,
+      quote:
+        "Delivered our backend migration ahead of schedule and took the time to document everything for the rest of the team. Would work with again in a heartbeat.",
+      authorName: "James Cooper",
+      authorRole: "CTO",
+      authorCompany: "Northwind Solutions",
+      photoUrl: "",
+    },
+    {
+      id: 3,
+      quote:
+        "Great communicator and problem solver. Consistently found the simplest fix instead of the flashiest one, which saved us a lot of headaches later.",
+      authorName: "Priya Nair",
+      authorRole: "Product Lead",
+      authorCompany: "",
+      photoUrl: "",
+    },
+  ],
   projects: [
     {
       id: 1,

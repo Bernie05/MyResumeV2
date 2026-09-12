@@ -73,8 +73,11 @@ const SecretLoginForm = ({ callbackUrl }: SecretLoginFormProps) => {
       dispatch(signInSucceeded());
       setPassword("");
 
-      // Use replace to avoid keeping the login page in the history stack
-      router.replace(result.url || nextUrl);
+      // Always redirect with the relative nextUrl, never result.url: NextAuth
+      // builds that from its own inferred origin (defaults to localhost:3000
+      // when NEXTAUTH_URL isn't set), which sends the browser to the wrong
+      // origin whenever the dev server isn't actually on that port.
+      router.replace(nextUrl);
       router.refresh();
     } catch {
       dispatch(signInFailed("Unable to sign in to the private editor."));

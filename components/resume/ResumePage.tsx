@@ -10,6 +10,7 @@ import Skills from "./Skills";
 import Portfolio from "./Portfolio";
 import Projects from "./Projects";
 import Certifications from "./Certifications";
+import Testimonials from "./Testimonials";
 import { useThemeContext } from "../../context/ThemeContext";
 import type { ResumeData } from "../../types/resume";
 import { Box, Container, Stack, Typography } from "@mui/material";
@@ -40,6 +41,7 @@ export type ResumeEditableSection =
   | "education"
   | "skills"
   | "certifications"
+  | "testimonials"
   | "contact"
   | "stats";
 
@@ -151,48 +153,79 @@ const ResumePage = ({
                 skills={resume.skills}
                 servicesTitle={resume.servicesTitle}
                 servicesSubtitle={resume.servicesSubtitle}
+                onInlineFieldClick={editor?.onInlineFieldClick}
+                activeInlineFieldId={editor?.activeInlineFieldId}
+                onAddAction={editor?.onAddAction}
+                onDeleteAction={editor?.onDeleteAction}
               />
             ),
           })}
 
-          {/* {renderSection({
+          {renderSection({
             sectionId: "experience",
             component: "section",
             children: <Experience experience={resume.experience} />,
-          })} */}
+          })}
 
-          {/* {renderSection({
+          {renderSection({
             sectionId: "portfolio",
             component: "section",
             children: <Portfolio portfolio={resume.portfolio} />,
-          })} */}
+          })}
 
-          {/* {renderSection({
+          {renderSection({
             sectionId: "projects",
             children: <Projects projects={resume.projects} />,
-          })} */}
+          })}
 
-          {/* {renderSection({
+          {renderSection({
             sectionId: "education",
             children: <Education education={resume.education} />,
-          })} */}
+          })}
 
-          {/* {renderSection({
+          {renderSection({
             sectionId: "skills",
             component: "section",
-            children: <Skills skills={resume.skills} />,
-          })} */}
+            children: (
+              <Skills
+                skills={resume.skills}
+                onInlineFieldClick={editor?.onInlineFieldClick}
+                activeInlineFieldId={editor?.activeInlineFieldId}
+                onDeleteAction={editor?.onDeleteAction}
+                onAddAction={editor?.onAddAction}
+              />
+            ),
+          })}
 
-          {/* {renderSection({
+          {renderSection({
             sectionId: "certifications",
-            children: <Certifications certifications={resume.certifications} />,
-          })} */}
+            children: (
+              <Certifications
+                certifications={resume.certifications}
+                onInlineFieldClick={editor?.onInlineFieldClick}
+                activeInlineFieldId={editor?.activeInlineFieldId}
+                onAddAction={editor?.onAddAction}
+                onDeleteAction={editor?.onDeleteAction}
+              />
+            ),
+          })}
 
-          {/* {renderSection({
+          {renderSection({
+            sectionId: "testimonials",
+            children: <Testimonials testimonials={resume.testimonials} />,
+          })}
+
+          {renderSection({
             sectionId: "contact",
             component: "section",
-            children: <ContactSection personalInfo={resume.personalInfo} />,
-          })} */}
+            children: (
+              <ContactSection
+                personalInfo={resume.personalInfo}
+                onInlineFieldClick={editor?.onInlineFieldClick}
+                activeInlineFieldId={editor?.activeInlineFieldId}
+              />
+            ),
+          })}
 
           <Box
             component="footer"

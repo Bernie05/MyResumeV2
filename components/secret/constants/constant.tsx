@@ -12,6 +12,7 @@ export const EDITOR_SECTIONS = [
   { value: "projects", label: "Projects" },
   { value: "portfolio", label: "Portfolio" },
   { value: "certifications", label: "Certifications" },
+  { value: "testimonials", label: "Testimonials" },
 ] as const;
 
 export type InlineEditableFieldId =
@@ -58,6 +59,11 @@ export type InlineEditableFieldId =
   | `certifications.${number}.name`
   | `certifications.${number}.issuer`
   | `certifications.${number}.year`
+  | `testimonials.${number}.quote`
+  | `testimonials.${number}.authorName`
+  | `testimonials.${number}.authorRole`
+  | `testimonials.${number}.authorCompany`
+  | `testimonials.${number}.photoUrl`
   | "servicesTitle"
   | "servicesSubtitle";
 
@@ -97,6 +103,7 @@ export const PREVIEW_SECTION_TO_EDITOR_SECTION: Record<
   education: "education",
   skills: "skills",
   certifications: "certifications",
+  testimonials: "testimonials",
   contact: "personalInfo",
   stats: "stats",
 };

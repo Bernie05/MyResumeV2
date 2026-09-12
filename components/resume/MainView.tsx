@@ -19,8 +19,13 @@ const MainView = () => {
     }
   }, [loadResume, storedResumeData]);
 
-  // Use Redux store data if available, fallback to direct data
-  const displayData = storedResumeData || resumeData;
+  // Use Redux store data if available, fallback to direct data. Merge over the
+  // baseline so a draft persisted (via redux-persist/localStorage) before a newer
+  // field was added to ResumeData doesn't crash section components that assume
+  // every field is present.
+  const displayData = storedResumeData
+    ? { ...resumeData, ...storedResumeData }
+    : resumeData;
 
   return <ResumePage resume={displayData} position="sticky" />;
 };

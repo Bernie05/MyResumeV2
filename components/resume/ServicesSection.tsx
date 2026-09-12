@@ -372,7 +372,11 @@ const ServicesSection = ({
                       fontWeight: 700,
                       fontSize: "1.5rem",
                       color: titleColor,
+                      ...getInlineFieldSx(`skills.${categoryIndex}.category`),
                     }}
+                    {...createInlineFieldProps(
+                      `skills.${categoryIndex}.category`,
+                    )}
                   >
                     {category.category} Development
                   </CustomTypography>
@@ -383,7 +387,11 @@ const ServicesSection = ({
                       color: mutedColor,
                       display: "block",
                       mt: 0.5,
+                      ...getInlineFieldSx(`skills.${categoryIndex}.subtitle`),
                     }}
+                    {...createInlineFieldProps(
+                      `skills.${categoryIndex}.subtitle`,
+                    )}
                   >
                     {category.subtitle ||
                       `Expert ${category.category.toLowerCase()} solutions`}

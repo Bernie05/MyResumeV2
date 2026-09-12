@@ -17,9 +17,10 @@ import {
 
 interface ICustomStatsProps {
   stats: HeroStats;
+  animatedValues?: Record<string, number>;
 }
 
-export const CustomStats = ({ stats }: ICustomStatsProps) => {
+export const CustomStats = ({ stats, animatedValues }: ICustomStatsProps) => {
   const { isDarkMode } = useThemeContext();
   const { primaryAccent } = getSectionPalette(isDarkMode);
   const editor = useEditor();
@@ -71,7 +72,7 @@ export const CustomStats = ({ stats }: ICustomStatsProps) => {
               inlineFieldClick,
             )}
           >
-            {customStat.value.toLocaleString()}
+            {(animatedValues?.[`custom_${idx}`] ?? 0).toLocaleString()}
             {customStat.suffix}
           </Typography>
           <Typography

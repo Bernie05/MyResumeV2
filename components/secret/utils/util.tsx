@@ -7,6 +7,7 @@ import {
   ResumeData,
   SkillCategory,
   SkillItem,
+  TestimonialItem,
 } from "@/types/resume";
 
 /**
@@ -138,6 +139,19 @@ export const createEmptyCertificationItem = (
     name: "",
     issuer: "",
     year: "",
+  };
+};
+
+export const createEmptyTestimonialItem = (
+  items: TestimonialItem[],
+): TestimonialItem => {
+  return {
+    id: getNextId(items),
+    quote: "",
+    authorName: "",
+    authorRole: "",
+    authorCompany: "",
+    photoUrl: "",
   };
 };
 

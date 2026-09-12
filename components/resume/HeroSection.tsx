@@ -84,7 +84,22 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
   const { isDarkMode } = useThemeContext();
   const theme = getSectionPalette(isDarkMode);
 
-  const { animatedStats, statsRef } = useAnimatedStats(stats, 2000);
+  // Flatten custom stats (an array) into numeric keys so the same count-up
+  // animation used for the built-in stats also applies to them.
+  const statsForAnimation = stats
+    ? {
+        ...stats,
+        ...(stats.custom ?? []).reduce<Record<string, number>>(
+          (accumulator, customStat, index) => {
+            accumulator[`custom_${index}`] = customStat.value;
+            return accumulator;
+          },
+          {},
+        ),
+      }
+    : stats;
+
+  const { animatedStats, statsRef } = useAnimatedStats(statsForAnimation, 2000);
 
   const { primaryAccent, accentGlow, accentText, buttonGradient } = theme;
 
@@ -359,7 +374,7 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
                 ))}
 
               {/* Render of the Custom Stats + */}
-              <CustomStats stats={stats} />
+              <CustomStats stats={stats} animatedValues={animatedStats} />
             </Box>
           </Container>
         </Box>

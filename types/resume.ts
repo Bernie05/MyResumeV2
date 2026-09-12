@@ -68,6 +68,15 @@ export interface CertificationItem {
   year: string;
 }
 
+export interface TestimonialItem {
+  id: number;
+  quote: string;
+  authorName: string;
+  authorRole: string;
+  authorCompany?: string;
+  photoUrl?: string;
+}
+
 export interface ProjectItem {
   id: number;
   name: string;
@@ -104,6 +113,7 @@ export interface ResumeData {
   certifications: CertificationItem[];
   projects: ProjectItem[];
   portfolio: PortfolioItem[];
+  testimonials: TestimonialItem[];
   servicesTitle?: string;
   servicesSubtitle?: string;
 }

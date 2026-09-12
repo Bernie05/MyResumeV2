@@ -10,6 +10,7 @@ import type {
   PortfolioItem,
   ResumeStats,
   SocialMediaLink,
+  TestimonialItem,
 } from "@/types/resume";
 
 interface ResumeDataState {
@@ -212,6 +213,39 @@ const resumeDataSlice = createSlice({
       if (state.data) {
         state.data.projects = state.data.projects.filter(
           (proj) => proj.id !== action.payload,
+        );
+        state.hasChanges = true;
+      }
+    },
+
+    // Testimonials operations
+    addTestimonial: (state, action: PayloadAction<TestimonialItem>) => {
+      if (state.data) {
+        state.data.testimonials.push(action.payload);
+        state.hasChanges = true;
+      }
+    },
+    updateTestimonial: (
+      state,
+      action: PayloadAction<{ id: number; updates: Partial<TestimonialItem> }>,
+    ) => {
+      if (state.data) {
+        const index = state.data.testimonials.findIndex(
+          (item) => item.id === action.payload.id,
+        );
+        if (index !== -1) {
+          state.data.testimonials[index] = {
+            ...state.data.testimonials[index],
+            ...action.payload.updates,
+          };
+          state.hasChanges = true;
+        }
+      }
+    },
+    deleteTestimonial: (state, action: PayloadAction<number>) => {
+      if (state.data) {
+        state.data.testimonials = state.data.testimonials.filter(
+          (item) => item.id !== action.payload,
         );
         state.hasChanges = true;
       }
@@ -455,6 +489,9 @@ export const {
   addProject,
   updateProject,
   deleteProject,
+  addTestimonial,
+  updateTestimonial,
+  deleteTestimonial,
   markAsSaved,
   clearResumeData,
   addExperienceBullet,

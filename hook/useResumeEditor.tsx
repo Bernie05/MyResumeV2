@@ -36,6 +36,7 @@ const EMPTY_RESUME_DATA: ResumeData = {
   certifications: [],
   projects: [],
   portfolio: [],
+  testimonials: [],
   servicesTitle: "",
   servicesSubtitle: "",
 };
@@ -62,8 +63,15 @@ export const useResumeEditor = () => {
     [storedDraft, dispatch],
   );
 
+  // Merge over EMPTY_RESUME_DATA so a draft persisted (via redux-persist/localStorage)
+  // before a newer field was added to ResumeData doesn't crash consumers that assume
+  // every field is present (e.g. `draft.testimonials.map(...)`).
+  const draft = storedDraft
+    ? { ...EMPTY_RESUME_DATA, ...storedDraft }
+    : EMPTY_RESUME_DATA;
+
   return {
-    draft: storedDraft ?? EMPTY_RESUME_DATA,
+    draft,
     hasDraft,
     setDraft,
     hasChanges,
