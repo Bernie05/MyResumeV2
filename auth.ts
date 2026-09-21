@@ -69,6 +69,14 @@ export const authOptions: NextAuthOptions = {
         const password =
           typeof credentials?.password === "string" ? credentials.password : "";
 
+        if (!getOwnerPassword()) {
+          // Distinguish "server misconfigured" from "wrong password" in logs —
+          // otherwise every login attempt fails identically and silently.
+          console.error(
+            "[auth] RESUME_OWNER_PASSWORD is not set; all logins will fail.",
+          );
+        }
+
         if (!(await passwordsMatch(password))) {
           return null;
         }
@@ -82,6 +90,12 @@ export const authOptions: NextAuthOptions = {
   ],
 };
 
-export const signInUp = async (props: any) => {
+interface OwnerSignInOptions {
+  callbackUrl?: string;
+  password: string;
+  redirect?: boolean;
+}
+
+export const signInUp = async (props: OwnerSignInOptions) => {
   return await signIn("credentials", { ...props, redirect: false });
 };

@@ -1,66 +1,59 @@
 "use client";
 
+import { Avatar, Box, Card, CardContent, IconButton, Typography } from "@mui/material";
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Chip,
-  IconButton,
-} from "@mui/material";
-import SchoolIcon from "@mui/icons-material/School";
-import { DeleteOutline as DeleteOutlineIcon } from "@mui/icons-material";
+  FormatQuote as FormatQuoteIcon,
+  DeleteOutline as DeleteOutlineIcon,
+} from "@mui/icons-material";
 import { useInlineEditing } from "@/hook/useInlineEditing";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
-import type { ResumeEditableSection } from "./ResumePage";
-import type { InlineEditableFieldId } from "../secret/constants/constant";
+import { AddButton } from "../component/static/AddButton";
+import { useEditor, useActiveField, useOnFieldClick } from "@/hook/useEditor";
 
-interface Certification {
+interface Testimonial {
   id: number;
-  name: string;
-  issuer: string;
-  year: string;
+  quote: string;
+  authorName: string;
+  authorRole: string;
+  authorCompany?: string;
+  photoUrl?: string;
 }
 
-interface CertificationsProps {
-  certifications: Certification[];
-  onInlineFieldClick?: (
-    section: ResumeEditableSection,
-    fieldId: InlineEditableFieldId,
-    anchor?: HTMLElement,
-  ) => void;
-  activeInlineFieldId?: string | null;
-  onAddAction?: (action: string, anchor: HTMLElement) => void;
-  onDeleteAction?: (action: string) => void;
+interface ITestimonialsProps {
+  testimonials?: Testimonial[];
 }
 
-const Certifications = ({
-  certifications,
-  onInlineFieldClick,
-  activeInlineFieldId,
-  onAddAction,
-  onDeleteAction,
-}: CertificationsProps) => {
+const Testimonials = ({ testimonials = [] }: ITestimonialsProps) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
     titleColor,
+    bodyColor,
     mutedColor,
     sectionBackground,
     surfaceBackground,
-    softBackground,
     outline,
     buttonGradient,
     accentText,
     hoverShadow,
   } = getSectionPalette(isDarkMode);
 
+  const editor = useEditor();
+  const activeInlineFieldId = useActiveField();
+  const onInlineFieldClick = useOnFieldClick();
+
+  const { onDeleteAction, onAddAction } = editor || {};
+
   const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
-    targetSection: "certifications",
+    targetSection: "testimonials",
     activeInlineFieldId,
     onInlineFieldClick,
   });
+
+  if (testimonials.length === 0 && !onAddAction) {
+    return null;
+  }
 
   return (
     <Box
@@ -88,7 +81,7 @@ const Certifications = ({
             mb: 2,
           }}
         >
-          Certifications
+          Testimonials
         </Box>
         <Typography
           variant="h3"
@@ -99,11 +92,10 @@ const Certifications = ({
             fontSize: { xs: "1.875rem", md: "2.25rem" },
           }}
         >
-          Certifications
+          What People Say
         </Typography>
       </Box>
 
-      {/* Certifications Grid */}
       <Box
         sx={{
           display: "grid",
@@ -111,9 +103,9 @@ const Certifications = ({
           gap: 3,
         }}
       >
-        {certifications.map((cert, index) => (
+        {testimonials.map((testimonial, index) => (
           <Card
-            key={cert.id}
+            key={testimonial.id}
             sx={{
               background: surfaceBackground,
               border: `1px solid ${outline}`,
@@ -128,10 +120,10 @@ const Certifications = ({
           >
             {onDeleteAction && (
               <IconButton
-                aria-label="Delete certification"
+                aria-label="Delete testimonial"
                 onClick={(event) => {
                   event.stopPropagation();
-                  onDeleteAction(`certifications.${index}`);
+                  onDeleteAction(`testimonials.${index}`);
                 }}
                 sx={{
                   position: "absolute",
@@ -155,58 +147,66 @@ const Certifications = ({
               </IconButton>
             )}
             <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: "flex", gap: 2 }}>
-                {/* Icon */}
-                <SchoolIcon
-                  sx={{
-                    fontSize: "2.25rem",
-                    color: primaryAccent,
-                    flexShrink: 0,
-                  }}
-                />
+              <FormatQuoteIcon
+                sx={{
+                  fontSize: "2.25rem",
+                  color: primaryAccent,
+                  transform: "scaleX(-1)",
+                  mb: 1,
+                }}
+              />
 
-                {/* Content */}
+              <Typography
+                variant="body1"
+                sx={{
+                  color: bodyColor,
+                  mb: 2.5,
+                  fontStyle: "italic",
+                  lineHeight: 1.6,
+                  ...getInlineFieldSx(`testimonials.${index}.quote`),
+                }}
+                {...createInlineFieldProps(`testimonials.${index}.quote`)}
+              >
+                “{testimonial.quote}”
+              </Typography>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Avatar
+                  src={testimonial.photoUrl || undefined}
+                  sx={{ width: 44, height: 44, bgcolor: primaryAccent }}
+                >
+                  {testimonial.authorName?.charAt(0) ?? "?"}
+                </Avatar>
                 <Box sx={{ flexGrow: 1 }}>
                   <Typography
-                    variant="h6"
+                    variant="subtitle2"
                     sx={{
                       fontWeight: "bold",
                       color: titleColor,
-                      mb: 0.5,
-                      ...getInlineFieldSx(`certifications.${index}.name`),
-                    }}
-                    {...createInlineFieldProps(`certifications.${index}.name`)}
-                  >
-                    {cert.name}
-                  </Typography>
-
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: mutedColor,
-                      mb: 1,
-                      ...getInlineFieldSx(`certifications.${index}.issuer`),
+                      ...getInlineFieldSx(`testimonials.${index}.authorName`),
                     }}
                     {...createInlineFieldProps(
-                      `certifications.${index}.issuer`,
+                      `testimonials.${index}.authorName`,
                     )}
                   >
-                    {cert.issuer}
+                    {testimonial.authorName}
                   </Typography>
-
-                  {/* Year Chip */}
-                  <Chip
-                    label={cert.year}
-                    size="small"
+                  <Typography
+                    variant="caption"
                     sx={{
-                      background: softBackground,
-                      color: primaryAccent,
-                      fontWeight: "600",
-                      fontSize: "0.875rem",
-                      ...getInlineFieldSx(`certifications.${index}.year`),
+                      color: mutedColor,
+                      display: "block",
+                      ...getInlineFieldSx(`testimonials.${index}.authorRole`),
                     }}
-                    {...createInlineFieldProps(`certifications.${index}.year`)}
-                  />
+                    {...createInlineFieldProps(
+                      `testimonials.${index}.authorRole`,
+                    )}
+                  >
+                    {testimonial.authorRole}
+                    {testimonial.authorCompany
+                      ? ` · ${testimonial.authorCompany}`
+                      : ""}
+                  </Typography>
                 </Box>
               </Box>
             </CardContent>
@@ -214,36 +214,18 @@ const Certifications = ({
         ))}
       </Box>
 
-      {/* Add Certification Button */}
+      {/* Add Testimonial Button */}
       {onAddAction && (
-        <Box
-          sx={{
-            mt: 3,
-            p: 3,
-            border: `2px dashed ${primaryAccent}50`,
-            borderRadius: "1rem",
-            textAlign: "center",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              borderColor: primaryAccent,
-              background: softBackground,
-            },
-          }}
-          onClick={(event) => {
-            event.stopPropagation();
-            onAddAction("certifications", event.currentTarget as HTMLElement);
-          }}
-        >
+        <AddButton targetSectionId="testimonials">
           <Typography
             sx={{ color: primaryAccent, fontWeight: 600, fontSize: "1rem" }}
           >
-            + Add Certification
+            + Add Testimonial
           </Typography>
-        </Box>
+        </AddButton>
       )}
     </Box>
   );
 };
 
-export default Certifications;
+export default Testimonials;

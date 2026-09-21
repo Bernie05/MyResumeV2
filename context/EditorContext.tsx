@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import type { ResumeEditableSection } from "../components/resume/ResumePage";
 import type { InlineEditableFieldId } from "../components/secret/constants/constant";
 
@@ -56,21 +56,27 @@ export const EditorProvider = ({ value, children }: EditorProviderProps) => {
     useState<ResumeEditableSection | null>(value?.activeSection ?? null);
 
   // Use provided value or fallback to defaults
-  const contextValue: EditorContextValue = value
-    ? {
-        ...value,
-        activeInlineFieldId: value.activeInlineFieldId ?? activeInlineFieldId,
-        activeSection: value.activeSection ?? activeSection,
-        setActiveInlineFieldId,
-        setActiveSection,
-      }
-    : {
-        activeInlineFieldId,
-        activeSection,
-        isEditMode: false,
-        setActiveInlineFieldId,
-        setActiveSection,
-      };
+  // Memoized so consumers only re-render when a field actually referenced by the
+  // context (not just the parent) changes, rather than on every parent render.
+  const contextValue: EditorContextValue = useMemo(() => {
+    return value
+      ? {
+          ...value,
+          activeInlineFieldId:
+            value.activeInlineFieldId ?? activeInlineFieldId,
+          activeSection: value.activeSection ?? activeSection,
+          setActiveInlineFieldId,
+          setActiveSection,
+        }
+      : {
+          activeInlineFieldId,
+          activeSection,
+          isEditMode: false,
+          setActiveInlineFieldId,
+          setActiveSection,
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, activeInlineFieldId, activeSection]);
 
   return (
     <EditorContext.Provider value={contextValue}>

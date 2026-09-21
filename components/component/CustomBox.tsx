@@ -24,5 +24,6 @@ const BaseBox = React.forwardRef<HTMLDivElement, CustomBoxProps>(
     );
   },
 );
+BaseBox.displayName = "BaseBox";
 
 export const CustomBox = withEditableField(BaseBox);

@@ -19,15 +19,20 @@ import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
+import { TECH_ICON_MAP } from "@/components/resume/constants/techIcons";
+import { ICON_MAP } from "@/components/resume/ServicesSection";
 
 interface SkillItem {
   readonly name: string;
   readonly proficiency: number;
+  readonly icon?: string;
 }
 
 interface SkillCategory {
   readonly category: string;
   readonly items: readonly SkillItem[];
+  readonly icon?: string;
+  readonly subtitle?: string;
 }
 
 interface SkillsProps {
@@ -39,6 +44,7 @@ interface SkillsProps {
   ) => void;
   readonly activeInlineFieldId?: InlineEditableFieldId | null;
   readonly onDeleteAction?: (action: string) => void;
+  readonly onAddAction?: (action: string, anchor: HTMLElement) => void;
 }
 
 const ANIMATION_DURATION_MS = 1500;
@@ -66,7 +72,12 @@ const getCategoryColor = (
   return category === "Backend" ? secondaryAccent : primaryAccent;
 };
 
-const getCategoryIcon = (category: string, color: string) => {
+const getCategoryIcon = (category: string, color: string, icon?: string) => {
+  if (icon && ICON_MAP[icon]) {
+    const Icon = ICON_MAP[icon];
+    return <Icon sx={{ color }} />;
+  }
+
   switch (category) {
     case "Frontend":
       return <BoltIcon sx={{ color }} />;
@@ -97,6 +108,7 @@ const Skills = ({
   onInlineFieldClick,
   activeInlineFieldId,
   onDeleteAction,
+  onAddAction,
 }: SkillsProps) => {
   const { isDarkMode } = useThemeContext();
   const {
@@ -291,7 +303,11 @@ const Skills = ({
                   borderBottom: `2px solid ${divider}`,
                 }}
               >
-                {getCategoryIcon(skillGroup.category, categoryColor)}
+                {getCategoryIcon(
+                  skillGroup.category,
+                  categoryColor,
+                  skillGroup.icon,
+                )}
                 <Typography
                   variant="h5"
                   sx={{
@@ -445,16 +461,12 @@ const Skills = ({
                           </Box>
 
                           <Box sx={{ flex: 1 }}>
-                            <Typography
-                              variant="subtitle1"
+                            <Box
                               sx={{
-                                fontWeight: 700,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0.75,
                                 mb: 2,
-                                color: titleColor,
-                                fontSize: "1rem",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
                                 ...getInlineFieldSx(
                                   `skills.${categoryIndex}.${itemIndex}.name`,
                                 ),
@@ -463,8 +475,30 @@ const Skills = ({
                                 `skills.${categoryIndex}.${itemIndex}.name`,
                               )}
                             >
-                              {skill.name}
-                            </Typography>
+                              {skill.icon && TECH_ICON_MAP[skill.icon] && (
+                                <Box
+                                  component={TECH_ICON_MAP[skill.icon]}
+                                  sx={{
+                                    fontSize: "1.1rem",
+                                    color: categoryColor,
+                                    flexShrink: 0,
+                                  }}
+                                />
+                              )}
+                              <Typography
+                                variant="subtitle1"
+                                sx={{
+                                  fontWeight: 700,
+                                  color: titleColor,
+                                  fontSize: "1rem",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {skill.name}
+                              </Typography>
+                            </Box>
 
                             <Box sx={{ mb: 2 }}>
                               <LinearProgress
@@ -528,6 +562,41 @@ const Skills = ({
                   );
                 })}
               </Box>
+
+              {onAddAction && (
+                <Box
+                  sx={{
+                    mt: 3,
+                    p: 2.5,
+                    border: `2px dashed ${categoryColor}50`,
+                    borderRadius: "1rem",
+                    textAlign: "center",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      borderColor: categoryColor,
+                      background: softBackground,
+                    },
+                  }}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onAddAction(
+                      `skills.${categoryIndex}.item`,
+                      event.currentTarget as HTMLElement,
+                    );
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      color: categoryColor,
+                      fontWeight: 600,
+                      fontSize: "0.95rem",
+                    }}
+                  >
+                    + Add Skill
+                  </Typography>
+                </Box>
+              )}
             </Box>
           );
         })}

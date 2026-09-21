@@ -61,11 +61,35 @@ export interface SkillCategory {
   subtitle?: string;
 }
 
+export interface ServiceItem {
+  id: number;
+  name: string;
+  proficiency: number;
+  icon?: string;
+}
+
+export interface ServiceCard {
+  id: number;
+  title: string;
+  subtitle?: string;
+  icon?: string;
+  items: ServiceItem[];
+}
+
 export interface CertificationItem {
   id: number;
   name: string;
   issuer: string;
   year: string;
+}
+
+export interface TestimonialItem {
+  id: number;
+  quote: string;
+  authorName: string;
+  authorRole: string;
+  authorCompany?: string;
+  photoUrl?: string;
 }
 
 export interface ProjectItem {
@@ -101,9 +125,20 @@ export interface ResumeData {
   experience: ExperienceItem[];
   education: EducationItem[];
   skills: SkillCategory[];
+  services: ServiceCard[];
   certifications: CertificationItem[];
   projects: ProjectItem[];
   portfolio: PortfolioItem[];
+  testimonials: TestimonialItem[];
+  servicesBadge?: string;
   servicesTitle?: string;
   servicesSubtitle?: string;
+  experienceBadge?: string;
+  experienceTitle?: string;
+  portfolioBadge?: string;
+  portfolioTitle?: string;
+  portfolioSubtitle?: string;
+  projectsBadge?: string;
+  projectsTitle?: string;
+  projectsSubtitle?: string;
 }

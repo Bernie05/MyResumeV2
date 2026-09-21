@@ -10,6 +10,7 @@ import Skills from "./Skills";
 import Portfolio from "./Portfolio";
 import Projects from "./Projects";
 import Certifications from "./Certifications";
+import Testimonials from "./Testimonials";
 import { useThemeContext } from "../../context/ThemeContext";
 import type { ResumeData } from "../../types/resume";
 import { Box, Container, Stack, Typography } from "@mui/material";
@@ -22,6 +23,7 @@ import {
 } from "../../hook/useEditor";
 import { createSectionProps } from "../secret/utils/componentUtil";
 import { isAuthenticated } from "./util/authUtil";
+import Footer from "./components/footer";
 
 export type NavbarPosition =
   | "fixed"
@@ -39,6 +41,7 @@ export type ResumeEditableSection =
   | "education"
   | "skills"
   | "certifications"
+  | "testimonials"
   | "contact"
   | "stats";
 
@@ -105,6 +108,7 @@ const ResumePage = ({
         id={domId}
         component={component}
         sx={getSectionSx(sectionId)}
+        // Editable section props for interactivity in edit mode
         {...createSectionProps(
           sectionsAreInteractive,
           sectionId,
@@ -137,7 +141,7 @@ const ResumePage = ({
         ),
       })}
 
-      {/* <Container
+      <Container
         maxWidth="xl"
         sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, sm: 3, lg: 4 } }}
       >
@@ -146,9 +150,14 @@ const ResumePage = ({
             sectionId: "services",
             children: (
               <ServicesSection
-                skills={resume.skills}
+                services={resume.services}
+                servicesBadge={resume.servicesBadge}
                 servicesTitle={resume.servicesTitle}
                 servicesSubtitle={resume.servicesSubtitle}
+                onInlineFieldClick={editor?.onInlineFieldClick}
+                activeInlineFieldId={editor?.activeInlineFieldId}
+                onAddAction={editor?.onAddAction}
+                onDeleteAction={editor?.onDeleteAction}
               />
             ),
           })}
@@ -156,18 +165,38 @@ const ResumePage = ({
           {renderSection({
             sectionId: "experience",
             component: "section",
-            children: <Experience experience={resume.experience} />,
+            children: (
+              <Experience
+                experience={resume.experience}
+                experienceBadge={resume.experienceBadge}
+                experienceTitle={resume.experienceTitle}
+              />
+            ),
           })}
 
           {renderSection({
             sectionId: "portfolio",
             component: "section",
-            children: <Portfolio portfolio={resume.portfolio} />,
+            children: (
+              <Portfolio
+                portfolio={resume.portfolio}
+                portfolioBadge={resume.portfolioBadge}
+                portfolioTitle={resume.portfolioTitle}
+                portfolioSubtitle={resume.portfolioSubtitle}
+              />
+            ),
           })}
 
           {renderSection({
             sectionId: "projects",
-            children: <Projects projects={resume.projects} />,
+            children: (
+              <Projects
+                projects={resume.projects}
+                projectsBadge={resume.projectsBadge}
+                projectsTitle={resume.projectsTitle}
+                projectsSubtitle={resume.projectsSubtitle}
+              />
+            ),
           })}
 
           {renderSection({
@@ -178,18 +207,45 @@ const ResumePage = ({
           {renderSection({
             sectionId: "skills",
             component: "section",
-            children: <Skills skills={resume.skills} />,
+            children: (
+              <Skills
+                skills={resume.skills}
+                onInlineFieldClick={editor?.onInlineFieldClick}
+                activeInlineFieldId={editor?.activeInlineFieldId}
+                onDeleteAction={editor?.onDeleteAction}
+                onAddAction={editor?.onAddAction}
+              />
+            ),
           })}
 
           {renderSection({
             sectionId: "certifications",
-            children: <Certifications certifications={resume.certifications} />,
+            children: (
+              <Certifications
+                certifications={resume.certifications}
+                onInlineFieldClick={editor?.onInlineFieldClick}
+                activeInlineFieldId={editor?.activeInlineFieldId}
+                onAddAction={editor?.onAddAction}
+                onDeleteAction={editor?.onDeleteAction}
+              />
+            ),
+          })}
+
+          {renderSection({
+            sectionId: "testimonials",
+            children: <Testimonials testimonials={resume.testimonials} />,
           })}
 
           {renderSection({
             sectionId: "contact",
             component: "section",
-            children: <ContactSection personalInfo={resume.personalInfo} />,
+            children: (
+              <ContactSection
+                personalInfo={resume.personalInfo}
+                onInlineFieldClick={editor?.onInlineFieldClick}
+                activeInlineFieldId={editor?.activeInlineFieldId}
+              />
+            ),
           })}
 
           <Box
@@ -203,13 +259,10 @@ const ResumePage = ({
               borderColor: footerBorderColor,
             }}
           >
-            <Typography variant="body2" sx={{ color: footerTextColor }}>
-              {new Date().getFullYear()} © {resume.personalInfo.name}. All
-              rights reserved.
-            </Typography>
+            {Footer(resume, { color: footerTextColor })}
           </Box>
         </Stack>
-      </Container> */}
+      </Container>
     </Box>
   );
 };

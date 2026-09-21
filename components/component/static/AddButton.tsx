@@ -1,23 +1,19 @@
 import { ResumeEditableSection } from "@/components/resume/ResumePage";
-import { IEditorProps } from "@/components/secret/SecretResumeEditor";
 import { useThemeContext } from "@/context/ThemeContext";
+import { useEditor } from "@/hook/useEditor";
 import { getSectionPalette } from "@/theme/sectionPalette";
 import { Box, Typography } from "@mui/material";
 import React from "react";
 
-interface IAddButtonProps extends IEditorProps {
+interface IAddButtonProps {
   children: React.ReactNode;
   targetSectionId: ResumeEditableSection;
 }
 
-export const AddButton = ({
-  children,
-  targetSectionId,
-  editorProps,
-}: IAddButtonProps) => {
+export const AddButton = ({ children, targetSectionId }: IAddButtonProps) => {
   const { isDarkMode } = useThemeContext();
   const { primaryAccent, softBackground } = getSectionPalette(isDarkMode);
-  const { onAddAction } = editorProps || {};
+  const { onAddAction } = useEditor() || {};
 
   return (
     <Box
@@ -34,9 +30,10 @@ export const AddButton = ({
           background: softBackground,
         },
       }}
-      onClick={(event) =>
-        onAddAction?.(targetSectionId, event.currentTarget as HTMLElement)
-      }
+      onClick={(event) => {
+        event.stopPropagation();
+        onAddAction?.(targetSectionId, event.currentTarget as HTMLElement);
+      }}
     >
       {children}
     </Box>

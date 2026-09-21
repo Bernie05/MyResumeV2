@@ -129,7 +129,7 @@ export const useInlineEditing = ({
 
     // Return the actual field IDs for the current inline section and item index
     return {
-      ...(getSectionBuildFieldIds(targetSection!, true) as any),
+      ...(getSectionBuildFieldIds(targetSection!, false) as any),
     };
   }, [targetSection, itemIndex, buildFieldId]);
 

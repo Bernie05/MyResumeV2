@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useThemeContext } from "@/context/ThemeContext";
 import { useAnimatedStats } from "@/hook/useAnimated";
 import { getSectionPalette, IThemePalette } from "../../theme/sectionPalette";
@@ -8,7 +8,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 
 import { type ResumeEditableSection } from "@/components/resume/ResumePage";
 import { Box, Container, Stack, Typography } from "@mui/material";
-import { heroSectionId, socialLinks, statItems } from "./constants/constant";
+import { heroSectionId, statItems } from "./constants/constant";
 import {
   createInlineFieldProps,
   getCreatedInlineFields,
@@ -84,7 +84,30 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
   const { isDarkMode } = useThemeContext();
   const theme = getSectionPalette(isDarkMode);
 
-  const { animatedStats, statsRef } = useAnimatedStats(stats, 2000);
+  // Flatten custom stats (an array) into numeric keys so the same count-up
+  // animation used for the built-in stats also applies to them. Memoized on
+  // `stats` (stable across renders unless stats data actually changes) —
+  // useAnimatedStats resets its whole animation whenever this reference
+  // changes, so a fresh object here on every render would reset it
+  // continuously and the count-up would never finish.
+  const statsForAnimation = useMemo(() => {
+    if (!stats) {
+      return stats;
+    }
+
+    return {
+      ...stats,
+      ...(stats.custom ?? []).reduce<Record<string, number>>(
+        (accumulator, customStat, index) => {
+          accumulator[`custom_${index}`] = customStat.value;
+          return accumulator;
+        },
+        {},
+      ),
+    };
+  }, [stats]);
+
+  const { animatedStats, statsRef } = useAnimatedStats(statsForAnimation, 2000);
 
   const { primaryAccent, accentGlow, accentText, buttonGradient } = theme;
 
@@ -269,14 +292,7 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
             </Stack>
 
             {/* Social Media */}
-            <Stack direction="row" spacing={1.5} flexWrap="wrap">
-              {/* Static Social Links */}
-              {/* Make this component dynamic */}
-              <SocialMediaBtn
-                defaultLinks={socialLinks as SocialLink[]}
-                newLinks={personalInfo.social ?? []}
-              />
-            </Stack>
+            <SocialMediaBtn links={(personalInfo.social ?? []) as SocialLink[]} />
           </Stack>
         </Container>
       </CustomBox>
@@ -359,7 +375,7 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
                 ))}
 
               {/* Render of the Custom Stats + */}
-              <CustomStats stats={stats} />
+              <CustomStats stats={stats} animatedValues={animatedStats} />
             </Box>
           </Container>
         </Box>

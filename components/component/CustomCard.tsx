@@ -24,5 +24,6 @@ const BaseCard = React.forwardRef<HTMLDivElement, CustomCardProps>(
     );
   },
 );
+BaseCard.displayName = "BaseCard";
 
 export const CustomCard = withEditableField(BaseCard);

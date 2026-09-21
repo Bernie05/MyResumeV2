@@ -10,6 +10,8 @@ import type {
   PortfolioItem,
   ResumeStats,
   SocialMediaLink,
+  TestimonialItem,
+  ServiceCard,
 } from "@/types/resume";
 
 interface ResumeDataState {
@@ -148,6 +150,93 @@ const resumeDataSlice = createSlice({
       }
     },
 
+    // Services operations (independent from Skills — one card per entry)
+    addServiceCard: (state, action: PayloadAction<ServiceCard>) => {
+      if (state.data) {
+        state.data.services.push(action.payload);
+        state.hasChanges = true;
+      }
+    },
+    updateServiceCard: (
+      state,
+      action: PayloadAction<{ id: number; updates: Partial<ServiceCard> }>,
+    ) => {
+      if (state.data) {
+        const index = state.data.services.findIndex(
+          (card) => card.id === action.payload.id,
+        );
+        if (index !== -1) {
+          state.data.services[index] = {
+            ...state.data.services[index],
+            ...action.payload.updates,
+          };
+          state.hasChanges = true;
+        }
+      }
+    },
+    deleteServiceCard: (state, action: PayloadAction<number>) => {
+      if (state.data) {
+        state.data.services = state.data.services.filter(
+          (card) => card.id !== action.payload,
+        );
+        state.hasChanges = true;
+      }
+    },
+
+    // Service card item (skill row) operations — scoped by card id + item index
+    addServiceItem: (
+      state,
+      action: PayloadAction<{
+        cardId: number;
+        item: ServiceCard["items"][number];
+      }>,
+    ) => {
+      if (state.data) {
+        const card = state.data.services.find(
+          (c) => c.id === action.payload.cardId,
+        );
+        if (card) {
+          card.items.push(action.payload.item);
+          state.hasChanges = true;
+        }
+      }
+    },
+    updateServiceItem: (
+      state,
+      action: PayloadAction<{
+        cardId: number;
+        itemIndex: number;
+        updates: Partial<ServiceCard["items"][number]>;
+      }>,
+    ) => {
+      if (state.data) {
+        const card = state.data.services.find(
+          (c) => c.id === action.payload.cardId,
+        );
+        if (card && card.items[action.payload.itemIndex]) {
+          card.items[action.payload.itemIndex] = {
+            ...card.items[action.payload.itemIndex],
+            ...action.payload.updates,
+          };
+          state.hasChanges = true;
+        }
+      }
+    },
+    deleteServiceItem: (
+      state,
+      action: PayloadAction<{ cardId: number; itemIndex: number }>,
+    ) => {
+      if (state.data) {
+        const card = state.data.services.find(
+          (c) => c.id === action.payload.cardId,
+        );
+        if (card) {
+          card.items.splice(action.payload.itemIndex, 1);
+          state.hasChanges = true;
+        }
+      }
+    },
+
     // Certifications operations
     addCertification: (state, action: PayloadAction<CertificationItem>) => {
       if (state.data) {
@@ -212,6 +301,39 @@ const resumeDataSlice = createSlice({
       if (state.data) {
         state.data.projects = state.data.projects.filter(
           (proj) => proj.id !== action.payload,
+        );
+        state.hasChanges = true;
+      }
+    },
+
+    // Testimonials operations
+    addTestimonial: (state, action: PayloadAction<TestimonialItem>) => {
+      if (state.data) {
+        state.data.testimonials.push(action.payload);
+        state.hasChanges = true;
+      }
+    },
+    updateTestimonial: (
+      state,
+      action: PayloadAction<{ id: number; updates: Partial<TestimonialItem> }>,
+    ) => {
+      if (state.data) {
+        const index = state.data.testimonials.findIndex(
+          (item) => item.id === action.payload.id,
+        );
+        if (index !== -1) {
+          state.data.testimonials[index] = {
+            ...state.data.testimonials[index],
+            ...action.payload.updates,
+          };
+          state.hasChanges = true;
+        }
+      }
+    },
+    deleteTestimonial: (state, action: PayloadAction<number>) => {
+      if (state.data) {
+        state.data.testimonials = state.data.testimonials.filter(
+          (item) => item.id !== action.payload,
         );
         state.hasChanges = true;
       }
@@ -449,12 +571,21 @@ export const {
   deleteEducation,
   updateSkills,
   addSkillCategory,
+  addServiceCard,
+  updateServiceCard,
+  deleteServiceCard,
+  addServiceItem,
+  updateServiceItem,
+  deleteServiceItem,
   addCertification,
   updateCertification,
   deleteCertification,
   addProject,
   updateProject,
   deleteProject,
+  addTestimonial,
+  updateTestimonial,
+  deleteTestimonial,
   markAsSaved,
   clearResumeData,
   addExperienceBullet,

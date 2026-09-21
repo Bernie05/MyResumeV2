@@ -39,25 +39,37 @@ import {
   Twitter as TwitterIcon,
   LinkedIn as LinkedInIcon,
   Instagram as InstagramIcon,
+  RocketLaunch as RocketLaunchIcon,
+  Star as StarIcon,
+  Lightbulb as LightbulbIcon,
+  EmojiEvents as EmojiEventsIcon,
+  Handshake as HandshakeIcon,
+  GpsFixed as GpsFixedIcon,
+  CalendarMonth as CalendarMonthIcon,
+  Email as EmailIcon,
+  Search as SearchIcon,
+  SupportAgent as SupportAgentIcon,
 } from "@mui/icons-material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import { IEditorProps } from "../secret/SecretResumeEditor";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
+import { CustomTypography } from "../component/CustomTypography";
+import { CustomCard } from "../component/CustomCard";
+import { CustomBox } from "../component/CustomBox";
+import { TECH_ICON_MAP } from "@/components/resume/constants/techIcons";
+import { useInlineEditing } from "@/hook/useInlineEditing";
 
-interface SkillItem {
-  name: string;
-  proficiency: number;
-  icon?: string;
-}
+import type { ServiceCard } from "@/types/resume";
 
-interface SkillCategory {
-  category: string;
-  items: SkillItem[];
-  icon?: string;
-  subtitle?: string;
-}
+// Item-level skill icons (services.N.N.icon) are picked from TECH_ICON_MAP
+// (react-icons, keyed by technology name e.g. "react", "docker") in the
+// editor toolbox — a different key space from ICON_MAP (MUI icons, used for
+// card-level icons like services.N.icon). Keep both namespaces distinct here
+// so lookups for one never silently miss because they were tried against the
+// other.
+const SKILL_ICON_SIZE = 20;
 
 export const ICON_MAP: Record<string, React.ElementType> = {
   code: CodeIcon,
@@ -84,6 +96,16 @@ export const ICON_MAP: Record<string, React.ElementType> = {
   twitter: TwitterIcon,
   linkedin: LinkedInIcon,
   instagram: InstagramIcon,
+  rocket: RocketLaunchIcon,
+  star: StarIcon,
+  lightbulb: LightbulbIcon,
+  award: EmojiEventsIcon,
+  handshake: HandshakeIcon,
+  target: GpsFixedIcon,
+  calendar: CalendarMonthIcon,
+  mail: EmailIcon,
+  search: SearchIcon,
+  support: SupportAgentIcon,
 };
 
 export const ICON_NAMES = Object.keys(ICON_MAP);
@@ -101,10 +123,20 @@ const SKILL_ICONS: Record<string, React.ElementType> = {
   default: CodeIcon,
 };
 
+// Item-level skill icons (services.N.N.icon) are picked from TECH_ICON_MAP
+// (react-icons, keyed by technology name e.g. "react", "docker") in the
+// editor toolbox — a different key space from ICON_MAP (MUI icons, used for
+// card-level icons like services.N.icon). Look up TECH_ICON_MAP first so a
+// picked item icon actually resolves; MUI's <Box component={...}> renders
+// either family through the same `sx` styling, so callers don't need to
+// branch on which family they got back.
 const getIconForSkill = (
   skillName: string,
   iconKey?: string,
 ): React.ElementType => {
+  if (iconKey && TECH_ICON_MAP[iconKey]) {
+    return TECH_ICON_MAP[iconKey] as React.ElementType;
+  }
   if (iconKey && ICON_MAP[iconKey]) {
     return ICON_MAP[iconKey];
   }
@@ -133,13 +165,15 @@ const getCategoryIcon = (
 };
 
 export interface IServiceSection extends IEditorProps {
-  skills: SkillCategory[];
+  services: ServiceCard[];
+  servicesBadge: string | undefined;
   servicesTitle: string | undefined;
   servicesSubtitle: string | undefined;
 }
 
 const ServicesSection = ({
-  skills,
+  services,
+  servicesBadge,
   servicesTitle,
   servicesSubtitle,
   onInlineFieldClick,
@@ -147,7 +181,8 @@ const ServicesSection = ({
   onAddAction,
   onDeleteAction,
 }: {
-  skills: SkillCategory[];
+  services: ServiceCard[];
+  servicesBadge?: string;
   servicesTitle?: string;
   servicesSubtitle?: string;
   onInlineFieldClick?: (
@@ -174,53 +209,18 @@ const ServicesSection = ({
     hoverShadow,
   } = getSectionPalette(isDarkMode);
 
-  const getInlineFieldSx = (fieldId: InlineEditableFieldId) => ({
-    borderRadius: 1,
-    outline:
-      activeInlineFieldId === fieldId
-        ? "2px solid rgba(20, 184, 166, 0.9)"
-        : "2px solid transparent",
-    outlineOffset: 2,
-    cursor: onInlineFieldClick ? "pointer" : "inherit",
-    transition: "outline-color 160ms ease, box-shadow 160ms ease",
-    "&:hover": onInlineFieldClick
-      ? {
-          outlineColor: "rgba(20, 184, 166, 0.55)",
-          boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-        }
-      : undefined,
+  // Shared with Experience/Portfolio/Projects — this used to be a
+  // hand-rolled copy of the same outline/hover sx and click/keydown wiring
+  // that useInlineEditing already provides. ServicesSection differs from
+  // those three only in that it receives activeInlineFieldId/
+  // onInlineFieldClick as props (from ResumePage) rather than reading them
+  // via useActiveField()/useOnFieldClick(); useInlineEditing accepts either
+  // way, so that difference stays intact.
+  const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
+    targetSection: "services",
+    activeInlineFieldId,
+    onInlineFieldClick,
   });
-
-  const createInlineFieldProps = (fieldId: InlineEditableFieldId) => {
-    if (!onInlineFieldClick) {
-      return {};
-    }
-
-    return {
-      onClick: (event: React.MouseEvent) => {
-        event.stopPropagation();
-        onInlineFieldClick(
-          "services",
-          fieldId,
-          event.currentTarget as HTMLElement,
-        );
-      },
-      onKeyDown: (event: React.KeyboardEvent) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          event.stopPropagation();
-          onInlineFieldClick(
-            "services",
-            fieldId,
-            event.currentTarget as HTMLElement,
-          );
-        }
-      },
-      role: "button",
-      tabIndex: 0,
-      "aria-label": `Edit ${fieldId}`,
-    };
-  };
 
   return (
     <Box
@@ -240,7 +240,6 @@ const ServicesSection = ({
             alignItems: "center",
             px: 1.75,
             py: 0.75,
-            borderRadius: 999,
             background: buttonGradient,
             color: accentText,
             fontWeight: 700,
@@ -248,36 +247,34 @@ const ServicesSection = ({
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             mb: 2,
+            ...getInlineFieldSx("servicesBadge"),
+            borderRadius: 999,
           }}
+          {...createInlineFieldProps("servicesBadge")}
         >
-          Services
+          {servicesBadge || "Services"}
         </Box>
-        <Typography
+        <CustomTypography
           variant="h3"
+          targetSectionId="services"
+          targetFieldId="servicesTitle"
           sx={{
             fontWeight: 800,
             fontSize: { xs: "2rem", md: "2.5rem" },
             color: titleColor,
             mb: 2,
-            ...getInlineFieldSx("servicesTitle"),
           }}
-          {...createInlineFieldProps("servicesTitle")}
         >
           {servicesTitle || "What I Offer"}
-        </Typography>
-        <Typography
+        </CustomTypography>
+        <CustomTypography
           variant="h6"
-          sx={{
-            fontSize: "1.125rem",
-            color: mutedColor,
-            fontWeight: 400,
-            ...getInlineFieldSx("servicesSubtitle"),
-          }}
-          {...createInlineFieldProps("servicesSubtitle")}
+          targetSectionId="services"
+          targetFieldId="servicesSubtitle"
         >
           {servicesSubtitle ||
             "Professional services tailored to your project needs"}
-        </Typography>
+        </CustomTypography>
       </Box>
 
       {/* Services Grid */}
@@ -292,9 +289,9 @@ const ServicesSection = ({
           gap: 4,
         }}
       >
-        {skills.map((category, categoryIndex) => (
+        {services.map((card, cardIndex) => (
           <Card
-            key={`${category.category}-${categoryIndex}`}
+            key={card.id}
             sx={{
               background: surfaceBackground,
               border: `1px solid ${outline}`,
@@ -310,10 +307,10 @@ const ServicesSection = ({
           >
             {onDeleteAction && (
               <IconButton
-                aria-label="Delete service category"
+                aria-label="Delete service card"
                 onClick={(event) => {
                   event.stopPropagation();
-                  onDeleteAction(`services.${categoryIndex}`);
+                  onDeleteAction(`services.${cardIndex}`);
                 }}
                 sx={{
                   position: "absolute",
@@ -346,6 +343,7 @@ const ServicesSection = ({
                   mb: 4,
                 }}
               >
+                {/* Icon */}
                 <Box
                   sx={{
                     p: 2,
@@ -353,82 +351,94 @@ const ServicesSection = ({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    ...getInlineFieldSx(`skills.${categoryIndex}.icon`),
                     borderRadius: "0.75rem",
                     cursor: "pointer",
                   }}
-                  {...createInlineFieldProps(`skills.${categoryIndex}.icon`)}
+                  {...createInlineFieldProps(`services.${cardIndex}.icon`)}
                 >
-                  {React.createElement(
-                    getCategoryIcon(category.category, category.icon),
-                    {
-                      sx: {
-                        fontSize: "1.75rem",
-                        color: primaryAccent,
+                  {/* Highlight target sized to the icon itself, not the
+                      padded chip background above, so the edit-mode outline
+                      hugs the icon instead of the whole badge. */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      ...getInlineFieldSx(`services.${cardIndex}.icon`),
+                    }}
+                  >
+                    {React.createElement(
+                      getCategoryIcon(card.title, card.icon),
+                      {
+                        sx: {
+                          fontSize: "1.75rem",
+                          color: primaryAccent,
+                          display: "block",
+                        },
                       },
-                    },
-                  )}
+                    )}
+                  </Box>
                 </Box>
+                {/* Title and Subtitle */}
                 <Box>
-                  <Typography
+                  <CustomTypography
                     variant="h5"
                     sx={{
                       fontWeight: 700,
                       fontSize: "1.5rem",
                       color: titleColor,
-                      ...getInlineFieldSx(`skills.${categoryIndex}.category`),
+                      ...getInlineFieldSx(`services.${cardIndex}.title`),
                     }}
-                    {...createInlineFieldProps(
-                      `skills.${categoryIndex}.category`,
-                    )}
+                    {...createInlineFieldProps(`services.${cardIndex}.title`)}
                   >
-                    {category.category} Development
-                  </Typography>
-                  <Typography
+                    {card.title || "Development"}
+                  </CustomTypography>
+                  <CustomTypography
                     variant="caption"
                     sx={{
                       fontSize: "0.875rem",
                       color: mutedColor,
                       display: "block",
                       mt: 0.5,
-                      ...getInlineFieldSx(`skills.${categoryIndex}.subtitle`),
+                      ...getInlineFieldSx(`services.${cardIndex}.subtitle`),
                     }}
                     {...createInlineFieldProps(
-                      `skills.${categoryIndex}.subtitle`,
+                      `services.${cardIndex}.subtitle`,
                     )}
                   >
-                    {category.subtitle ||
-                      `Expert ${category.category.toLowerCase()} solutions`}
-                  </Typography>
+                    {card.subtitle ||
+                      `Expert ${card.title.toLowerCase()} solutions`}
+                  </CustomTypography>
                 </Box>
               </Box>
 
               {/* Skills List */}
               <List sx={{ p: 0, m: 0 }}>
-                {category.items.slice(0, 4).map((skill, itemIndex) => {
+                {card.items.map((skill, itemIndex) => {
                   const IconComponent = getIconForSkill(skill.name, skill.icon);
                   return (
                     <ListItem
-                      key={`${skill.name}-${itemIndex}`}
+                      key={skill.id}
                       sx={{
                         p: 0,
                         mb: 2,
                         alignItems: "center",
                         "&:last-child": { mb: 0 },
                         ...getInlineFieldSx(
-                          `skills.${categoryIndex}.${itemIndex}.name`,
+                          `services.${cardIndex}.${itemIndex}.name`,
                         ),
                       }}
                       {...createInlineFieldProps(
-                        `skills.${categoryIndex}.${itemIndex}.name`,
+                        `services.${cardIndex}.${itemIndex}.name`,
                       )}
                     >
+                      {/* Icon */}
                       <ListItemIcon
                         sx={{
                           minWidth: "32px",
                           color: primaryAccent,
                           ...getInlineFieldSx(
-                            `skills.${categoryIndex}.${itemIndex}.icon`,
+                            `services.${cardIndex}.${itemIndex}.icon`,
                           ),
                           cursor: "pointer",
                           borderRadius: "4px",
@@ -436,13 +446,18 @@ const ServicesSection = ({
                         onClick={(e) => {
                           e.stopPropagation();
                           const props = createInlineFieldProps(
-                            `skills.${categoryIndex}.${itemIndex}.icon`,
+                            `services.${cardIndex}.${itemIndex}.icon`,
                           );
                           if (props.onClick) props.onClick(e as any);
                         }}
                       >
-                        <IconComponent sx={{ fontSize: "1.25rem" }} />
+                        <Box
+                          component={IconComponent}
+                          sx={{ fontSize: SKILL_ICON_SIZE, flexShrink: 0 }}
+                        />
                       </ListItemIcon>
+
+                      {/* Skill Name */}
                       <ListItemText
                         primary={skill.name}
                         primaryTypographyProps={{
@@ -453,24 +468,12 @@ const ServicesSection = ({
                           },
                         }}
                       />
+                      {/* Proficiency Chip */}
                       <Box
                         sx={{
                           ml: "auto",
-                          ...getInlineFieldSx(
-                            `skills.${categoryIndex}.${itemIndex}.proficiency`,
-                          ),
                           cursor: "pointer",
                           borderRadius: "16px",
-                        }}
-                        {...createInlineFieldProps(
-                          `skills.${categoryIndex}.${itemIndex}.proficiency`,
-                        )}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const props = createInlineFieldProps(
-                            `skills.${categoryIndex}.${itemIndex}.proficiency`,
-                          );
-                          if (props.onClick) props.onClick(e as any);
                         }}
                       >
                         <Chip
@@ -488,6 +491,50 @@ const ServicesSection = ({
                   );
                 })}
               </List>
+
+              {/* Add Skill (scoped to this card) */}
+              {onAddAction && (
+                <Box
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Add skill to this card"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onAddAction(
+                      `services.${cardIndex}.item`,
+                      event.currentTarget as HTMLElement,
+                    );
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      onAddAction(
+                        `services.${cardIndex}.item`,
+                        event.currentTarget as HTMLElement,
+                      );
+                    }
+                  }}
+                  sx={{
+                    mt: 2,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    fontSize: "0.8125rem",
+                    fontWeight: 600,
+                    color: primaryAccent,
+                    cursor: "pointer",
+                    borderRadius: 1,
+                    px: 1,
+                    py: 0.5,
+                    "&:hover": {
+                      backgroundColor: softBackground,
+                    },
+                  }}
+                >
+                  + Add Skill
+                </Box>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -510,9 +557,10 @@ const ServicesSection = ({
                 background: `${softBackground}`,
               },
             }}
-            onClick={(event) =>
-              onAddAction("services", event.currentTarget as HTMLElement)
-            }
+            onClick={(event) => {
+              event.stopPropagation();
+              onAddAction("services", event.currentTarget as HTMLElement);
+            }}
           >
             <CardContent
               sx={{

@@ -7,15 +7,26 @@ import { ProjectCardComponent } from "./components/cards/ProjectCardComponent";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
-import { useEditor } from "@/hook/useEditor";
+import { useEditor, useActiveField, useOnFieldClick } from "@/hook/useEditor";
+import { useInlineEditing } from "@/hook/useInlineEditing";
 
 interface IPortfolioProps {
   portfolio: IPortfolioItem[];
+  portfolioBadge?: string;
+  portfolioTitle?: string;
+  portfolioSubtitle?: string;
 }
 
-const Portfolio = ({ portfolio }: IPortfolioProps) => {
+const Portfolio = ({
+  portfolio,
+  portfolioBadge,
+  portfolioTitle,
+  portfolioSubtitle,
+}: IPortfolioProps) => {
   const editor = useEditor();
   const { onAddAction, onDeleteAction } = editor || {};
+  const activeInlineFieldId = useActiveField();
+  const onInlineFieldClick = useOnFieldClick();
   const { isDarkMode } = useThemeContext();
   const {
     titleColor,
@@ -24,7 +35,14 @@ const Portfolio = ({ portfolio }: IPortfolioProps) => {
     outline,
     buttonGradient,
     accentText,
+    primaryAccent,
   } = getSectionPalette(isDarkMode);
+
+  const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
+    targetSection: "portfolio",
+    activeInlineFieldId,
+    onInlineFieldClick,
+  });
 
   return (
     <Box
@@ -42,7 +60,6 @@ const Portfolio = ({ portfolio }: IPortfolioProps) => {
             display: "inline-flex",
             px: 1.75,
             py: 0.75,
-            borderRadius: 999,
             background: buttonGradient,
             color: accentText,
             fontWeight: 700,
@@ -50,9 +67,12 @@ const Portfolio = ({ portfolio }: IPortfolioProps) => {
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             mb: 2,
+            ...getInlineFieldSx("portfolioBadge"),
+            borderRadius: 999,
           }}
+          {...createInlineFieldProps("portfolioBadge")}
         >
-          Portfolio
+          {portfolioBadge || "Portfolio"}
         </Box>
         <Typography
           variant="h3"
@@ -61,9 +81,11 @@ const Portfolio = ({ portfolio }: IPortfolioProps) => {
             fontSize: { xs: "2rem", md: "2.5rem", lg: "3rem" },
             color: titleColor,
             mb: 2,
+            ...getInlineFieldSx("portfolioTitle"),
           }}
+          {...createInlineFieldProps("portfolioTitle")}
         >
-          Featured Work
+          {portfolioTitle || "Featured Work"}
         </Typography>
         <Typography
           variant="h6"
@@ -72,10 +94,12 @@ const Portfolio = ({ portfolio }: IPortfolioProps) => {
             fontSize: "1.125rem",
             color: mutedColor,
             fontWeight: 400,
+            ...getInlineFieldSx("portfolioSubtitle"),
           }}
+          {...createInlineFieldProps("portfolioSubtitle")}
         >
-          Explore my best projects and case studies. Each project showcases
-          strategic problem-solving and technical excellence.
+          {portfolioSubtitle ||
+            "Explore my best projects and case studies. Each project showcases strategic problem-solving and technical excellence."}
         </Typography>
       </Box>
 
@@ -103,23 +127,24 @@ const Portfolio = ({ portfolio }: IPortfolioProps) => {
           sx={{
             mt: 4,
             p: 4,
-            border: `2px dashed ${accentText}40`,
+            border: `2px dashed ${primaryAccent}50`,
             borderRadius: "1rem",
             textAlign: "center",
             cursor: "pointer",
             transition: "all 0.3s ease",
             "&:hover": {
-              borderColor: accentText,
+              borderColor: primaryAccent,
               background: `${mutedColor}10`,
             },
           }}
-          onClick={(event) =>
-            onAddAction("portfolio", event.currentTarget as HTMLElement)
-          }
+          onClick={(event) => {
+            event.stopPropagation();
+            onAddAction("portfolio", event.currentTarget as HTMLElement);
+          }}
         >
           <Typography
             sx={{
-              color: accentText,
+              color: primaryAccent,
               fontWeight: 700,
               fontSize: "1.1rem",
             }}

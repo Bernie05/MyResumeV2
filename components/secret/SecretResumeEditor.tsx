@@ -9,6 +9,7 @@ import type {
   EducationItem,
   ResumeData,
   ResumeStats,
+  TestimonialItem,
 } from "@/types/resume";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -17,6 +18,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import { ICON_MAP, ICON_NAMES } from "@/components/resume/ServicesSection";
+import { TECH_ICON_OPTIONS } from "@/components/resume/constants/techIcons";
 import { SecretEditorSkeleton } from "@/components/secret/SecretSkeletons";
 import {
   Alert,
@@ -38,7 +40,7 @@ import {
 } from "@mui/material";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   loadResumeDataSuccess,
@@ -56,8 +58,11 @@ import {
   createEmptyExperienceItem,
   createEmptyPortfolioItem,
   createEmptyProjectItem,
+  createEmptyServiceCard,
+  createEmptyServiceItem,
   createEmptySkillCategory,
   createEmptySkillItem,
+  createEmptyTestimonialItem,
   csvToText,
   linesToText,
   removeItemAtIndex,
@@ -65,16 +70,111 @@ import {
   textToCsv,
   textToLines,
 } from "./utils/util";
-import { getInlineFieldLabel } from "./utils/componentUtil";
+import {
+  getInlineFieldLabel,
+  renderIconMapPickerGrid,
+} from "./utils/componentUtil";
 import {
   EDITOR_SECTIONS,
   InlineEditableFieldId,
   PREVIEW_SECTION_TO_EDITOR_SECTION,
+  SIMPLE_TEXT_FIELD_CONFIG,
 } from "./constants/constant";
 import { CustomPopover } from "../component/CustomPopover";
 import { EditorProvider } from "@/context/EditorContext";
 
 export type EditorSection = (typeof EDITOR_SECTIONS)[number]["value"];
+
+// Quick-select presets for the "Add social link" flow — covers the most
+// common platforms using icons already available in ICON_MAP, so picking one
+// pre-fills label/icon/URL prefix while still allowing a fully custom entry.
+const SOCIAL_LINK_PRESETS: Array<{
+  label: string;
+  icon: string;
+  urlPrefix: string;
+}> = [
+  { label: "Facebook", icon: "facebook", urlPrefix: "https://facebook.com/" },
+  {
+    label: "LinkedIn",
+    icon: "linkedin",
+    urlPrefix: "https://linkedin.com/in/",
+  },
+  {
+    label: "Instagram",
+    icon: "instagram",
+    urlPrefix: "https://instagram.com/",
+  },
+  { label: "Twitter / X", icon: "twitter", urlPrefix: "https://x.com/" },
+];
+
+// Role/category keyword -> suggested TECH_ICON_OPTIONS keys, used to surface
+// a "Suggested" chip row above the full icon grid when adding/editing a
+// service card's skill icon. Matched by substring against the card's
+// (lowercased) title, e.g. "Backend Developer" matches "backend". Keep small
+// and only reference keys that actually exist in TECH_ICON_OPTIONS.
+const ROLE_ICON_SUGGESTIONS: Record<string, string[]> = {
+  backend: [
+    "nodejs",
+    "express",
+    "java",
+    "spring",
+    "python",
+    "django",
+    "flask",
+    "go",
+    "rust",
+    "csharp",
+    "php",
+    "laravel",
+    "ruby",
+    "rails",
+    "graphql",
+  ],
+  frontend: [
+    "html5",
+    "css3",
+    "javascript",
+    "typescript",
+    "react",
+    "nextjs",
+    "redux",
+    "vue",
+    "angular",
+    "tailwind",
+    "bootstrap",
+    "sass",
+    "jquery",
+  ],
+  devops: [
+    "docker",
+    "kubernetes",
+    "aws",
+    "gcp",
+    "vercel",
+    "git",
+    "github",
+    "gitlab",
+    "linux",
+  ],
+  database: [
+    "mysql",
+    "postgresql",
+    "mongodb",
+    "redis",
+    "sqlite",
+    "graphql",
+    "firebase",
+  ],
+  mobile: [
+    "swift",
+    "kotlin",
+    "react",
+    "typescript",
+    "javascript",
+    "firebase",
+  ],
+  design: ["figma", "css3", "html5", "sass", "tailwind", "bootstrap"],
+};
 
 interface SecretResumeEditorProps {
   initialResume: ResumeData;
@@ -234,28 +334,34 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     router.refresh();
   };
 
-  const handlePreviewSectionClick = (section: ResumeEditableSection) => {
-    setSelectedPreviewSection(section);
-    setSelectedInlineFieldId(null);
-    setActiveSection(PREVIEW_SECTION_TO_EDITOR_SECTION[section]);
-  };
+  const handlePreviewSectionClick = useCallback(
+    (section: ResumeEditableSection) => {
+      setSelectedPreviewSection(section);
+      setSelectedInlineFieldId(null);
+      setActiveSection(PREVIEW_SECTION_TO_EDITOR_SECTION[section]);
+    },
+    [],
+  );
 
-  const handleInlineFieldClick = (
-    section: ResumeEditableSection,
-    fieldId: InlineEditableFieldId,
-    anchor?: HTMLElement,
-  ) => {
-    setSelectedPreviewSection(section);
-    setSelectedInlineFieldId(fieldId);
-    setAnchorEl(anchor ?? null);
-  };
+  const handleInlineFieldClick = useCallback(
+    (
+      section: ResumeEditableSection,
+      fieldId: InlineEditableFieldId,
+      anchor?: HTMLElement,
+    ) => {
+      setSelectedPreviewSection(section);
+      setSelectedInlineFieldId(fieldId);
+      setAnchorEl(anchor ?? null);
+    },
+    [],
+  );
 
   const handleCloseInlineEditor = () => {
     setAnchorEl(null);
     setSelectedInlineFieldId(null);
   };
 
-  const handleAddAction = (action: string, anchor: HTMLElement) => {
+  const handleAddAction = useCallback((action: string, anchor: HTMLElement) => {
     if (action === "experience") {
       setDraft((current) => ({
         ...current,
@@ -273,19 +379,24 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       const expIndex = Number(bulletMatch[1]);
       const item = draft.experience[expIndex];
       if (item) {
-        setDraft((current) => ({
-          ...current,
-          experience: replaceItemAtIndex(current.experience, expIndex, {
-            ...item,
-            description: [...item.description, ""],
-          }),
-        }));
+        setDraft((current) => {
+          const currentItem = current.experience[expIndex];
+          if (!currentItem) {
+            return current;
+          }
+
+          return {
+            ...current,
+            experience: replaceItemAtIndex(current.experience, expIndex, {
+              ...currentItem,
+              description: [...currentItem.description, ""],
+            }),
+          };
+        });
         const bulletIndex = item.description.length;
         const fieldId =
           `experience.${expIndex}.description.${bulletIndex}` as InlineEditableFieldId;
-        setSelectedPreviewSection("experience");
-        setSelectedInlineFieldId(fieldId);
-        setAnchorEl(anchor);
+        handleInlineFieldClick("experience", fieldId, anchor);
       }
       return;
     }
@@ -317,23 +428,86 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     if (action === "services") {
       setDraft((current) => ({
         ...current,
-        skills: [...current.skills, createEmptySkillCategory()],
+        services: [
+          ...current.services,
+          createEmptyServiceCard(current.services),
+        ],
       }));
-      setNotice("New skill category added.");
+      setNotice("New service card added.");
+      return;
+    }
+
+    const serviceItemMatch = action.match(/^services\.(\d+)\.item$/);
+    if (serviceItemMatch) {
+      const cardIndex = Number(serviceItemMatch[1]);
+      const card = draft.services[cardIndex];
+      if (card) {
+        const newItemIndex = card.items.length;
+        setDraft((current) => {
+          const currentCard = current.services[cardIndex];
+          if (!currentCard) {
+            return current;
+          }
+
+          return {
+            ...current,
+            services: replaceItemAtIndex(current.services, cardIndex, {
+              ...currentCard,
+              items: [
+                ...currentCard.items,
+                createEmptyServiceItem(currentCard.items),
+              ],
+            }),
+          };
+        });
+        const fieldId =
+          `services.${cardIndex}.${newItemIndex}.name` as InlineEditableFieldId;
+        handleInlineFieldClick("services", fieldId, anchor);
+      }
+      return;
+    }
+
+    const skillItemMatch = action.match(/^skills\.(\d+)\.item$/);
+    if (skillItemMatch) {
+      const catIndex = Number(skillItemMatch[1]);
+      const category = draft.skills[catIndex];
+      if (category) {
+        const newItemIndex = category.items.length;
+        setDraft((current) => {
+          // Read the category fresh from `current` (not the outer `category`
+          // closure) so a rename that hasn't propagated back into `draft` yet
+          // isn't silently reverted by this merge.
+          const currentCategory = current.skills[catIndex];
+          if (!currentCategory) {
+            return current;
+          }
+
+          return {
+            ...current,
+            skills: replaceItemAtIndex(current.skills, catIndex, {
+              ...currentCategory,
+              items: [...currentCategory.items, createEmptySkillItem()],
+            }),
+          };
+        });
+        const fieldId =
+          `skills.${catIndex}.${newItemIndex}.name` as InlineEditableFieldId;
+        handleInlineFieldClick("skills", fieldId, anchor);
+      }
       return;
     }
 
     if (action === "social") {
       const socialLinks = draft.personalInfo.social ?? [];
+      const newIndex = socialLinks.length;
       const nextSocial = [...socialLinks, { label: "", url: "" }];
       setDraft((current) => ({
         ...current,
         personalInfo: { ...current.personalInfo, social: nextSocial },
       }));
-      const fieldId = "personalInfo.social.new" as InlineEditableFieldId;
-      setSelectedPreviewSection("about");
-      setSelectedInlineFieldId(fieldId);
-      setAnchorEl(anchor);
+      const fieldId =
+        `personalInfo.social.${newIndex}` as InlineEditableFieldId;
+      handleInlineFieldClick("about", fieldId, anchor);
       return;
     }
 
@@ -346,9 +520,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       }));
       const newIdx = nextCustom.length - 1;
       const fieldId = `stats.custom.${newIdx}` as InlineEditableFieldId;
-      setSelectedPreviewSection("about");
-      setSelectedInlineFieldId(fieldId);
-      setAnchorEl(anchor);
+      handleInlineFieldClick("about", fieldId, anchor);
       return;
     }
 
@@ -376,24 +548,41 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       return;
     }
 
+    if (action === "testimonials") {
+      setDraft((current) => ({
+        ...current,
+        testimonials: [
+          ...current.testimonials,
+          createEmptyTestimonialItem(current.testimonials),
+        ],
+      }));
+      setNotice("New testimonial added.");
+      return;
+    }
+
     const portfolioResultMatch = action.match(/^portfolio\.(\d+)\.result$/);
     if (portfolioResultMatch) {
       const portIndex = Number(portfolioResultMatch[1]);
       const item = draft.portfolio[portIndex];
       if (item) {
-        setDraft((current) => ({
-          ...current,
-          portfolio: replaceItemAtIndex(current.portfolio, portIndex, {
-            ...item,
-            results: [...item.results, ""],
-          }),
-        }));
+        setDraft((current) => {
+          const currentItem = current.portfolio[portIndex];
+          if (!currentItem) {
+            return current;
+          }
+
+          return {
+            ...current,
+            portfolio: replaceItemAtIndex(current.portfolio, portIndex, {
+              ...currentItem,
+              results: [...currentItem.results, ""],
+            }),
+          };
+        });
         const resultIndex = item.results.length;
         const fieldId =
           `portfolio.${portIndex}.result.${resultIndex}` as InlineEditableFieldId;
-        setSelectedPreviewSection("portfolio");
-        setSelectedInlineFieldId(fieldId);
-        setAnchorEl(anchor);
+        handleInlineFieldClick("portfolio", fieldId, anchor);
       }
       return;
     }
@@ -403,17 +592,57 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       const portIndex = Number(portfolioTechMatch[1]);
       const item = draft.portfolio[portIndex];
       if (item) {
+        const newTechIndex = item.technologies.length;
+        setDraft((current) => {
+          const currentItem = current.portfolio[portIndex];
+          if (!currentItem) {
+            return current;
+          }
+
+          return {
+            ...current,
+            portfolio: replaceItemAtIndex(current.portfolio, portIndex, {
+              ...currentItem,
+              technologies: [...currentItem.technologies, ""],
+            }),
+          };
+        });
         const fieldId =
-          `portfolio.${portIndex}.technologies` as InlineEditableFieldId;
-        setSelectedPreviewSection("portfolio");
-        setSelectedInlineFieldId(fieldId);
-        setAnchorEl(anchor);
+          `portfolio.${portIndex}.technologies.${newTechIndex}` as InlineEditableFieldId;
+        handleInlineFieldClick("portfolio", fieldId, anchor);
       }
       return;
     }
-  };
 
-  const handleDeleteAction = (action: string) => {
+    const projectTechMatch = action.match(/^projects\.(\d+)\.tech$/);
+    if (projectTechMatch) {
+      const projIndex = Number(projectTechMatch[1]);
+      const item = draft.projects[projIndex];
+      if (item) {
+        const newTechIndex = item.technologies.length;
+        setDraft((current) => {
+          const currentItem = current.projects[projIndex];
+          if (!currentItem) {
+            return current;
+          }
+
+          return {
+            ...current,
+            projects: replaceItemAtIndex(current.projects, projIndex, {
+              ...currentItem,
+              technologies: [...currentItem.technologies, ""],
+            }),
+          };
+        });
+        const fieldId =
+          `projects.${projIndex}.technologies.${newTechIndex}` as InlineEditableFieldId;
+        handleInlineFieldClick("projects", fieldId, anchor);
+      }
+      return;
+    }
+  }, [draft, setDraft, handleInlineFieldClick]);
+
+  const handleDeleteAction = useCallback((action: string) => {
     const projectMatch = action.match(/^projects\.(\d+)$/);
     if (projectMatch) {
       const index = Number(projectMatch[1]);
@@ -435,104 +664,262 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       setNotice("Portfolio item removed.");
       return;
     }
+
+    const experienceMatch = action.match(/^experience\.(\d+)$/);
+    if (experienceMatch) {
+      const index = Number(experienceMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        experience: removeItemAtIndex(current.experience, index),
+      }));
+      setNotice("Experience removed.");
+      return;
+    }
+
+    const educationMatch = action.match(/^education\.(\d+)$/);
+    if (educationMatch) {
+      const index = Number(educationMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        education: removeItemAtIndex(current.education, index),
+      }));
+      setNotice("Education removed.");
+      return;
+    }
+
+    const certificationMatch = action.match(/^certifications\.(\d+)$/);
+    if (certificationMatch) {
+      const index = Number(certificationMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        certifications: removeItemAtIndex(current.certifications, index),
+      }));
+      setNotice("Certification removed.");
+      return;
+    }
+
+    const testimonialMatch = action.match(/^testimonials\.(\d+)$/);
+    if (testimonialMatch) {
+      const index = Number(testimonialMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        testimonials: removeItemAtIndex(current.testimonials, index),
+      }));
+      setNotice("Testimonial removed.");
+      return;
+    }
+
+    const serviceCardMatch = action.match(/^services\.(\d+)$/);
+    if (serviceCardMatch) {
+      const index = Number(serviceCardMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        services: removeItemAtIndex(current.services, index),
+      }));
+      setNotice("Service card removed.");
+      return;
+    }
+  }, [setDraft]);
+
+  // Shared icon picker for a service card's skill item — used by both the
+  // services.N.N.name (comprehensive form) and services.N.N.icon branches so
+  // the two stay in sync. Renders an optional "Suggested" chip row (based on
+  // the parent card's title matching ROLE_ICON_SUGGESTIONS) above the full
+  // TECH_ICON_OPTIONS grid. Any icon already used by another skill item
+  // anywhere in draft.services is disabled/dimmed, mirroring the social-link
+  // picker's duplicate-prevention pattern.
+  const renderServiceItemIconPicker = (
+    cardIndex: number,
+    itemIndex: number,
+  ) => {
+    const card = draft.services[cardIndex];
+    const item = card?.items[itemIndex];
+    if (!card || !item) return null;
+
+    const applyIcon = (key: string) => {
+      const nextItems = replaceItemAtIndex(card.items, itemIndex, {
+        ...item,
+        icon: key,
+      });
+      setDraft((current) => ({
+        ...current,
+        services: replaceItemAtIndex(current.services, cardIndex, {
+          ...card,
+          items: nextItems,
+        }),
+      }));
+    };
+
+    // Icon keys already used by any skill item on any card, excluding the
+    // item currently being edited, checked case-insensitively so the same
+    // icon can't be assigned to two different skills across the section.
+    const usedServiceIconKeys = new Set(
+      draft.services.flatMap((c, cIdx) =>
+        c.items
+          .filter(
+            (_it, iIdx) => !(cIdx === cardIndex && iIdx === itemIndex),
+          )
+          .map((it) => it.icon?.toLowerCase())
+          .filter((icon): icon is string => Boolean(icon)),
+      ),
+    );
+
+    const cardTitle = (card.title ?? "").toLowerCase();
+    const matchedRoleKey = Object.keys(ROLE_ICON_SUGGESTIONS).find(
+      (roleKeyword) => cardTitle.includes(roleKeyword),
+    );
+    const suggestedKeys = matchedRoleKey
+      ? ROLE_ICON_SUGGESTIONS[matchedRoleKey].filter(
+          (key) => !usedServiceIconKeys.has(key.toLowerCase()),
+        )
+      : [];
+    const suggestedOptions = suggestedKeys
+      .map((key) => TECH_ICON_OPTIONS.find((option) => option.key === key))
+      .filter((option): option is (typeof TECH_ICON_OPTIONS)[number] =>
+        Boolean(option),
+      );
+
+    return (
+      <Stack spacing={1}>
+        {suggestedOptions.length > 0 && (
+          <Stack spacing={0.5}>
+            <Typography variant="caption" color="text.secondary">
+              Suggested
+            </Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {suggestedOptions.map(({ key, label, Icon: Ic }) => (
+                <Chip
+                  key={key}
+                  size="small"
+                  clickable
+                  icon={<Ic size={16} />}
+                  label={label}
+                  onClick={() => applyIcon(key)}
+                />
+              ))}
+            </Stack>
+          </Stack>
+        )}
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+          {TECH_ICON_OPTIONS.map(({ key, label, Icon: Ic }) => {
+            const isSelected = item.icon === key;
+            const isUsedElsewhere =
+              !isSelected && usedServiceIconKeys.has(key.toLowerCase());
+            return (
+              <IconButton
+                key={key}
+                size="small"
+                disabled={isUsedElsewhere}
+                onClick={() => {
+                  if (isUsedElsewhere) return;
+                  applyIcon(key);
+                }}
+                sx={{
+                  border: isSelected ? "2px solid" : "1px solid transparent",
+                  borderColor: isSelected ? "primary.main" : "transparent",
+                  borderRadius: 1,
+                  opacity: isUsedElsewhere ? 0.35 : 1,
+                }}
+                title={
+                  isUsedElsewhere
+                    ? `${label} — already used by another skill`
+                    : label
+                }
+              >
+                <Ic size={18} />
+              </IconButton>
+            );
+          })}
+        </Box>
+      </Stack>
+    );
   };
 
   const renderInlineFieldToolbox = () => {
-    console.log(
-      "Rendering inline field toolbox for fieldId: ",
-      selectedInlineFieldId,
-    );
     if (!selectedInlineFieldId) {
       return null;
     }
 
     if (selectedInlineFieldId.startsWith("personalInfo.")) {
-      // Handle social links
+      // Handle social links — scoped to the single entry that was clicked,
+      // not the whole list, so each entry edits independently.
       const socialMatch = selectedInlineFieldId.match(
-        /^personalInfo\.social\.(.+)$/,
+        /^personalInfo\.social\.(\d+)$/,
       );
 
       if (socialMatch) {
+        const idx = Number(socialMatch[1]);
         const socialInfo = draft.personalInfo.social ?? [];
+        const s = socialInfo[idx];
+
+        if (!s) {
+          return null;
+        }
+
+        // Only offer quick presets while the entry is still blank — once the
+        // user has typed a custom label/url, keep the toolbox focused on
+        // editing rather than re-surfacing the preset row.
+        const isBlankEntry = !s.label && !s.url;
+
+        // Icon keys already used by *other* social entries — checked
+        // case-insensitively against the live draft (saved + unsaved) so an
+        // icon can't be assigned to two entries, whether picked via the
+        // Quick add chips or the manual icon grid below.
+        const usedIconKeys = new Set(
+          socialInfo
+            .filter((_entry, entryIdx) => entryIdx !== idx)
+            .map((entry) => entry.icon?.toLowerCase())
+            .filter((icon): icon is string => Boolean(icon)),
+        );
+
+        // Hide presets that are already present among the existing social
+        // entries (matched by icon key, falling back to label) so the same
+        // platform can't be quick-added twice.
+        const availablePresets = SOCIAL_LINK_PRESETS.filter((preset) => {
+          if (usedIconKeys.has(preset.icon.toLowerCase())) {
+            return false;
+          }
+          const isAlreadyAddedByLabel = socialInfo.some((entry, entryIdx) => {
+            if (entryIdx === idx || entry.icon) {
+              return false;
+            }
+            return (
+              (entry.label ?? "").trim().toLowerCase() ===
+              preset.label.toLowerCase()
+            );
+          });
+          return !isAlreadyAddedByLabel;
+        });
+
         return (
-          <Stack spacing={1.25} sx={{ mt: 1.5 }}>
-            <Typography variant="caption" color="text.secondary">
-              Social links (label : url)
-            </Typography>
-            {socialInfo.map((s, idx) => (
-              <Stack key={idx} spacing={1}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <TextField
-                    size="small"
-                    label="Label"
-                    value={s.label}
-                    sx={{ flex: 1 }}
-                    onChange={(event) => {
-                      const next = [...socialInfo];
-                      next[idx] = { ...next[idx], label: event.target.value };
-                      setDraft((current) => ({
-                        ...current,
-                        personalInfo: {
-                          ...current.personalInfo,
-                          social: next,
-                        },
-                      }));
-                    }}
-                  />
-                  <TextField
-                    size="small"
-                    label="URL"
-                    value={s.url ?? ""}
-                    sx={{ flex: 2 }}
-                    onChange={(event) => {
-                      const next = [...socialInfo];
-                      next[idx] = { ...next[idx], url: event.target.value };
-                      setDraft((current) => ({
-                        ...current,
-                        personalInfo: {
-                          ...current.personalInfo,
-                          social: next,
-                        },
-                      }));
-                    }}
-                  />
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      const next = socialInfo.filter(
-                        (_: unknown, i: number) => i !== idx,
-                      );
-                      setDraft((current) => ({
-                        ...current,
-                        personalInfo: {
-                          ...current.personalInfo,
-                          social: next,
-                        },
-                      }));
-                    }}
-                  >
-                    <DeleteOutlineIcon fontSize="small" />
-                  </IconButton>
-                </Stack>
+          <Stack spacing={1} sx={{ mt: 1.5 }}>
+            {isBlankEntry && availablePresets.length > 0 && (
+              <Stack spacing={0.5}>
                 <Typography variant="caption" color="text.secondary">
-                  Icon
+                  Quick add
                 </Typography>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, 36px)",
-                    gap: 0.5,
-                  }}
-                >
-                  {ICON_NAMES.map((iconKey) => {
-                    const Icon = ICON_MAP[iconKey];
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                  {availablePresets.map((preset) => {
+                    const PresetIcon = ICON_MAP[preset.icon];
                     return (
-                      <IconButton
-                        key={iconKey}
+                      <Chip
+                        key={preset.icon}
                         size="small"
+                        clickable
+                        icon={
+                          PresetIcon ? (
+                            <PresetIcon sx={{ fontSize: 16 }} />
+                          ) : undefined
+                        }
+                        label={preset.label}
                         onClick={() => {
                           const next = [...socialInfo];
-                          next[idx] = { ...next[idx], icon: iconKey };
+                          next[idx] = {
+                            ...next[idx],
+                            label: preset.label,
+                            icon: preset.icon,
+                            url: preset.urlPrefix,
+                          };
                           setDraft((current) => ({
                             ...current,
                             personalInfo: {
@@ -541,39 +928,127 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
                             },
                           }));
                         }}
-                        sx={{
-                          border: "1px solid",
-                          borderColor:
-                            s.icon === iconKey ? "primary.main" : "divider",
-                          backgroundColor:
-                            s.icon === iconKey
-                              ? "action.selected"
-                              : "transparent",
-                          borderRadius: 1,
-                        }}
-                      >
-                        <Icon sx={{ fontSize: 18 }} />
-                      </IconButton>
+                      />
                     );
                   })}
-                </Box>
-                <Divider />
+                </Stack>
               </Stack>
-            ))}
+            )}
+            <Stack direction="row" spacing={1} alignItems="center">
+              <TextField
+                size="small"
+                label="Label"
+                value={s.label}
+                sx={{ flex: 1 }}
+                onChange={(event) => {
+                  const next = [...socialInfo];
+                  next[idx] = { ...next[idx], label: event.target.value };
+                  setDraft((current) => ({
+                    ...current,
+                    personalInfo: {
+                      ...current.personalInfo,
+                      social: next,
+                    },
+                  }));
+                }}
+              />
+              <TextField
+                size="small"
+                label="URL"
+                value={s.url ?? ""}
+                sx={{ flex: 2 }}
+                onChange={(event) => {
+                  const next = [...socialInfo];
+                  next[idx] = { ...next[idx], url: event.target.value };
+                  setDraft((current) => ({
+                    ...current,
+                    personalInfo: {
+                      ...current.personalInfo,
+                      social: next,
+                    },
+                  }));
+                }}
+              />
+            </Stack>
+            <Typography variant="caption" color="text.secondary">
+              Icon
+            </Typography>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, 36px)",
+                gap: 0.5,
+              }}
+            >
+              {ICON_NAMES.map((iconKey) => {
+                const Icon = ICON_MAP[iconKey];
+                const isSelected = s.icon === iconKey;
+                // An icon already used by another entry can't be reassigned
+                // here either — otherwise this grid reintroduces the same
+                // duplicate-icon bug the Quick add presets guard against.
+                const isUsedElsewhere =
+                  !isSelected && usedIconKeys.has(iconKey.toLowerCase());
+                return (
+                  <IconButton
+                    key={iconKey}
+                    size="small"
+                    disabled={isUsedElsewhere}
+                    title={
+                      isUsedElsewhere
+                        ? "Already used by another social link"
+                        : undefined
+                    }
+                    onClick={() => {
+                      if (isUsedElsewhere) {
+                        return;
+                      }
+                      const next = [...socialInfo];
+                      next[idx] = { ...next[idx], icon: iconKey };
+                      setDraft((current) => ({
+                        ...current,
+                        personalInfo: {
+                          ...current.personalInfo,
+                          social: next,
+                        },
+                      }));
+                    }}
+                    sx={{
+                      border: "1px solid",
+                      borderColor: isSelected ? "primary.main" : "divider",
+                      backgroundColor: isSelected
+                        ? "action.selected"
+                        : "transparent",
+                      borderRadius: 1,
+                      opacity: isUsedElsewhere ? 0.35 : 1,
+                    }}
+                  >
+                    <Icon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                );
+              })}
+            </Box>
+            <Divider />
             <Button
               size="small"
+              color="error"
               variant="outlined"
-              startIcon={<AddIcon />}
+              startIcon={<DeleteOutlineIcon />}
               onClick={() => {
-                const next = [...socialInfo, { label: "", url: "" }];
+                const next = socialInfo.filter(
+                  (_: unknown, i: number) => i !== idx,
+                );
                 setDraft((current) => ({
                   ...current,
-                  personalInfo: { ...current.personalInfo, social: next },
+                  personalInfo: {
+                    ...current.personalInfo,
+                    social: next,
+                  },
                 }));
+                handleCloseInlineEditor();
               }}
               sx={{ textTransform: "none" }}
             >
-              Add social link
+              Remove social link
             </Button>
           </Stack>
         );
@@ -742,12 +1217,24 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       );
     }
 
+    // Experience field clicked directly (e.g. clicking the "Sr. Software
+    // Engineer" title) — scoped to ONLY that one field on that one entry,
+    // mirroring the education.(idx).(school|degree|year|location) pattern
+    // below. Previously this branch ignored which key was clicked and always
+    // rendered the whole entry (position + company + duration + location +
+    // all bullets), so clicking any single field on any entry opened the
+    // same "everything" panel — the per-entry leak reported by the user.
     const experienceMatch = selectedInlineFieldId.match(
       /^experience\.(\d+)\.(company|position|duration|location)$/,
     );
 
     if (experienceMatch) {
       const index = Number(experienceMatch[1]);
+      const key = experienceMatch[2] as
+        | "company"
+        | "position"
+        | "duration"
+        | "location";
       const item = draft.experience[index];
 
       if (!item) {
@@ -758,124 +1245,18 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
         <Stack spacing={1.25} sx={{ mt: 1.5 }}>
           <TextField
             size="small"
-            label="Position"
-            value={item.position}
+            label={getInlineFieldLabel(selectedInlineFieldId)}
+            value={item[key]}
             onChange={(event) =>
               setDraft((current) => ({
                 ...current,
                 experience: replaceItemAtIndex(current.experience, index, {
                   ...item,
-                  position: event.target.value,
+                  [key]: event.target.value,
                 }),
               }))
             }
           />
-          <TextField
-            size="small"
-            label="Company"
-            value={item.company}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                experience: replaceItemAtIndex(current.experience, index, {
-                  ...item,
-                  company: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Duration"
-            value={item.duration}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                experience: replaceItemAtIndex(current.experience, index, {
-                  ...item,
-                  duration: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Location"
-            value={item.location}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                experience: replaceItemAtIndex(current.experience, index, {
-                  ...item,
-                  location: event.target.value,
-                }),
-              }))
-            }
-          />
-          <Divider />
-          <Typography variant="caption" color="text.secondary">
-            Bullet points
-          </Typography>
-          {item.description.map((bullet, bulletIndex) => (
-            <Stack
-              key={bulletIndex}
-              direction="row"
-              spacing={1}
-              alignItems="center"
-            >
-              <TextField
-                size="small"
-                label={`Bullet #${bulletIndex + 1}`}
-                value={bullet}
-                sx={{ flex: 1 }}
-                onChange={(event) => {
-                  const nextDesc = [...item.description];
-                  nextDesc[bulletIndex] = event.target.value;
-                  setDraft((current) => ({
-                    ...current,
-                    experience: replaceItemAtIndex(current.experience, index, {
-                      ...item,
-                      description: nextDesc,
-                    }),
-                  }));
-                }}
-              />
-              <IconButton
-                size="small"
-                onClick={() => {
-                  const nextDesc = item.description.filter(
-                    (_, i) => i !== bulletIndex,
-                  );
-                  setDraft((current) => ({
-                    ...current,
-                    experience: replaceItemAtIndex(current.experience, index, {
-                      ...item,
-                      description: nextDesc,
-                    }),
-                  }));
-                }}
-              >
-                <DeleteOutlineIcon fontSize="small" />
-              </IconButton>
-            </Stack>
-          ))}
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={() => {
-              setDraft((current) => ({
-                ...current,
-                experience: replaceItemAtIndex(current.experience, index, {
-                  ...item,
-                  description: [...item.description, ""],
-                }),
-              }));
-            }}
-            sx={{ textTransform: "none" }}
-          >
-            Add bullet
-          </Button>
           <Divider />
           <Button
             size="small"
@@ -957,118 +1338,51 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       );
     }
 
+    // Project field clicked directly (e.g. clicking the project name, or its
+    // image, or its tech list) — scoped to ONLY that one field on that one
+    // entry, mirroring the experience.(idx).(company|position|...) pattern.
+    // Previously this branch captured the clicked field key but ignored it
+    // and always rendered every project field (name + description + image +
+    // technologies + link + demoUrl + caseStudy) together.
     const projectMatch = selectedInlineFieldId.match(
       /^projects\.(\d+)\.(name|description|image|technologies|link|demoUrl|caseStudy)$/,
     );
 
     if (projectMatch) {
       const index = Number(projectMatch[1]);
+      const key = projectMatch[2] as
+        | "name"
+        | "description"
+        | "image"
+        | "technologies"
+        | "link"
+        | "demoUrl"
+        | "caseStudy";
       const item = draft.projects[index];
 
       if (!item) {
         return null;
       }
 
+      const isMultiline = key === "description" || key === "caseStudy";
+      const isTechnologies = key === "technologies";
+
       return (
         <Stack spacing={1.25} sx={{ mt: 1.5 }}>
           <TextField
             size="small"
-            label="Project Name"
-            value={item.name}
+            label={getInlineFieldLabel(selectedInlineFieldId)}
+            value={isTechnologies ? csvToText(item.technologies) : item[key]}
+            multiline={isMultiline}
+            minRows={isMultiline ? 3 : undefined}
             onChange={(event) =>
               setDraft((current) => ({
                 ...current,
                 projects: replaceItemAtIndex(current.projects, index, {
                   ...item,
-                  name: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Description"
-            value={item.description}
-            multiline
-            minRows={3}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                projects: replaceItemAtIndex(current.projects, index, {
-                  ...item,
-                  description: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Image URL"
-            value={item.image}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                projects: replaceItemAtIndex(current.projects, index, {
-                  ...item,
-                  image: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Technologies (comma-separated)"
-            value={csvToText(item.technologies)}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                projects: replaceItemAtIndex(current.projects, index, {
-                  ...item,
-                  technologies: textToCsv(event.target.value),
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Link"
-            value={item.link}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                projects: replaceItemAtIndex(current.projects, index, {
-                  ...item,
-                  link: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Demo URL"
-            value={item.demoUrl}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                projects: replaceItemAtIndex(current.projects, index, {
-                  ...item,
-                  demoUrl: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Case Study"
-            value={item.caseStudy}
-            multiline
-            minRows={3}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                projects: replaceItemAtIndex(current.projects, index, {
-                  ...item,
-                  caseStudy: event.target.value,
+                  [key]: isTechnologies
+                    ? textToCsv(event.target.value)
+                    : event.target.value,
                 }),
               }))
             }
@@ -1094,13 +1408,18 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       );
     }
 
-    const portfolioMatch = selectedInlineFieldId.match(
-      /^portfolio\.(\d+)\.(name|description|image|longDescription|category|technologies|demoUrl|githubUrl|testimonial|client)$/,
+    // Project technology tag clicked directly — scoped to ONLY that one
+    // tag by index, mirroring the portfolio.(idx).technologies.(idx) "add
+    // one, edit that one" pattern rather than editing the whole
+    // technologies array as a single combined CSV field.
+    const projectTechItemMatch = selectedInlineFieldId.match(
+      /^projects\.(\d+)\.technologies\.(\d+)$/,
     );
 
-    if (portfolioMatch) {
-      const index = Number(portfolioMatch[1]);
-      const item = draft.portfolio[index];
+    if (projectTechItemMatch) {
+      const projIndex = Number(projectTechItemMatch[1]);
+      const techIndex = Number(projectTechItemMatch[2]);
+      const item = draft.projects[projIndex];
 
       if (!item) {
         return null;
@@ -1110,211 +1429,107 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
         <Stack spacing={1.25} sx={{ mt: 1.5 }}>
           <TextField
             size="small"
-            label="Title"
-            value={item.title}
-            onChange={(event) =>
+            label={`Tag #${techIndex + 1}`}
+            value={item.technologies[techIndex] ?? ""}
+            onChange={(event) => {
+              const nextTechnologies = [...item.technologies];
+              nextTechnologies[techIndex] = event.target.value;
               setDraft((current) => ({
                 ...current,
-                portfolio: replaceItemAtIndex(current.portfolio, index, {
+                projects: replaceItemAtIndex(current.projects, projIndex, {
                   ...item,
-                  title: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Description"
-            value={item.description}
-            multiline
-            minRows={2}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                portfolio: replaceItemAtIndex(current.portfolio, index, {
-                  ...item,
-                  description: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Long Description"
-            value={item.longDescription}
-            multiline
-            minRows={3}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                portfolio: replaceItemAtIndex(current.portfolio, index, {
-                  ...item,
-                  longDescription: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Category"
-            value={item.category}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                portfolio: replaceItemAtIndex(current.portfolio, index, {
-                  ...item,
-                  category: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Image URL"
-            value={item.image}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                portfolio: replaceItemAtIndex(current.portfolio, index, {
-                  ...item,
-                  image: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Technologies (comma-separated)"
-            value={csvToText(item.technologies)}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                portfolio: replaceItemAtIndex(current.portfolio, index, {
-                  ...item,
-                  technologies: textToCsv(event.target.value),
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Demo URL"
-            value={item.demoUrl}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                portfolio: replaceItemAtIndex(current.portfolio, index, {
-                  ...item,
-                  demoUrl: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="GitHub URL"
-            value={item.githubUrl}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                portfolio: replaceItemAtIndex(current.portfolio, index, {
-                  ...item,
-                  githubUrl: event.target.value,
-                }),
-              }))
-            }
-          />
-          <Divider />
-          <Typography variant="caption" color="text.secondary">
-            Key Results
-          </Typography>
-          {item.results.map((result, resultIndex) => (
-            <Stack
-              key={resultIndex}
-              direction="row"
-              spacing={1}
-              alignItems="center"
-            >
-              <TextField
-                size="small"
-                label={`Result #${resultIndex + 1}`}
-                value={result}
-                sx={{ flex: 1 }}
-                onChange={(event) => {
-                  const nextResults = [...item.results];
-                  nextResults[resultIndex] = event.target.value;
-                  setDraft((current) => ({
-                    ...current,
-                    portfolio: replaceItemAtIndex(current.portfolio, index, {
-                      ...item,
-                      results: nextResults,
-                    }),
-                  }));
-                }}
-              />
-              <IconButton
-                size="small"
-                onClick={() => {
-                  const nextResults = item.results.filter(
-                    (_, i) => i !== resultIndex,
-                  );
-                  setDraft((current) => ({
-                    ...current,
-                    portfolio: replaceItemAtIndex(current.portfolio, index, {
-                      ...item,
-                      results: nextResults,
-                    }),
-                  }));
-                }}
-              >
-                <DeleteOutlineIcon fontSize="small" />
-              </IconButton>
-            </Stack>
-          ))}
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={() => {
-              setDraft((current) => ({
-                ...current,
-                portfolio: replaceItemAtIndex(current.portfolio, index, {
-                  ...item,
-                  results: [...item.results, ""],
+                  technologies: nextTechnologies,
                 }),
               }));
             }}
+          />
+          <Button
+            size="small"
+            color="error"
+            variant="outlined"
+            startIcon={<DeleteOutlineIcon />}
+            onClick={() => {
+              const nextTechnologies = item.technologies.filter(
+                (_, i) => i !== techIndex,
+              );
+              setDraft((current) => ({
+                ...current,
+                projects: replaceItemAtIndex(current.projects, projIndex, {
+                  ...item,
+                  technologies: nextTechnologies,
+                }),
+              }));
+              handleCloseInlineEditor();
+            }}
             sx={{ textTransform: "none" }}
           >
-            Add result
+            Remove tag
           </Button>
-          <Divider />
+        </Stack>
+      );
+    }
+
+    // Portfolio field clicked directly (e.g. clicking the item's title, tag,
+    // image, or testimonial) — scoped to ONLY that one field on that one
+    // entry, mirroring the experience.(idx).(company|position|...) pattern.
+    // Previously this branch captured the clicked field key but ignored it
+    // and always rendered every portfolio field (title + description +
+    // longDescription + category + image + technologies + demoUrl +
+    // githubUrl + results + testimonial + client) together.
+    const portfolioMatch = selectedInlineFieldId.match(
+      /^portfolio\.(\d+)\.(name|description|image|longDescription|category|technologies|demoUrl|githubUrl|testimonial|client)$/,
+    );
+
+    if (portfolioMatch) {
+      const index = Number(portfolioMatch[1]);
+      const key = portfolioMatch[2] as
+        | "name"
+        | "description"
+        | "image"
+        | "longDescription"
+        | "category"
+        | "technologies"
+        | "demoUrl"
+        | "githubUrl"
+        | "testimonial"
+        | "client";
+      const item = draft.portfolio[index];
+
+      if (!item) {
+        return null;
+      }
+
+      // `name` maps to the item's `title` field; every other key matches the
+      // portfolio item's own property name.
+      const isTitle = key === "name";
+      const isTechnologies = key === "technologies";
+      const isMultiline =
+        key === "description" || key === "longDescription" || key === "testimonial";
+
+      const fieldValue = isTitle
+        ? item.title
+        : isTechnologies
+          ? csvToText(item.technologies)
+          : String(item[key as keyof typeof item] ?? "");
+
+      return (
+        <Stack spacing={1.25} sx={{ mt: 1.5 }}>
           <TextField
             size="small"
-            label="Testimonial"
-            value={item.testimonial}
-            multiline
-            minRows={2}
+            label={getInlineFieldLabel(selectedInlineFieldId)}
+            value={fieldValue}
+            multiline={isMultiline}
+            minRows={isMultiline ? (key === "description" ? 2 : 3) : undefined}
             onChange={(event) =>
               setDraft((current) => ({
                 ...current,
                 portfolio: replaceItemAtIndex(current.portfolio, index, {
                   ...item,
-                  testimonial: event.target.value,
-                }),
-              }))
-            }
-          />
-          <TextField
-            size="small"
-            label="Client"
-            value={item.client}
-            onChange={(event) =>
-              setDraft((current) => ({
-                ...current,
-                portfolio: replaceItemAtIndex(current.portfolio, index, {
-                  ...item,
-                  client: event.target.value,
+                  ...(isTitle
+                    ? { title: event.target.value }
+                    : isTechnologies
+                      ? { technologies: textToCsv(event.target.value) }
+                      : { [key]: event.target.value }),
                 }),
               }))
             }
@@ -1335,6 +1550,67 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
             sx={{ textTransform: "none" }}
           >
             Remove portfolio item
+          </Button>
+        </Stack>
+      );
+    }
+
+    // Portfolio technology tag clicked directly — scoped to ONLY that one
+    // tag by index, mirroring the personalInfo.social.(idx) "add one, edit
+    // that one" pattern rather than editing the whole technologies array as
+    // a single combined CSV field.
+    const portfolioTechItemMatch = selectedInlineFieldId.match(
+      /^portfolio\.(\d+)\.technologies\.(\d+)$/,
+    );
+
+    if (portfolioTechItemMatch) {
+      const portIndex = Number(portfolioTechItemMatch[1]);
+      const techIndex = Number(portfolioTechItemMatch[2]);
+      const item = draft.portfolio[portIndex];
+
+      if (!item) {
+        return null;
+      }
+
+      return (
+        <Stack spacing={1.25} sx={{ mt: 1.5 }}>
+          <TextField
+            size="small"
+            label={`Tag #${techIndex + 1}`}
+            value={item.technologies[techIndex] ?? ""}
+            onChange={(event) => {
+              const nextTechnologies = [...item.technologies];
+              nextTechnologies[techIndex] = event.target.value;
+              setDraft((current) => ({
+                ...current,
+                portfolio: replaceItemAtIndex(current.portfolio, portIndex, {
+                  ...item,
+                  technologies: nextTechnologies,
+                }),
+              }));
+            }}
+          />
+          <Button
+            size="small"
+            color="error"
+            variant="outlined"
+            startIcon={<DeleteOutlineIcon />}
+            onClick={() => {
+              const nextTechnologies = item.technologies.filter(
+                (_, i) => i !== techIndex,
+              );
+              setDraft((current) => ({
+                ...current,
+                portfolio: replaceItemAtIndex(current.portfolio, portIndex, {
+                  ...item,
+                  technologies: nextTechnologies,
+                }),
+              }));
+              handleCloseInlineEditor();
+            }}
+            sx={{ textTransform: "none" }}
+          >
+            Remove tag
           </Button>
         </Stack>
       );
@@ -1432,37 +1708,28 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       );
     }
 
-    // --- servicesTitle / servicesSubtitle ---
-    if (selectedInlineFieldId === "servicesTitle") {
+    // --- Top-level "Badge"/"Title"/"Subtitle" single-string fields
+    // (servicesBadge, servicesTitle, servicesSubtitle, experienceBadge,
+    // experienceTitle, portfolioBadge, portfolioTitle, portfolioSubtitle,
+    // projectsBadge, projectsTitle, projectsSubtitle) — all identical in
+    // shape (one TextField, a label + placeholder, writes straight back to
+    // draft.<field>), so they're driven from SIMPLE_TEXT_FIELD_CONFIG rather
+    // than one near-identical `if` block per field.
+    const simpleTextFieldConfig =
+      SIMPLE_TEXT_FIELD_CONFIG[selectedInlineFieldId];
+    if (simpleTextFieldConfig) {
+      const { label, placeholder, field } = simpleTextFieldConfig;
       return (
         <TextField
           size="small"
           sx={{ mt: 1.5 }}
-          label="Services Title"
-          value={draft.servicesTitle ?? ""}
-          placeholder="What I Offer"
+          label={label}
+          value={draft[field] ?? ""}
+          placeholder={placeholder}
           onChange={(event) =>
             setDraft((current) => ({
               ...current,
-              servicesTitle: event.target.value,
-            }))
-          }
-        />
-      );
-    }
-
-    if (selectedInlineFieldId === "servicesSubtitle") {
-      return (
-        <TextField
-          size="small"
-          sx={{ mt: 1.5 }}
-          label="Services Subtitle"
-          value={draft.servicesSubtitle ?? ""}
-          placeholder="Professional services tailored to your project needs"
-          onChange={(event) =>
-            setDraft((current) => ({
-              ...current,
-              servicesSubtitle: event.target.value,
+              [field]: event.target.value,
             }))
           }
         />
@@ -1485,38 +1752,15 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
           <Typography variant="caption" sx={{ fontWeight: 600 }}>
             {getInlineFieldLabel(selectedInlineFieldId)}
           </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-            {ICON_NAMES.map((key) => {
-              const Ic = ICON_MAP[key];
-              return (
-                <IconButton
-                  key={key}
-                  size="small"
-                  onClick={() =>
-                    setDraft((current) => ({
-                      ...current,
-                      skills: replaceItemAtIndex(current.skills, index, {
-                        ...category,
-                        icon: key,
-                      }),
-                    }))
-                  }
-                  sx={{
-                    border:
-                      category.icon === key
-                        ? "2px solid"
-                        : "1px solid transparent",
-                    borderColor:
-                      category.icon === key ? "primary.main" : "transparent",
-                    borderRadius: 1,
-                  }}
-                  title={key}
-                >
-                  <Ic fontSize="small" />
-                </IconButton>
-              );
-            })}
-          </Box>
+          {renderIconMapPickerGrid(category.icon, (key) =>
+            setDraft((current) => ({
+              ...current,
+              skills: replaceItemAtIndex(current.skills, index, {
+                ...category,
+                icon: key,
+              }),
+            })),
+          )}
         </Stack>
       );
     }
@@ -1600,37 +1844,16 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
             <Typography variant="caption" sx={{ fontWeight: 600, mb: 0.5 }}>
               Category Icon
             </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
-              {ICON_NAMES.map((key) => {
-                const Ic = ICON_MAP[key];
-                return (
-                  <IconButton
-                    key={key}
-                    size="small"
-                    onClick={() =>
-                      setDraft((current) => ({
-                        ...current,
-                        skills: replaceItemAtIndex(current.skills, index, {
-                          ...category,
-                          icon: key,
-                        }),
-                      }))
-                    }
-                    sx={{
-                      border:
-                        category.icon === key
-                          ? "2px solid"
-                          : "1px solid transparent",
-                      borderColor:
-                        category.icon === key ? "primary.main" : "transparent",
-                      borderRadius: 1,
-                    }}
-                    title={key}
-                  >
-                    <Ic fontSize="small" />
-                  </IconButton>
-                );
-              })}
+            <Box sx={{ mt: 0.5 }}>
+              {renderIconMapPickerGrid(category.icon, (key) =>
+                setDraft((current) => ({
+                  ...current,
+                  skills: replaceItemAtIndex(current.skills, index, {
+                    ...category,
+                    icon: key,
+                  }),
+                })),
+              )}
             </Box>
           </Box>
           <Divider />
@@ -1816,11 +2039,10 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
           </Box>
           <Box>
             <Typography variant="caption" sx={{ fontWeight: 600, mb: 0.5 }}>
-              Icon
+              Technology Icon
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
-              {ICON_NAMES.map((key) => {
-                const Ic = ICON_MAP[key];
+              {TECH_ICON_OPTIONS.map(({ key, label, Icon: Ic }) => {
                 return (
                   <IconButton
                     key={key}
@@ -1851,9 +2073,9 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
                         item.icon === key ? "primary.main" : "transparent",
                       borderRadius: 1,
                     }}
-                    title={key}
+                    title={label}
                   >
-                    <Ic fontSize="small" />
+                    <Ic size={18} />
                   </IconButton>
                 );
               })}
@@ -1903,8 +2125,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
             {getInlineFieldLabel(selectedInlineFieldId)}
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-            {ICON_NAMES.map((key) => {
-              const Ic = ICON_MAP[key];
+            {TECH_ICON_OPTIONS.map(({ key, label, Icon: Ic }) => {
               return (
                 <IconButton
                   key={key}
@@ -1933,9 +2154,9 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
                       item.icon === key ? "primary.main" : "transparent",
                     borderRadius: 1,
                   }}
-                  title={key}
+                  title={label}
                 >
-                  <Ic fontSize="small" />
+                  <Ic size={18} />
                 </IconButton>
               );
             })}
@@ -1986,6 +2207,389 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       );
     }
 
+    // --- services.N.icon (card icon) ---
+    const servicesCardIconMatch = selectedInlineFieldId.match(
+      /^services\.(\d+)\.icon$/,
+    );
+
+    if (servicesCardIconMatch) {
+      const index = Number(servicesCardIconMatch[1]);
+      const card = draft.services[index];
+
+      if (!card) return null;
+
+      return (
+        <Stack spacing={1} sx={{ mt: 1.5 }}>
+          <Typography variant="caption" sx={{ fontWeight: 600 }}>
+            Service Card #{index + 1} Icon
+          </Typography>
+          {renderIconMapPickerGrid(card.icon, (key) =>
+            setDraft((current) => ({
+              ...current,
+              services: replaceItemAtIndex(current.services, index, {
+                ...card,
+                icon: key,
+              }),
+            })),
+          )}
+        </Stack>
+      );
+    }
+
+    // --- services.N.subtitle ---
+    const servicesCardSubtitleMatch = selectedInlineFieldId.match(
+      /^services\.(\d+)\.subtitle$/,
+    );
+
+    if (servicesCardSubtitleMatch) {
+      const index = Number(servicesCardSubtitleMatch[1]);
+      const card = draft.services[index];
+
+      if (!card) return null;
+
+      return (
+        <TextField
+          size="small"
+          sx={{ mt: 1.5 }}
+          label={`Service Card #${index + 1} Subtitle`}
+          value={card.subtitle ?? ""}
+          placeholder={`Expert ${card.title.toLowerCase()} solutions`}
+          onChange={(event) =>
+            setDraft((current) => ({
+              ...current,
+              services: replaceItemAtIndex(current.services, index, {
+                ...card,
+                subtitle: event.target.value,
+              }),
+            }))
+          }
+        />
+      );
+    }
+
+    // --- services.N.title (comprehensive card form) ---
+    const servicesCardTitleMatch = selectedInlineFieldId.match(
+      /^services\.(\d+)\.title$/,
+    );
+
+    if (servicesCardTitleMatch) {
+      const index = Number(servicesCardTitleMatch[1]);
+      const card = draft.services[index];
+
+      if (!card) {
+        return null;
+      }
+
+      return (
+        <Stack spacing={2} sx={{ mt: 1.5 }}>
+          <TextField
+            size="small"
+            label="Card Title"
+            value={card.title}
+            onChange={(event) =>
+              setDraft((current) => ({
+                ...current,
+                services: replaceItemAtIndex(current.services, index, {
+                  ...card,
+                  title: event.target.value,
+                }),
+              }))
+            }
+          />
+          <TextField
+            size="small"
+            label="Subtitle"
+            value={card.subtitle ?? ""}
+            placeholder={`Expert ${card.title.toLowerCase()} solutions`}
+            onChange={(event) =>
+              setDraft((current) => ({
+                ...current,
+                services: replaceItemAtIndex(current.services, index, {
+                  ...card,
+                  subtitle: event.target.value,
+                }),
+              }))
+            }
+          />
+          <Box>
+            <Typography variant="caption" sx={{ fontWeight: 600, mb: 0.5 }}>
+              Card Icon
+            </Typography>
+            <Box sx={{ mt: 0.5 }}>
+              {renderIconMapPickerGrid(card.icon, (key) =>
+                setDraft((current) => ({
+                  ...current,
+                  services: replaceItemAtIndex(current.services, index, {
+                    ...card,
+                    icon: key,
+                  }),
+                })),
+              )}
+            </Box>
+          </Box>
+          <Divider />
+          <Typography variant="caption" sx={{ fontWeight: 600 }}>
+            Skills ({card.items.length})
+          </Typography>
+          {card.items.map((item, itemIdx) => (
+            <Stack
+              key={item.id}
+              direction="row"
+              spacing={1}
+              alignItems="center"
+            >
+              <TextField
+                size="small"
+                label="Name"
+                value={item.name}
+                sx={{ flex: 1 }}
+                onChange={(event) => {
+                  const nextItems = replaceItemAtIndex(card.items, itemIdx, {
+                    ...item,
+                    name: event.target.value,
+                  });
+                  setDraft((current) => ({
+                    ...current,
+                    services: replaceItemAtIndex(current.services, index, {
+                      ...card,
+                      items: nextItems,
+                    }),
+                  }));
+                }}
+              />
+              <TextField
+                size="small"
+                label="%"
+                type="number"
+                value={item.proficiency}
+                sx={{ width: 70 }}
+                inputProps={{ min: 0, max: 100 }}
+                onChange={(event) => {
+                  const nextItems = replaceItemAtIndex(card.items, itemIdx, {
+                    ...item,
+                    proficiency: Math.min(
+                      100,
+                      Math.max(0, Number(event.target.value)),
+                    ),
+                  });
+                  setDraft((current) => ({
+                    ...current,
+                    services: replaceItemAtIndex(current.services, index, {
+                      ...card,
+                      items: nextItems,
+                    }),
+                  }));
+                }}
+              />
+              <IconButton
+                size="small"
+                color="error"
+                onClick={() => {
+                  const nextItems = card.items.filter((_, i) => i !== itemIdx);
+                  setDraft((current) => ({
+                    ...current,
+                    services: replaceItemAtIndex(current.services, index, {
+                      ...card,
+                      items: nextItems,
+                    }),
+                  }));
+                }}
+              >
+                <DeleteOutlineIcon fontSize="small" />
+              </IconButton>
+            </Stack>
+          ))}
+          <Button
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={() => {
+              setDraft((current) => ({
+                ...current,
+                services: replaceItemAtIndex(current.services, index, {
+                  ...card,
+                  items: [...card.items, createEmptyServiceItem(card.items)],
+                }),
+              }));
+            }}
+            sx={{ textTransform: "none" }}
+          >
+            Add Skill
+          </Button>
+          <Button
+            size="small"
+            color="error"
+            startIcon={<DeleteOutlineIcon />}
+            onClick={() => {
+              setDraft((current) => ({
+                ...current,
+                services: current.services.filter((_, i) => i !== index),
+              }));
+              handleCloseInlineEditor();
+            }}
+            sx={{ textTransform: "none" }}
+          >
+            Delete Card
+          </Button>
+        </Stack>
+      );
+    }
+
+    // --- services.N.N.name (comprehensive skill item form) ---
+    const servicesItemMatch = selectedInlineFieldId.match(
+      /^services\.(\d+)\.(\d+)\.name$/,
+    );
+
+    if (servicesItemMatch) {
+      const cardIndex = Number(servicesItemMatch[1]);
+      const itemIndex = Number(servicesItemMatch[2]);
+      const card = draft.services[cardIndex];
+      const item = card?.items[itemIndex];
+
+      if (!card || !item) {
+        return null;
+      }
+
+      return (
+        <Stack spacing={1.5} sx={{ mt: 1.5 }}>
+          <TextField
+            size="small"
+            label="Skill Name"
+            value={item.name}
+            onChange={(event) => {
+              const nextItems = replaceItemAtIndex(card.items, itemIndex, {
+                ...item,
+                name: event.target.value,
+              });
+              setDraft((current) => ({
+                ...current,
+                services: replaceItemAtIndex(current.services, cardIndex, {
+                  ...card,
+                  items: nextItems,
+                }),
+              }));
+            }}
+          />
+          <Box>
+            <Typography variant="caption" sx={{ mb: 0.5 }}>
+              Proficiency: {item.proficiency}%
+            </Typography>
+            <Slider
+              size="small"
+              value={item.proficiency}
+              min={0}
+              max={100}
+              step={5}
+              onChange={(_, value) => {
+                const nextItems = replaceItemAtIndex(card.items, itemIndex, {
+                  ...item,
+                  proficiency: value as number,
+                });
+                setDraft((current) => ({
+                  ...current,
+                  services: replaceItemAtIndex(current.services, cardIndex, {
+                    ...card,
+                    items: nextItems,
+                  }),
+                }));
+              }}
+            />
+          </Box>
+          <Box>
+            <Typography variant="caption" sx={{ fontWeight: 600, mb: 0.5 }}>
+              Technology Icon
+            </Typography>
+            <Box sx={{ mt: 0.5 }}>
+              {renderServiceItemIconPicker(cardIndex, itemIndex)}
+            </Box>
+          </Box>
+          <Button
+            size="small"
+            color="error"
+            startIcon={<DeleteOutlineIcon />}
+            onClick={() => {
+              const nextItems = card.items.filter((_, i) => i !== itemIndex);
+              setDraft((current) => ({
+                ...current,
+                services: replaceItemAtIndex(current.services, cardIndex, {
+                  ...card,
+                  items: nextItems,
+                }),
+              }));
+              handleCloseInlineEditor();
+            }}
+            sx={{ textTransform: "none" }}
+          >
+            Delete Skill
+          </Button>
+        </Stack>
+      );
+    }
+
+    // --- services.N.N.icon ---
+    const servicesItemIconMatch = selectedInlineFieldId.match(
+      /^services\.(\d+)\.(\d+)\.icon$/,
+    );
+
+    if (servicesItemIconMatch) {
+      const cardIndex = Number(servicesItemIconMatch[1]);
+      const itemIndex = Number(servicesItemIconMatch[2]);
+      const card = draft.services[cardIndex];
+      const item = card?.items[itemIndex];
+
+      if (!card || !item) return null;
+
+      return (
+        <Stack spacing={1} sx={{ mt: 1.5 }}>
+          <Typography variant="caption" sx={{ fontWeight: 600 }}>
+            Service Card #{cardIndex + 1} Item #{itemIndex + 1} Icon
+          </Typography>
+          {renderServiceItemIconPicker(cardIndex, itemIndex)}
+        </Stack>
+      );
+    }
+
+    // --- services.N.N.proficiency ---
+    const servicesItemProficiencyMatch = selectedInlineFieldId.match(
+      /^services\.(\d+)\.(\d+)\.proficiency$/,
+    );
+
+    if (servicesItemProficiencyMatch) {
+      const cardIndex = Number(servicesItemProficiencyMatch[1]);
+      const itemIndex = Number(servicesItemProficiencyMatch[2]);
+      const card = draft.services[cardIndex];
+      const item = card?.items[itemIndex];
+
+      if (!card || !item) return null;
+
+      return (
+        <Stack spacing={1} sx={{ mt: 1.5 }}>
+          <Typography variant="caption" sx={{ fontWeight: 600 }}>
+            Proficiency: {item.proficiency}%
+          </Typography>
+          <Slider
+            size="small"
+            value={item.proficiency}
+            min={0}
+            max={100}
+            step={5}
+            onChange={(_, value) => {
+              const nextItems = replaceItemAtIndex(card.items, itemIndex, {
+                ...item,
+                proficiency: value as number,
+              });
+              setDraft((current) => ({
+                ...current,
+                services: replaceItemAtIndex(current.services, cardIndex, {
+                  ...card,
+                  items: nextItems,
+                }),
+              }));
+            }}
+          />
+        </Stack>
+      );
+    }
+
     const certificationMatch = selectedInlineFieldId.match(
       /^certifications\.(\d+)\.(name|issuer|year)$/,
     );
@@ -2016,6 +2620,40 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
                   [key]: event.target.value,
                 },
               ),
+            }))
+          }
+        />
+      );
+    }
+
+    const testimonialMatch = selectedInlineFieldId.match(
+      /^testimonials\.(\d+)\.(quote|authorName|authorRole|authorCompany|photoUrl)$/,
+    );
+
+    if (testimonialMatch) {
+      const index = Number(testimonialMatch[1]);
+      const key = testimonialMatch[2] as keyof TestimonialItem;
+      const item = draft.testimonials[index];
+
+      if (!item) {
+        return null;
+      }
+
+      return (
+        <TextField
+          size="small"
+          sx={{ mt: 1.5 }}
+          label={getInlineFieldLabel(selectedInlineFieldId)}
+          multiline={key === "quote"}
+          minRows={key === "quote" ? 2 : undefined}
+          value={String(item[key] ?? "")}
+          onChange={(event) =>
+            setDraft((current) => ({
+              ...current,
+              testimonials: replaceItemAtIndex(current.testimonials, index, {
+                ...item,
+                [key]: event.target.value,
+              }),
             }))
           }
         />
@@ -2082,10 +2720,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       );
     }
 
-    if (
-      selectedPreviewSection === "skills" ||
-      selectedPreviewSection === "services"
-    ) {
+    if (selectedPreviewSection === "skills") {
       const firstCategory = draft.skills[0];
 
       if (!firstCategory) {
@@ -2117,6 +2752,46 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
                 skills: replaceItemAtIndex(current.skills, 0, {
                   ...firstCategory,
                   category: event.target.value,
+                }),
+              }))
+            }
+          />
+        </Stack>
+      );
+    }
+
+    if (selectedPreviewSection === "services") {
+      const firstCard = draft.services[0];
+
+      if (!firstCard) {
+        return (
+          <Button
+            sx={{ mt: 1.5, alignSelf: "flex-start", textTransform: "none" }}
+            variant="outlined"
+            onClick={() =>
+              setDraft((current) => ({
+                ...current,
+                services: [createEmptyServiceCard(current.services)],
+              }))
+            }
+          >
+            Add first service card
+          </Button>
+        );
+      }
+
+      return (
+        <Stack spacing={1.25} sx={{ mt: 1.5 }}>
+          <TextField
+            size="small"
+            label="Card Title"
+            value={firstCard.title}
+            onChange={(event) =>
+              setDraft((current) => ({
+                ...current,
+                services: replaceItemAtIndex(current.services, 0, {
+                  ...firstCard,
+                  title: event.target.value,
                 }),
               }))
             }
@@ -3519,25 +4194,179 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
             </Button>
           </Stack>
         );
+      case "testimonials":
+        return (
+          <Stack spacing={2.5}>
+            {draft.testimonials.map((item, index) => (
+              <Card key={item.id} variant="outlined">
+                <CardContent>
+                  <Stack spacing={2}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                        Testimonial #{index + 1}
+                      </Typography>
+                      <IconButton
+                        aria-label="Remove testimonial"
+                        onClick={() =>
+                          setDraft((current) => ({
+                            ...current,
+                            testimonials: removeItemAtIndex(
+                              current.testimonials,
+                              index,
+                            ),
+                          }))
+                        }
+                      >
+                        <DeleteOutlineIcon />
+                      </IconButton>
+                    </Stack>
+                    <TextField
+                      label="Quote"
+                      value={item.quote}
+                      multiline
+                      minRows={2}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          quote: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          testimonials: replaceItemAtIndex(
+                            current.testimonials,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                    <TextField
+                      label="Author name"
+                      value={item.authorName}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          authorName: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          testimonials: replaceItemAtIndex(
+                            current.testimonials,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                    <TextField
+                      label="Author role"
+                      value={item.authorRole}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          authorRole: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          testimonials: replaceItemAtIndex(
+                            current.testimonials,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                    <TextField
+                      label="Author company (optional)"
+                      value={item.authorCompany ?? ""}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          authorCompany: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          testimonials: replaceItemAtIndex(
+                            current.testimonials,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                    <TextField
+                      label="Photo URL (optional)"
+                      value={item.photoUrl ?? ""}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          photoUrl: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          testimonials: replaceItemAtIndex(
+                            current.testimonials,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                  </Stack>
+                </CardContent>
+              </Card>
+            ))}
+
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() =>
+                setDraft((current) => ({
+                  ...current,
+                  testimonials: [
+                    ...current.testimonials,
+                    createEmptyTestimonialItem(current.testimonials),
+                  ],
+                }))
+              }
+            >
+              Add testimonial
+            </Button>
+          </Stack>
+        );
       default:
         return null;
     }
   };
 
+  const editorProps = useMemo(
+    () => ({
+      isEditMode: true,
+      onInlineFieldClick: handleInlineFieldClick,
+      activeInlineFieldId: selectedInlineFieldId,
+      onSectionClick: handlePreviewSectionClick,
+      activeSection: selectedPreviewSection,
+      onAddAction: handleAddAction,
+      onDeleteAction: handleDeleteAction,
+      onDelete: handleDeleteAction,
+    }),
+    [
+      handleInlineFieldClick,
+      selectedInlineFieldId,
+      handlePreviewSectionClick,
+      selectedPreviewSection,
+      handleAddAction,
+      handleDeleteAction,
+    ],
+  );
+
   if (!isHydrated || !hasDraft) {
     return <SecretEditorSkeleton isDarkMode={isDarkMode} />;
   }
-
-  const editorProps = {
-    isEditMode: true,
-    onInlineFieldClick: handleInlineFieldClick,
-    activeInlineFieldId: selectedInlineFieldId,
-    onSectionClick: handlePreviewSectionClick,
-    activeSection: selectedPreviewSection,
-    onAddAction: handleAddAction,
-    onDeleteAction: handleDeleteAction,
-    onDelete: handleDeleteAction,
-  };
 
   return (
     <EditorProvider value={editorProps}>

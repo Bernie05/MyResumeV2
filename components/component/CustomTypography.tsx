@@ -23,5 +23,6 @@ const BaseTypography = React.forwardRef<HTMLDivElement, CustomTypographyProps>(
     );
   },
 );
+BaseTypography.displayName = "BaseTypography";
 
 export const CustomTypography = withEditableField(BaseTypography);

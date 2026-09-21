@@ -32,6 +32,8 @@ export const resumeData: ResumeData = {
     clients: 15,
     awards: 0,
   },
+  experienceBadge: "Experience",
+  experienceTitle: "Professional Experience",
   experience: [
     {
       id: 1,
@@ -145,6 +147,38 @@ export const resumeData: ResumeData = {
       ],
     },
   ],
+  services: [
+    {
+      id: 1,
+      title: "Backend Development",
+      subtitle: "Expert backend solutions",
+      icon: "database",
+      items: [
+        { id: 1, name: "Java", proficiency: 95, icon: "code" },
+        { id: 2, name: "Node.js", proficiency: 90, icon: "briefcase" },
+      ],
+    },
+    {
+      id: 2,
+      title: "Frontend Development",
+      subtitle: "Expert frontend solutions",
+      icon: "palette",
+      items: [
+        { id: 1, name: "React", proficiency: 90, icon: "code" },
+        { id: 2, name: "TypeScript", proficiency: 88, icon: "code" },
+      ],
+    },
+    {
+      id: 3,
+      title: "Tools & Design Development",
+      subtitle: "Expert tools & design solutions",
+      icon: "brush",
+      items: [
+        { id: 1, name: "Figma", proficiency: 90, icon: "design" },
+        { id: 2, name: "Git", proficiency: 90, icon: "git" },
+      ],
+    },
+  ],
   certifications: [
     {
       id: 1,
@@ -153,6 +187,38 @@ export const resumeData: ResumeData = {
       year: "2018",
     },
   ],
+  testimonials: [
+    {
+      id: 1,
+      quote:
+        "One of the most reliable engineers I've worked with — turned a messy legacy Salesforce setup into something the whole team could actually build on.",
+      authorName: "Maria Santos",
+      authorRole: "Engineering Manager",
+      authorCompany: "Acme Corp",
+      photoUrl: "",
+    },
+    {
+      id: 2,
+      quote:
+        "Delivered our backend migration ahead of schedule and took the time to document everything for the rest of the team. Would work with again in a heartbeat.",
+      authorName: "James Cooper",
+      authorRole: "CTO",
+      authorCompany: "Northwind Solutions",
+      photoUrl: "",
+    },
+    {
+      id: 3,
+      quote:
+        "Great communicator and problem solver. Consistently found the simplest fix instead of the flashiest one, which saved us a lot of headaches later.",
+      authorName: "Priya Nair",
+      authorRole: "Product Lead",
+      authorCompany: "",
+      photoUrl: "",
+    },
+  ],
+  projectsBadge: "Projects",
+  projectsTitle: "Recent Projects",
+  projectsSubtitle: "Latest work and technical achievements",
   projects: [
     {
       id: 1,
@@ -191,6 +257,10 @@ export const resumeData: ResumeData = {
         "Created responsive React application with TypeScript, improving user experience and reducing page load time by 45%.",
     },
   ],
+  portfolioBadge: "Portfolio",
+  portfolioTitle: "Featured Work",
+  portfolioSubtitle:
+    "Explore my best projects and case studies. Each project showcases strategic problem-solving and technical excellence.",
   portfolio: [
     {
       id: 1,

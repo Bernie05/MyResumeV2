@@ -27,19 +27,17 @@ const createAppTheme = (isDarkMode: boolean) =>
     palette: {
       mode: isDarkMode ? "dark" : "light",
       primary: {
-        main: isDarkMode ? "#ffd700" : "#1976d2",
+        main: isDarkMode ? "rgb(45, 212, 191)" : "#1976d2",
       },
       secondary: {
-        main: isDarkMode ? "#ffb700" : "#1565c0",
+        main: isDarkMode ? "rgb(45, 212, 191)" : "#1976d2",
       },
       background: {
         default: isDarkMode ? "#0f1419" : "#f5f5f5",
         paper: isDarkMode ? "#1a1f2e" : "#ffffff",
       },
       text: {
-        primary: isDarkMode
-          ? "rgba(0, 190, 168, 0.9)"
-          : "rgba(255, 255, 255, 0.9)",
+        primary: isDarkMode ? "#d4d4d4" : "rgba(255, 255, 255, 0.9)",
         secondary: isDarkMode ? "#b0b0b0" : "#666666",
       },
     },

@@ -33,11 +33,21 @@ const EMPTY_RESUME_DATA: ResumeData = {
   experience: [],
   education: [],
   skills: [],
+  services: [],
   certifications: [],
   projects: [],
   portfolio: [],
+  testimonials: [],
   servicesTitle: "",
   servicesSubtitle: "",
+  experienceBadge: "",
+  experienceTitle: "",
+  portfolioBadge: "",
+  portfolioTitle: "",
+  portfolioSubtitle: "",
+  projectsBadge: "",
+  projectsTitle: "",
+  projectsSubtitle: "",
 };
 
 /**
@@ -50,20 +60,30 @@ export const useResumeEditor = () => {
   const hasChanges = useAppSelector((state) => state.resumeData.hasChanges);
   const hasDraft = Boolean(storedDraft);
 
-  // Wrapper function that mimics setDraft behavior
+  // Merge over EMPTY_RESUME_DATA so a draft persisted (via redux-persist/localStorage)
+  // before a newer field was added to ResumeData doesn't crash consumers that assume
+  // every field is present (e.g. `draft.testimonials.map(...)`).
+  const draft = storedDraft
+    ? { ...EMPTY_RESUME_DATA, ...storedDraft }
+    : EMPTY_RESUME_DATA;
+
+  // Wrapper function that mimics setDraft behavior. Passes the merged `draft`
+  // (not the raw, possibly-stale `storedDraft`) to the updater so callers in
+  // SecretResumeEditor.tsx can safely spread/iterate any field — including
+  // ones added after this browser's localStorage was last persisted.
   const setDraft = useCallback(
     (updater: (current: ResumeData) => ResumeData) => {
       if (!storedDraft) {
         return;
       }
 
-      dispatch(replaceResumeDraft(updater(storedDraft)));
+      dispatch(replaceResumeDraft(updater(draft)));
     },
-    [storedDraft, dispatch],
+    [storedDraft, draft, dispatch],
   );
 
   return {
-    draft: storedDraft ?? EMPTY_RESUME_DATA,
+    draft,
     hasDraft,
     setDraft,
     hasChanges,

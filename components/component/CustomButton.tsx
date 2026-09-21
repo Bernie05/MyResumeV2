@@ -23,5 +23,6 @@ const BaseButton = React.forwardRef<HTMLButtonElement, CustomButtonProps>(
     );
   },
 );
+BaseButton.displayName = "BaseButton";
 
 export const CustomButton = withEditableField(BaseButton);

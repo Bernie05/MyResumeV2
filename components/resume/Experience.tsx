@@ -36,9 +36,15 @@ interface Job {
 
 interface IExperience {
   experience: Job[];
+  experienceBadge?: string;
+  experienceTitle?: string;
 }
 
-const Experience = ({ experience }: IExperience) => {
+const Experience = ({
+  experience,
+  experienceBadge,
+  experienceTitle,
+}: IExperience) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -83,7 +89,6 @@ const Experience = ({ experience }: IExperience) => {
             display: "inline-flex",
             px: 1.75,
             py: 0.75,
-            borderRadius: 999,
             background: buttonGradient,
             color: accentText,
             fontWeight: 700,
@@ -91,9 +96,12 @@ const Experience = ({ experience }: IExperience) => {
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             mb: 2,
+            ...getInlineFieldSx("experienceBadge"),
+            borderRadius: 999,
           }}
+          {...createInlineFieldProps("experienceBadge")}
         >
-          Experience
+          {experienceBadge || "Experience"}
         </Box>
         <Typography
           variant="h3"
@@ -101,9 +109,11 @@ const Experience = ({ experience }: IExperience) => {
             fontWeight: 800,
             fontSize: { xs: "2rem", md: "2.5rem" },
             color: titleColor,
+            ...getInlineFieldSx("experienceTitle"),
           }}
+          {...createInlineFieldProps("experienceTitle")}
         >
-          Professional Experience
+          {experienceTitle || "Professional Experience"}
         </Typography>
       </Box>
 
@@ -242,7 +252,9 @@ const Experience = ({ experience }: IExperience) => {
                       <ListItemIcon
                         sx={{
                           minWidth: "24px",
-                          mt: 0.5,
+                          height: "1.6rem",
+                          display: "flex",
+                          alignItems: "center",
                           color: primaryAccent,
                         }}
                       >
@@ -252,6 +264,7 @@ const Experience = ({ experience }: IExperience) => {
                       </ListItemIcon>
                       <ListItemText
                         primary={desc}
+                        sx={{ m: 0 }}
                         primaryTypographyProps={{
                           sx: {
                             fontSize: "1rem",
@@ -280,12 +293,13 @@ const Experience = ({ experience }: IExperience) => {
                       transition: "opacity 0.2s",
                       "&:hover": { opacity: 1 },
                     }}
-                    onClick={(event) =>
+                    onClick={(event) => {
+                      event.stopPropagation();
                       onAddAction(
                         `experience.${index}.bullet`,
                         event.currentTarget as HTMLElement,
-                      )
-                    }
+                      );
+                    }}
                   >
                     + Add bullet point
                   </Box>
