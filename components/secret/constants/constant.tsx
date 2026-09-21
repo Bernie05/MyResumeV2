@@ -32,6 +32,7 @@ export type InlineEditableFieldId =
   | `projects.${number}.description`
   | `projects.${number}.image`
   | `projects.${number}.technologies`
+  | `projects.${number}.technologies.${number}`
   | `projects.${number}.link`
   | `projects.${number}.demoUrl`
   | `projects.${number}.caseStudy`
@@ -41,6 +42,7 @@ export type InlineEditableFieldId =
   | `portfolio.${number}.longDescription`
   | `portfolio.${number}.category`
   | `portfolio.${number}.technologies`
+  | `portfolio.${number}.technologies.${number}`
   | `portfolio.${number}.demoUrl`
   | `portfolio.${number}.githubUrl`
   | `portfolio.${number}.testimonial`
@@ -56,6 +58,12 @@ export type InlineEditableFieldId =
   | `skills.${number}.${number}.name`
   | `skills.${number}.${number}.icon`
   | `skills.${number}.${number}.proficiency`
+  | `services.${number}.title`
+  | `services.${number}.icon`
+  | `services.${number}.subtitle`
+  | `services.${number}.${number}.name`
+  | `services.${number}.${number}.icon`
+  | `services.${number}.${number}.proficiency`
   | `certifications.${number}.name`
   | `certifications.${number}.issuer`
   | `certifications.${number}.year`
@@ -64,8 +72,17 @@ export type InlineEditableFieldId =
   | `testimonials.${number}.authorRole`
   | `testimonials.${number}.authorCompany`
   | `testimonials.${number}.photoUrl`
+  | "servicesBadge"
   | "servicesTitle"
-  | "servicesSubtitle";
+  | "servicesSubtitle"
+  | "experienceBadge"
+  | "experienceTitle"
+  | "portfolioBadge"
+  | "portfolioTitle"
+  | "portfolioSubtitle"
+  | "projectsBadge"
+  | "projectsTitle"
+  | "projectsSubtitle";
 
 export const INLINE_FIELD_LABELS: Partial<
   Record<InlineEditableFieldId, string>
@@ -87,8 +104,87 @@ export const INLINE_FIELD_LABELS: Partial<
   "stats.projects": "Completed projects",
   "stats.clients": "Clients",
   "stats.awards": "Awards",
+  servicesBadge: "Services Badge",
   servicesTitle: "Services Title",
   servicesSubtitle: "Services Subtitle",
+  experienceBadge: "Experience Badge",
+  experienceTitle: "Experience Title",
+  portfolioBadge: "Portfolio Badge",
+  portfolioTitle: "Portfolio Title",
+  portfolioSubtitle: "Portfolio Subtitle",
+  projectsBadge: "Projects Badge",
+  projectsTitle: "Projects Title",
+  projectsSubtitle: "Projects Subtitle",
+};
+
+// The 11 top-level "Badge"/"Title"/"Subtitle" fields (servicesBadge,
+// experienceTitle, portfolioSubtitle, etc.) are each a single plain string on
+// ResumeData, rendered as one TextField with a label + placeholder that
+// writes straight back to `draft.<field>`. This table drives a single shared
+// branch in SecretResumeEditor's renderInlineFieldToolbox instead of one
+// near-identical `if` per field.
+export const SIMPLE_TEXT_FIELD_CONFIG: Partial<
+  Record<
+    InlineEditableFieldId,
+    { label: string; placeholder: string; field: keyof ResumeData }
+  >
+> = {
+  servicesBadge: {
+    label: "Services Badge",
+    placeholder: "Services",
+    field: "servicesBadge",
+  },
+  servicesTitle: {
+    label: "Services Title",
+    placeholder: "What I Offer",
+    field: "servicesTitle",
+  },
+  servicesSubtitle: {
+    label: "Services Subtitle",
+    placeholder: "Professional services tailored to your project needs",
+    field: "servicesSubtitle",
+  },
+  experienceBadge: {
+    label: "Experience Badge",
+    placeholder: "Experience",
+    field: "experienceBadge",
+  },
+  experienceTitle: {
+    label: "Experience Title",
+    placeholder: "Professional Experience",
+    field: "experienceTitle",
+  },
+  portfolioBadge: {
+    label: "Portfolio Badge",
+    placeholder: "Portfolio",
+    field: "portfolioBadge",
+  },
+  portfolioTitle: {
+    label: "Portfolio Title",
+    placeholder: "Featured Work",
+    field: "portfolioTitle",
+  },
+  portfolioSubtitle: {
+    label: "Portfolio Subtitle",
+    placeholder:
+      "Explore my best projects and case studies. Each project showcases strategic problem-solving and technical excellence.",
+    field: "portfolioSubtitle",
+  },
+  projectsBadge: {
+    label: "Projects Badge",
+    placeholder: "Projects",
+    field: "projectsBadge",
+  },
+  projectsTitle: {
+    label: "Projects Title",
+    placeholder: "Recent Projects",
+    field: "projectsTitle",
+  },
+  projectsSubtitle: {
+    label: "Projects Subtitle",
+    placeholder: "Latest work and technical achievements",
+    field: "projectsSubtitle",
+  },
 };
 
 export const PREVIEW_SECTION_TO_EDITOR_SECTION: Record<

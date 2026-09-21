@@ -1,16 +1,10 @@
 import React, { useCallback, useMemo } from "react";
 import { getSectionPalette } from "@/theme/sectionPalette";
-import { IconButton, Stack, SxProps, Theme } from "@mui/material";
+import { Box, IconButton, SxProps, Theme } from "@mui/material";
 import { useThemeContext } from "@/context/ThemeContext";
-import { getInlineFieldSxV2 } from "../secret/utils/componentUtil";
 import { ICON_MAP } from "../resume/ServicesSection";
 import LinkIcon from "@mui/icons-material/Link";
-import {
-  useEditor,
-  useIsEditMode,
-  useActiveField,
-  useOnFieldClick,
-} from "@/hook/useEditor";
+import { useEditor, useActiveField, useOnFieldClick } from "@/hook/useEditor";
 
 export interface SocialLink {
   icon?: React.ReactNode | string;
@@ -20,48 +14,24 @@ export interface SocialLink {
 }
 
 interface SocialMediaBtnProps {
-  defaultLinks: SocialLink[];
-  newLinks?: SocialLink[];
+  links?: SocialLink[];
+  /** Icons per row before wrapping; keeps rows readable instead of an unbounded row. */
+  maxPerRow?: number;
 }
-
-/**
- * Merges default and new social links, removing duplicates while preserving order
- * @param defaultLinks - Default links provided
- * @param newLinks - Newly added links
- * @returns Merged array of unique links with stable keys
- */
-const mergeAndDeduplicateLinks = (
-  defaultLinks: SocialLink[],
-  newLinks: SocialLink[],
-): (SocialLink & { key: string })[] => {
-  const mergedLinks = [...defaultLinks, ...(newLinks || [])];
-
-  const uniqueLinks = mergedLinks.reduce(
-    (acc, link, index) => {
-      // Use label + index as key to ensure uniqueness
-      const key = `${link.label}-${index}`;
-      // Check if this label already exists in accumulator
-      if (!acc.some((l) => l.label === link.label)) {
-        acc.push({ ...link, key });
-      }
-      return acc;
-    },
-    [] as (SocialLink & { key: string })[],
-  );
-
-  return uniqueLinks;
-};
 
 const SocialMediaButton = React.memo(
   ({
     icon,
     href,
+    url,
     label,
+    index,
     isDarkMode,
     primaryAccent,
     onInlineFieldClick,
     activeInlineFieldId,
   }: SocialLink & {
+    index: number;
     isDarkMode: boolean;
     primaryAccent: string;
     onInlineFieldClick?: (
@@ -71,7 +41,10 @@ const SocialMediaButton = React.memo(
     ) => void;
     activeInlineFieldId?: string | null;
   }) => {
-    const fieldId = `personalInfo.social.${label}`;
+    const linkHref = href || url;
+    // Keyed by index, not label, so each node keeps a stable identity (and
+    // can be independently updated) even when the label is blank or shared.
+    const fieldId = `personalInfo.social.${index}`;
     const isActive = activeInlineFieldId === fieldId;
 
     const handleClick = useCallback(
@@ -118,7 +91,7 @@ const SocialMediaButton = React.memo(
     return (
       <IconButton
         component={onInlineFieldClick ? "button" : "a"}
-        href={onInlineFieldClick ? undefined : href}
+        href={onInlineFieldClick ? undefined : linkHref}
         target={onInlineFieldClick ? undefined : "_blank"}
         rel={onInlineFieldClick ? undefined : "noopener noreferrer"}
         aria-label={label}
@@ -127,7 +100,7 @@ const SocialMediaButton = React.memo(
       >
         {icon && ICON_MAP[icon as keyof typeof ICON_MAP]
           ? React.createElement(ICON_MAP[icon as keyof typeof ICON_MAP])
-          : "+"}
+          : <LinkIcon fontSize="small" />}
       </IconButton>
     );
   },
@@ -136,43 +109,71 @@ const SocialMediaButton = React.memo(
 SocialMediaButton.displayName = "SocialMediaButton";
 
 export const SocialMediaBtn = ({
-  defaultLinks = [],
-  newLinks = [],
+  links = [],
+  maxPerRow = 6,
 }: SocialMediaBtnProps) => {
   const { isDarkMode } = useThemeContext();
   const { primaryAccent } = getSectionPalette(isDarkMode);
   const editor = useEditor();
-  const isEditMode = useIsEditMode();
   const activeFieldId = useActiveField();
   const onFieldClick = useOnFieldClick();
 
-  const { onInlineFieldClick, activeInlineFieldId } = editor || {};
+  const { onAddAction } = editor || {};
 
-  // Merge default and new links, removing duplicates
-  const mergedLinks = useMemo(
-    () => mergeAndDeduplicateLinks(defaultLinks, newLinks),
-    [defaultLinks, newLinks],
-  );
-
-  // Render all links (default + new + deduped)
+  // Render every link keyed by its array index, so a node's identity (and
+  // therefore its edit target) stays stable regardless of its label/icon.
   const renderedLinks = useMemo(
     () =>
-      mergedLinks.map(({ key: linkKey, ...link }) => (
+      links.map((link, index) => (
         <SocialMediaButton
-          key={linkKey}
+          key={index}
           {...link}
+          index={index}
           isDarkMode={isDarkMode}
           primaryAccent={primaryAccent}
           onInlineFieldClick={onFieldClick as any}
           activeInlineFieldId={activeFieldId ?? undefined}
         />
       )),
-    [mergedLinks, isDarkMode, primaryAccent, onFieldClick, activeFieldId],
+    [links, isDarkMode, primaryAccent, onFieldClick, activeFieldId],
   );
 
   return (
-    <Stack direction="row" spacing={1.5} flexWrap="wrap">
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: `repeat(${maxPerRow}, 52px)`,
+        gap: 1.5,
+        justifyContent: "center",
+      }}
+    >
       {renderedLinks}
-    </Stack>
+
+      {/* Add social link — always rendered after existing links so new
+          entries never appear out of order. */}
+      {onAddAction && (
+        <IconButton
+          aria-label="Add social link"
+          onClick={(event) => {
+            event.stopPropagation();
+            onAddAction("social", event.currentTarget as HTMLElement);
+          }}
+          sx={{
+            width: 52,
+            height: 52,
+            color: "common.white",
+            backgroundColor: "rgba(20, 184, 166, 0.25)",
+            border: "2px dashed rgba(20, 184, 166, 0.5)",
+            "&:hover": {
+              backgroundColor: "rgba(20, 184, 166, 0.4)",
+            },
+          }}
+        >
+          <Box sx={{ fontSize: "1.5rem", fontWeight: 700, lineHeight: 1 }}>
+            +
+          </Box>
+        </IconButton>
+      )}
+    </Box>
   );
 };

@@ -230,9 +230,10 @@ const Certifications = ({
               background: softBackground,
             },
           }}
-          onClick={(event) =>
-            onAddAction("certifications", event.currentTarget as HTMLElement)
-          }
+          onClick={(event) => {
+            event.stopPropagation();
+            onAddAction("certifications", event.currentTarget as HTMLElement);
+          }}
         >
           <Typography
             sx={{ color: primaryAccent, fontWeight: 600, fontSize: "1rem" }}

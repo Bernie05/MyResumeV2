@@ -5,6 +5,8 @@ import {
   PortfolioItem,
   ProjectItem,
   ResumeData,
+  ServiceCard,
+  ServiceItem,
   SkillCategory,
   SkillItem,
   TestimonialItem,
@@ -164,6 +166,23 @@ export const createEmptySkillCategory = (): SkillCategory => {
 
 export const createEmptySkillItem = (): SkillItem => {
   return {
+    name: "",
+    proficiency: 50,
+  };
+};
+
+export const createEmptyServiceCard = (items: ServiceCard[]): ServiceCard => {
+  return {
+    id: getNextId(items),
+    title: "",
+    subtitle: "",
+    items: [{ id: 1, name: "", proficiency: 50 }],
+  };
+};
+
+export const createEmptyServiceItem = (items: ServiceItem[]): ServiceItem => {
+  return {
+    id: getNextId(items),
     name: "",
     proficiency: 50,
   };

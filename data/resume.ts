@@ -32,6 +32,8 @@ export const resumeData: ResumeData = {
     clients: 15,
     awards: 0,
   },
+  experienceBadge: "Experience",
+  experienceTitle: "Professional Experience",
   experience: [
     {
       id: 1,
@@ -145,6 +147,38 @@ export const resumeData: ResumeData = {
       ],
     },
   ],
+  services: [
+    {
+      id: 1,
+      title: "Backend Development",
+      subtitle: "Expert backend solutions",
+      icon: "database",
+      items: [
+        { id: 1, name: "Java", proficiency: 95, icon: "code" },
+        { id: 2, name: "Node.js", proficiency: 90, icon: "briefcase" },
+      ],
+    },
+    {
+      id: 2,
+      title: "Frontend Development",
+      subtitle: "Expert frontend solutions",
+      icon: "palette",
+      items: [
+        { id: 1, name: "React", proficiency: 90, icon: "code" },
+        { id: 2, name: "TypeScript", proficiency: 88, icon: "code" },
+      ],
+    },
+    {
+      id: 3,
+      title: "Tools & Design Development",
+      subtitle: "Expert tools & design solutions",
+      icon: "brush",
+      items: [
+        { id: 1, name: "Figma", proficiency: 90, icon: "design" },
+        { id: 2, name: "Git", proficiency: 90, icon: "git" },
+      ],
+    },
+  ],
   certifications: [
     {
       id: 1,
@@ -182,6 +216,9 @@ export const resumeData: ResumeData = {
       photoUrl: "",
     },
   ],
+  projectsBadge: "Projects",
+  projectsTitle: "Recent Projects",
+  projectsSubtitle: "Latest work and technical achievements",
   projects: [
     {
       id: 1,
@@ -220,6 +257,10 @@ export const resumeData: ResumeData = {
         "Created responsive React application with TypeScript, improving user experience and reducing page load time by 45%.",
     },
   ],
+  portfolioBadge: "Portfolio",
+  portfolioTitle: "Featured Work",
+  portfolioSubtitle:
+    "Explore my best projects and case studies. Each project showcases strategic problem-solving and technical excellence.",
   portfolio: [
     {
       id: 1,

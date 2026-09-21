@@ -6,7 +6,8 @@ import { useThemeContext } from "@/context/ThemeContext";
 import { ProjectCardComponent } from "./components/cards/ProjectCardComponent";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import { AddButton } from "../component/static/AddButton";
-import { useEditor } from "@/hook/useEditor";
+import { useEditor, useActiveField, useOnFieldClick } from "@/hook/useEditor";
+import { useInlineEditing } from "@/hook/useInlineEditing";
 
 interface Project {
   id: number;
@@ -21,9 +22,17 @@ interface Project {
 
 export interface IProjectsSection {
   projects: Project[];
+  projectsBadge?: string;
+  projectsTitle?: string;
+  projectsSubtitle?: string;
 }
 
-const Projects = ({ projects }: IProjectsSection) => {
+const Projects = ({
+  projects,
+  projectsBadge,
+  projectsTitle,
+  projectsSubtitle,
+}: IProjectsSection) => {
   const { isDarkMode } = useThemeContext();
   const {
     titleColor,
@@ -37,6 +46,14 @@ const Projects = ({ projects }: IProjectsSection) => {
 
   const editor = useEditor();
   const { onAddAction } = editor || {};
+  const activeInlineFieldId = useActiveField();
+  const onInlineFieldClick = useOnFieldClick();
+
+  const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
+    targetSection: "projects",
+    activeInlineFieldId,
+    onInlineFieldClick,
+  });
 
   // Memoize projects to avoid unnecessary re-renders
   const memoizedProjects = useMemo(
@@ -68,7 +85,6 @@ const Projects = ({ projects }: IProjectsSection) => {
             display: "inline-flex",
             px: 1.75,
             py: 0.75,
-            borderRadius: 999,
             background: buttonGradient,
             color: accentText,
             fontWeight: 700,
@@ -76,9 +92,12 @@ const Projects = ({ projects }: IProjectsSection) => {
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             mb: 2,
+            ...getInlineFieldSx("projectsBadge"),
+            borderRadius: 999,
           }}
+          {...createInlineFieldProps("projectsBadge")}
         >
-          Projects
+          {projectsBadge || "Projects"}
         </Box>
         <Typography
           variant="h3"
@@ -87,9 +106,11 @@ const Projects = ({ projects }: IProjectsSection) => {
             fontSize: { xs: "2rem", md: "2.5rem" },
             color: titleColor,
             mb: 2,
+            ...getInlineFieldSx("projectsTitle"),
           }}
+          {...createInlineFieldProps("projectsTitle")}
         >
-          Recent Projects
+          {projectsTitle || "Recent Projects"}
         </Typography>
         <Typography
           variant="h6"
@@ -97,9 +118,11 @@ const Projects = ({ projects }: IProjectsSection) => {
             fontSize: "1.125rem",
             color: mutedColor,
             fontWeight: 400,
+            ...getInlineFieldSx("projectsSubtitle"),
           }}
+          {...createInlineFieldProps("projectsSubtitle")}
         >
-          Latest work and technical achievements
+          {projectsSubtitle || "Latest work and technical achievements"}
         </Typography>
       </Box>
 

@@ -105,9 +105,10 @@ export const CustomStats = ({ stats, animatedValues }: ICustomStatsProps) => {
             py: 2,
             "&:hover": { borderColor: primaryAccent },
           }}
-          onClick={(event) =>
-            onAddAction("stat", event.currentTarget as HTMLElement)
-          }
+          onClick={(event) => {
+            event.stopPropagation();
+            onAddAction("stat", event.currentTarget as HTMLElement);
+          }}
         >
           <Typography
             sx={{

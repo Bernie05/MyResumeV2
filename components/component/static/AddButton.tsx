@@ -30,9 +30,10 @@ export const AddButton = ({ children, targetSectionId }: IAddButtonProps) => {
           background: softBackground,
         },
       }}
-      onClick={(event) =>
-        onAddAction?.(targetSectionId, event.currentTarget as HTMLElement)
-      }
+      onClick={(event) => {
+        event.stopPropagation();
+        onAddAction?.(targetSectionId, event.currentTarget as HTMLElement);
+      }}
     >
       {children}
     </Box>

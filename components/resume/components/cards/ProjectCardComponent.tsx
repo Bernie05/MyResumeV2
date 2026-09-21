@@ -54,7 +54,7 @@ export const ProjectCardComponent = ({
   const editor = useEditor();
   const activeInlineFieldId = useActiveField();
   const onInlineFieldClick = useOnFieldClick();
-  const { onDeleteAction } = editor || {};
+  const { onDeleteAction, onAddAction } = editor || {};
 
   const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
     targetSection: inlineSection,
@@ -117,28 +117,45 @@ export const ProjectCardComponent = ({
         </IconButton>
       )}
 
-      {item.image && (
+      {(item.image || isEditMode) && (
         <Box
           sx={{
             ...getInlineFieldSx(buildFieldId("image")),
           }}
           {...createInlineFieldProps(buildFieldId("image"))}
         >
-          <CardMedia
-            component="img"
-            image={item.image}
-            alt={displayTitle}
-            sx={{ height: 180, objectFit: "cover" }}
-          />
+          {item.image ? (
+            <CardMedia
+              component="img"
+              image={item.image}
+              alt={displayTitle}
+              sx={{ height: 180, objectFit: "cover" }}
+            />
+          ) : (
+            <Box
+              sx={{
+                height: 180,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: softBackground,
+                color: mutedColor,
+                fontSize: "0.8rem",
+                fontWeight: 600,
+              }}
+            >
+              + Add image
+            </Box>
+          )}
         </Box>
       )}
 
       <CardContent
         sx={{ p: 3, flexGrow: 1, display: "flex", flexDirection: "column" }}
       >
-        {item.category && (
+        {(item.category || isEditMode) && (
           <Chip
-            label={item.category}
+            label={item.category || "+ Add tag"}
             size="small"
             sx={{
               alignSelf: "flex-start",
@@ -153,63 +170,100 @@ export const ProjectCardComponent = ({
           />
         )}
 
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-            color: titleColor,
-            mb: 1,
-            fontSize: "1.1rem",
-            ...getInlineFieldSx(buildFieldId("name")),
-          }}
-          {...createInlineFieldProps(buildFieldId("name"))}
-        >
-          {displayTitle}
-        </Typography>
+        {(displayTitle || isEditMode) && (
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              color: displayTitle ? titleColor : mutedColor,
+              mb: 1,
+              fontSize: "1.1rem",
+              ...getInlineFieldSx(buildFieldId("name")),
+            }}
+            {...createInlineFieldProps(buildFieldId("name"))}
+          >
+            {displayTitle || "+ Add title"}
+          </Typography>
+        )}
 
-        <Typography
-          variant="body2"
-          sx={{
-            color: mutedColor,
-            mb: 2,
-            flexGrow: 1,
-            ...getInlineFieldSx(buildFieldId("description")),
-          }}
-          {...createInlineFieldProps(buildFieldId("description"))}
-        >
-          {item.description}
-        </Typography>
+        {(item.description || isEditMode) && (
+          <Typography
+            variant="body2"
+            sx={{
+              color: mutedColor,
+              mb: 2,
+              flexGrow: 1,
+              fontStyle: item.description ? "normal" : "italic",
+              ...getInlineFieldSx(buildFieldId("description")),
+            }}
+            {...createInlineFieldProps(buildFieldId("description"))}
+          >
+            {item.description || "+ Add description"}
+          </Typography>
+        )}
 
-        {technologies.length > 0 && (
+        {(technologies.length > 0 || isEditMode) && (
           <Box
             sx={{
               display: "flex",
               flexWrap: "wrap",
               gap: 0.75,
               mb: 2,
-              ...getInlineFieldSx(buildFieldId("technologies")),
+              alignItems: "center",
             }}
-            {...createInlineFieldProps(buildFieldId("technologies"))}
           >
-            {technologies.map((tech, techIndex) => (
-              <Chip
-                key={`${tech}-${techIndex}`}
-                label={tech}
-                size="small"
-                sx={{
-                  backgroundColor: isDarkMode
-                    ? `${primaryAccent}22`
-                    : `${primaryAccent}15`,
-                  color: primaryAccent,
-                  fontWeight: 600,
-                  fontSize: "0.7rem",
-                }}
-              />
-            ))}
+            {technologies.map((tech, techIndex) => {
+              const techFieldId =
+                inlineSection === "portfolio" || inlineSection === "projects"
+                  ? buildFieldId(`technologies.${techIndex}`)
+                  : buildFieldId("technologies");
+              return (
+                <Chip
+                  key={`${tech}-${techIndex}`}
+                  label={tech || "+ Add tag"}
+                  size="small"
+                  sx={{
+                    backgroundColor: isDarkMode
+                      ? `${primaryAccent}22`
+                      : `${primaryAccent}15`,
+                    color: primaryAccent,
+                    fontWeight: 600,
+                    fontSize: "0.7rem",
+                    ...getInlineFieldSx(techFieldId),
+                  }}
+                  {...createInlineFieldProps(techFieldId)}
+                />
+              );
+            })}
+            {isEditMode &&
+              onAddAction &&
+              (inlineSection === "portfolio" ||
+                inlineSection === "projects") && (
+                <Chip
+                  label="+ Add tag"
+                  size="small"
+                  variant="outlined"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onAddAction(
+                      `${inlineSection}.${itemIndex}.tech`,
+                      event.currentTarget as HTMLElement,
+                    );
+                  }}
+                  sx={{
+                    borderStyle: "dashed",
+                    borderColor: primaryAccent,
+                    color: primaryAccent,
+                    fontWeight: 600,
+                    fontSize: "0.7rem",
+                    cursor: "pointer",
+                  }}
+                />
+              )}
           </Box>
         )}
 
-        {item.client && item.testimonial && (
+        {((item.client && item.testimonial) || isEditMode) && (
           <Box
             sx={{
               mb: 2,
@@ -231,7 +285,9 @@ export const ProjectCardComponent = ({
                 mb: 0.5,
               }}
             >
-              “{item.testimonial}”
+              {item.testimonial
+                ? `“${item.testimonial}”`
+                : "+ Add testimonial"}
             </Typography>
             <Typography
               variant="caption"
@@ -242,13 +298,13 @@ export const ProjectCardComponent = ({
               }}
               {...createInlineFieldProps(buildFieldId("client"))}
             >
-              — {item.client}
+              — {item.client || "Client name"}
             </Typography>
           </Box>
         )}
 
         <Box sx={{ display: "flex", gap: 1.5, mt: "auto" }}>
-          {demoUrl && (
+          {(demoUrl || isEditMode) && (
             <Box
               component={isEditMode ? "span" : "a"}
               href={isEditMode ? undefined : demoUrl}
@@ -260,17 +316,18 @@ export const ProjectCardComponent = ({
                 gap: 0.5,
                 fontSize: "0.8rem",
                 fontWeight: 600,
-                color: primaryAccent,
+                color: demoUrl ? primaryAccent : mutedColor,
+                fontStyle: demoUrl ? "normal" : "italic",
                 textDecoration: "none",
                 ...getInlineFieldSx(buildFieldId("demoUrl")),
               }}
               {...createInlineFieldProps(buildFieldId("demoUrl"))}
             >
               <LaunchIcon sx={{ fontSize: "1rem" }} />
-              Live Demo
+              {demoUrl ? "Live Demo" : "+ Add live demo link"}
             </Box>
           )}
-          {codeUrl && (
+          {(codeUrl || isEditMode) && (
             <Box
               component={isEditMode ? "span" : "a"}
               href={isEditMode ? undefined : codeUrl}
@@ -283,6 +340,7 @@ export const ProjectCardComponent = ({
                 fontSize: "0.8rem",
                 fontWeight: 600,
                 color: mutedColor,
+                fontStyle: codeUrl ? "normal" : "italic",
                 textDecoration: "none",
                 ...getInlineFieldSx(
                   buildFieldId(inlineSection === "portfolio" ? "githubUrl" : "link"),
@@ -293,7 +351,11 @@ export const ProjectCardComponent = ({
               )}
             >
               <GitHubIcon sx={{ fontSize: "1rem" }} />
-              {inlineSection === "portfolio" ? "View Code" : "View Project"}
+              {codeUrl
+                ? inlineSection === "portfolio"
+                  ? "View Code"
+                  : "View Project"
+                : "+ Add code link"}
             </Box>
           )}
         </Box>

@@ -1,4 +1,6 @@
+import { Box, IconButton } from "@mui/material";
 import { ResumeEditableSection } from "@/components/resume/ResumePage";
+import { ICON_MAP, ICON_NAMES } from "@/components/resume/ServicesSection";
 import {
   INLINE_FIELD_LABELS,
   InlineEditableFieldId,
@@ -96,14 +98,10 @@ export const getInlineFieldLabel = (fieldId: InlineEditableFieldId): string => {
     return `Experience #${expIndex} Bullet #${bulletIndex}`;
   }
 
-  const socialMatch = fieldId.match(/^personalInfo\.social\.(.+)$/);
+  const socialMatch = fieldId.match(/^personalInfo\.social\.(\d+)$/);
 
   if (socialMatch) {
-    const customSocialMatch = socialMatch[1].match(/^custom\.(\d+)$/);
-    if (customSocialMatch) {
-      return `Custom Social Link #${Number(customSocialMatch[1]) + 1}`;
-    }
-    return `Social: ${socialMatch[1]}`;
+    return `Social Link #${Number(socialMatch[1]) + 1}`;
   }
 
   const customStatMatch = fieldId.match(/^stats\.custom\.(\d+)$/);
@@ -128,6 +126,16 @@ export const getInlineFieldLabel = (fieldId: InlineEditableFieldId): string => {
       caseStudy: "Case Study",
     };
     return `Project #${index} ${keyLabelMap[key] ?? key}`;
+  }
+
+  const projectTechItemMatch = fieldId.match(
+    /^projects\.(\d+)\.technologies\.(\d+)$/,
+  );
+
+  if (projectTechItemMatch) {
+    const projIndex = Number(projectTechItemMatch[1]) + 1;
+    const techIndex = Number(projectTechItemMatch[2]) + 1;
+    return `Project #${projIndex} Tag #${techIndex}`;
   }
 
   const portfolioExtendedMatch = fieldId.match(
@@ -160,6 +168,16 @@ export const getInlineFieldLabel = (fieldId: InlineEditableFieldId): string => {
     const portIndex = Number(portfolioResultMatch[1]) + 1;
     const resultIndex = Number(portfolioResultMatch[2]) + 1;
     return `Portfolio #${portIndex} Result #${resultIndex}`;
+  }
+
+  const portfolioTechItemMatch = fieldId.match(
+    /^portfolio\.(\d+)\.technologies\.(\d+)$/,
+  );
+
+  if (portfolioTechItemMatch) {
+    const portIndex = Number(portfolioTechItemMatch[1]) + 1;
+    const techIndex = Number(portfolioTechItemMatch[2]) + 1;
+    return `Portfolio #${portIndex} Tag #${techIndex}`;
   }
 
   const educationMatch = fieldId.match(
@@ -360,3 +378,41 @@ export const getCreatedInlineFields = <TField extends string>(
 
   return inlineFields;
 };
+
+/**
+ * Shared `ICON_MAP`-based icon-picker grid: renders one small `IconButton`
+ * per entry in `ICON_NAMES`, highlighting whichever key equals
+ * `selectedKey` and invoking `onSelect(key)` on click. Used by the several
+ * near-identical toolbox branches in SecretResumeEditor (skills category
+ * icon, skills category icon within the comprehensive form, services card
+ * icon, services card icon within the comprehensive form) that only differ
+ * in which field the picked key is written back to. Not used by the
+ * social-link icon picker, which additionally disables icons already used
+ * by another social entry — a genuinely different behavior kept inline.
+ */
+export const renderIconMapPickerGrid = (
+  selectedKey: string | undefined,
+  onSelect: (key: string) => void,
+) => (
+  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+    {ICON_NAMES.map((key) => {
+      const Ic = ICON_MAP[key];
+      const isSelected = selectedKey === key;
+      return (
+        <IconButton
+          key={key}
+          size="small"
+          onClick={() => onSelect(key)}
+          sx={{
+            border: isSelected ? "2px solid" : "1px solid transparent",
+            borderColor: isSelected ? "primary.main" : "transparent",
+            borderRadius: 1,
+          }}
+          title={key}
+        >
+          <Ic fontSize="small" />
+        </IconButton>
+      );
+    })}
+  </Box>
+);

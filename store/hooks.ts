@@ -9,6 +9,7 @@ import type {
   SkillCategory,
   CertificationItem,
   ProjectItem,
+  ServiceCard,
 } from "@/types/resume";
 import {
   loadResumeDataStart,
@@ -23,6 +24,12 @@ import {
   deleteEducation,
   updateSkills,
   addSkillCategory,
+  addServiceCard,
+  updateServiceCard,
+  deleteServiceCard,
+  addServiceItem,
+  updateServiceItem,
+  deleteServiceItem,
   addCertification,
   updateCertification,
   deleteCertification,
@@ -165,6 +172,53 @@ export const useResumeOperations = () => {
     [dispatch],
   );
 
+  // Services operations (independent entity from Skills)
+  const addService = useCallback(
+    (card: ServiceCard) => {
+      dispatch(addServiceCard(card));
+    },
+    [dispatch],
+  );
+
+  const updateService = useCallback(
+    (id: number, updates: Partial<ServiceCard>) => {
+      dispatch(updateServiceCard({ id, updates }));
+    },
+    [dispatch],
+  );
+
+  const removeService = useCallback(
+    (id: number) => {
+      dispatch(deleteServiceCard(id));
+    },
+    [dispatch],
+  );
+
+  const addServiceCardItem = useCallback(
+    (cardId: number, item: ServiceCard["items"][number]) => {
+      dispatch(addServiceItem({ cardId, item }));
+    },
+    [dispatch],
+  );
+
+  const updateServiceCardItem = useCallback(
+    (
+      cardId: number,
+      itemIndex: number,
+      updates: Partial<ServiceCard["items"][number]>,
+    ) => {
+      dispatch(updateServiceItem({ cardId, itemIndex, updates }));
+    },
+    [dispatch],
+  );
+
+  const removeServiceCardItem = useCallback(
+    (cardId: number, itemIndex: number) => {
+      dispatch(deleteServiceItem({ cardId, itemIndex }));
+    },
+    [dispatch],
+  );
+
   // Certifications operations
   const addCert = useCallback(
     (certification: CertificationItem) => {
@@ -225,6 +279,12 @@ export const useResumeOperations = () => {
     removeEdu,
     updateAllSkills,
     addSkills,
+    addService,
+    updateService,
+    removeService,
+    addServiceCardItem,
+    updateServiceCardItem,
+    removeServiceCardItem,
     addCert,
     updateCert,
     removeCert,

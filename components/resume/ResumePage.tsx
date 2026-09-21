@@ -150,7 +150,8 @@ const ResumePage = ({
             sectionId: "services",
             children: (
               <ServicesSection
-                skills={resume.skills}
+                services={resume.services}
+                servicesBadge={resume.servicesBadge}
                 servicesTitle={resume.servicesTitle}
                 servicesSubtitle={resume.servicesSubtitle}
                 onInlineFieldClick={editor?.onInlineFieldClick}
@@ -164,18 +165,38 @@ const ResumePage = ({
           {renderSection({
             sectionId: "experience",
             component: "section",
-            children: <Experience experience={resume.experience} />,
+            children: (
+              <Experience
+                experience={resume.experience}
+                experienceBadge={resume.experienceBadge}
+                experienceTitle={resume.experienceTitle}
+              />
+            ),
           })}
 
           {renderSection({
             sectionId: "portfolio",
             component: "section",
-            children: <Portfolio portfolio={resume.portfolio} />,
+            children: (
+              <Portfolio
+                portfolio={resume.portfolio}
+                portfolioBadge={resume.portfolioBadge}
+                portfolioTitle={resume.portfolioTitle}
+                portfolioSubtitle={resume.portfolioSubtitle}
+              />
+            ),
           })}
 
           {renderSection({
             sectionId: "projects",
-            children: <Projects projects={resume.projects} />,
+            children: (
+              <Projects
+                projects={resume.projects}
+                projectsBadge={resume.projectsBadge}
+                projectsTitle={resume.projectsTitle}
+                projectsSubtitle={resume.projectsSubtitle}
+              />
+            ),
           })}
 
           {renderSection({

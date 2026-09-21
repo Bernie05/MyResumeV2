@@ -11,6 +11,7 @@ import type {
   ResumeStats,
   SocialMediaLink,
   TestimonialItem,
+  ServiceCard,
 } from "@/types/resume";
 
 interface ResumeDataState {
@@ -146,6 +147,93 @@ const resumeDataSlice = createSlice({
       if (state.data) {
         state.data.skills.push(action.payload);
         state.hasChanges = true;
+      }
+    },
+
+    // Services operations (independent from Skills — one card per entry)
+    addServiceCard: (state, action: PayloadAction<ServiceCard>) => {
+      if (state.data) {
+        state.data.services.push(action.payload);
+        state.hasChanges = true;
+      }
+    },
+    updateServiceCard: (
+      state,
+      action: PayloadAction<{ id: number; updates: Partial<ServiceCard> }>,
+    ) => {
+      if (state.data) {
+        const index = state.data.services.findIndex(
+          (card) => card.id === action.payload.id,
+        );
+        if (index !== -1) {
+          state.data.services[index] = {
+            ...state.data.services[index],
+            ...action.payload.updates,
+          };
+          state.hasChanges = true;
+        }
+      }
+    },
+    deleteServiceCard: (state, action: PayloadAction<number>) => {
+      if (state.data) {
+        state.data.services = state.data.services.filter(
+          (card) => card.id !== action.payload,
+        );
+        state.hasChanges = true;
+      }
+    },
+
+    // Service card item (skill row) operations — scoped by card id + item index
+    addServiceItem: (
+      state,
+      action: PayloadAction<{
+        cardId: number;
+        item: ServiceCard["items"][number];
+      }>,
+    ) => {
+      if (state.data) {
+        const card = state.data.services.find(
+          (c) => c.id === action.payload.cardId,
+        );
+        if (card) {
+          card.items.push(action.payload.item);
+          state.hasChanges = true;
+        }
+      }
+    },
+    updateServiceItem: (
+      state,
+      action: PayloadAction<{
+        cardId: number;
+        itemIndex: number;
+        updates: Partial<ServiceCard["items"][number]>;
+      }>,
+    ) => {
+      if (state.data) {
+        const card = state.data.services.find(
+          (c) => c.id === action.payload.cardId,
+        );
+        if (card && card.items[action.payload.itemIndex]) {
+          card.items[action.payload.itemIndex] = {
+            ...card.items[action.payload.itemIndex],
+            ...action.payload.updates,
+          };
+          state.hasChanges = true;
+        }
+      }
+    },
+    deleteServiceItem: (
+      state,
+      action: PayloadAction<{ cardId: number; itemIndex: number }>,
+    ) => {
+      if (state.data) {
+        const card = state.data.services.find(
+          (c) => c.id === action.payload.cardId,
+        );
+        if (card) {
+          card.items.splice(action.payload.itemIndex, 1);
+          state.hasChanges = true;
+        }
       }
     },
 
@@ -483,6 +571,12 @@ export const {
   deleteEducation,
   updateSkills,
   addSkillCategory,
+  addServiceCard,
+  updateServiceCard,
+  deleteServiceCard,
+  addServiceItem,
+  updateServiceItem,
+  deleteServiceItem,
   addCertification,
   updateCertification,
   deleteCertification,

@@ -578,12 +578,13 @@ const Skills = ({
                       background: softBackground,
                     },
                   }}
-                  onClick={(event) =>
+                  onClick={(event) => {
+                    event.stopPropagation();
                     onAddAction(
                       `skills.${categoryIndex}.item`,
                       event.currentTarget as HTMLElement,
-                    )
-                  }
+                    );
+                  }}
                 >
                   <Typography
                     sx={{
