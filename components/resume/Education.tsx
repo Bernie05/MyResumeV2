@@ -8,14 +8,19 @@ import {
   Chip,
   IconButton,
 } from "@mui/material";
-import SchoolIcon from "@mui/icons-material/School";
 import { DeleteOutline as DeleteOutlineIcon } from "@mui/icons-material";
+import { useInlineEditing } from "@/hook/useInlineEditing";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
 import type { ResumeEditableSection } from "./ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 import { AddButton } from "../component/static/AddButton";
-import { useEditor, useActiveField, useOnFieldClick } from "@/hook/useEditor";
+import {
+  useEditor,
+  useActiveField,
+  useOnFieldClick,
+  useIsEditMode,
+} from "@/hook/useEditor";
 
 interface IEducationItem {
   id: number;
@@ -28,9 +33,15 @@ interface IEducationItem {
 
 interface IEducationProps {
   education: IEducationItem[];
+  educationBadge?: string;
+  educationTitle?: string;
 }
 
-const Education = ({ education }: IEducationProps) => {
+const Education = ({
+  education,
+  educationBadge,
+  educationTitle,
+}: IEducationProps) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -46,59 +57,18 @@ const Education = ({ education }: IEducationProps) => {
     hoverShadow,
   } = getSectionPalette(isDarkMode);
 
+  const isEditMode = useIsEditMode();
   const editor = useEditor();
   const activeInlineFieldId = useActiveField();
   const onInlineFieldClick = useOnFieldClick();
 
   const { onAddAction, onDeleteAction } = editor || {};
 
-  const getInlineFieldSx = (fieldId: InlineEditableFieldId) => ({
-    borderRadius: 1,
-    outline:
-      activeInlineFieldId === fieldId
-        ? "2px solid rgba(20, 184, 166, 0.9)"
-        : "2px solid transparent",
-    outlineOffset: 2,
-    cursor: onInlineFieldClick ? "pointer" : "inherit",
-    transition: "outline-color 160ms ease, box-shadow 160ms ease",
-    "&:hover": onInlineFieldClick
-      ? {
-          outlineColor: "rgba(20, 184, 166, 0.55)",
-          boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-        }
-      : undefined,
+  const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
+    targetSection: "education",
+    activeInlineFieldId,
+    onInlineFieldClick,
   });
-
-  const createInlineFieldProps = (fieldId: InlineEditableFieldId) => {
-    if (!onInlineFieldClick) {
-      return {};
-    }
-
-    return {
-      onClick: (event: React.MouseEvent) => {
-        event.stopPropagation();
-        onInlineFieldClick(
-          "education",
-          fieldId,
-          event.currentTarget as HTMLElement,
-        );
-      },
-      onKeyDown: (event: React.KeyboardEvent) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          event.stopPropagation();
-          onInlineFieldClick(
-            "education",
-            fieldId,
-            event.currentTarget as HTMLElement,
-          );
-        }
-      },
-      role: "button",
-      tabIndex: 0,
-      "aria-label": `Edit ${fieldId}`,
-    };
-  };
 
   return (
     <Box
@@ -116,7 +86,6 @@ const Education = ({ education }: IEducationProps) => {
             display: "inline-flex",
             px: 1.75,
             py: 0.75,
-            borderRadius: 999,
             background: buttonGradient,
             color: accentText,
             fontWeight: 700,
@@ -124,9 +93,12 @@ const Education = ({ education }: IEducationProps) => {
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             mb: 2,
+            ...getInlineFieldSx("educationBadge"),
+            borderRadius: 999,
           }}
+          {...createInlineFieldProps("educationBadge")}
         >
-          Education
+          {educationBadge || "Education"}
         </Box>
         <Typography
           variant="h3"
@@ -134,9 +106,11 @@ const Education = ({ education }: IEducationProps) => {
             fontWeight: 800,
             fontSize: { xs: "2rem", md: "2.5rem" },
             color: titleColor,
+            ...getInlineFieldSx("educationTitle"),
           }}
+          {...createInlineFieldProps("educationTitle")}
         >
-          Education
+          {educationTitle || "Education"}
         </Typography>
       </Box>
 
@@ -199,56 +173,72 @@ const Education = ({ education }: IEducationProps) => {
                   }}
                 >
                   <Box>
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: "1.5rem",
-                        color: titleColor,
-                        mb: 1,
-                        ...getInlineFieldSx(`education.${index}.school`),
-                      }}
-                      {...createInlineFieldProps(`education.${index}.school`)}
-                    >
-                      {edu.school}
-                    </Typography>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 600,
-                        fontSize: "1.125rem",
-                        color: primaryAccent,
-                        ...getInlineFieldSx(`education.${index}.degree`),
-                      }}
-                      {...createInlineFieldProps(`education.${index}.degree`)}
-                    >
-                      {edu.degree} in {edu.field}
-                    </Typography>
+                    {(edu.school || isEditMode) && (
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: "1.5rem",
+                          color: edu.school ? titleColor : mutedColor,
+                          mb: 1,
+                          ...getInlineFieldSx(`education.${index}.school`),
+                        }}
+                        {...createInlineFieldProps(
+                          `education.${index}.school`,
+                        )}
+                      >
+                        {edu.school || "+ Add school"}
+                      </Typography>
+                    )}
+                    {(edu.degree || isEditMode) && (
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: "1.125rem",
+                          color: primaryAccent,
+                          ...getInlineFieldSx(`education.${index}.degree`),
+                        }}
+                        {...createInlineFieldProps(
+                          `education.${index}.degree`,
+                        )}
+                      >
+                        {edu.degree
+                          ? `${edu.degree}${edu.field ? ` in ${edu.field}` : ""}`
+                          : "+ Add degree"}
+                      </Typography>
+                    )}
                   </Box>
-                  <Chip
-                    label={edu.year}
-                    sx={{
-                      backgroundColor: softBackground,
-                      color: primaryAccent,
-                      fontWeight: 600,
-                      whiteSpace: "nowrap",
-                      ...getInlineFieldSx(`education.${index}.year`),
-                    }}
-                    {...createInlineFieldProps(`education.${index}.year`)}
-                  />
+                  {(edu.year || isEditMode) && (
+                    <Chip
+                      label={edu.year || "+ Add year"}
+                      sx={{
+                        backgroundColor: softBackground,
+                        color: primaryAccent,
+                        fontWeight: 600,
+                        whiteSpace: "nowrap",
+                        ...getInlineFieldSx(`education.${index}.year`),
+                      }}
+                      {...createInlineFieldProps(`education.${index}.year`)}
+                    />
+                  )}
                 </Box>
 
                 {/* Location */}
-                <Typography
-                  sx={{
-                    fontSize: "1rem",
-                    color: mutedColor,
-                    ...getInlineFieldSx(`education.${index}.location`),
-                  }}
-                  {...createInlineFieldProps(`education.${index}.location`)}
-                >
-                  📍 {edu.location}
-                </Typography>
+                {(edu.location || isEditMode) && (
+                  <Typography
+                    sx={{
+                      fontSize: "1rem",
+                      color: mutedColor,
+                      ...getInlineFieldSx(`education.${index}.location`),
+                    }}
+                    {...createInlineFieldProps(
+                      `education.${index}.location`,
+                    )}
+                  >
+                    📍 {edu.location || "+ Add location"}
+                  </Typography>
+                )}
               </CardContent>
             </Card>
 

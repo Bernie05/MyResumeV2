@@ -1,5 +1,6 @@
 import {
   CertificationItem,
+  CharacterReferenceItem,
   EducationItem,
   ExperienceItem,
   PortfolioItem,
@@ -154,6 +155,18 @@ export const createEmptyTestimonialItem = (
     authorRole: "",
     authorCompany: "",
     photoUrl: "",
+  };
+};
+
+export const createEmptyCharacterReferenceItem = (
+  items: CharacterReferenceItem[],
+): CharacterReferenceItem => {
+  return {
+    id: getNextId(items),
+    name: "",
+    company: "",
+    position: "",
+    contactNo: "",
   };
 };
 

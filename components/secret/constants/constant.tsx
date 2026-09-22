@@ -13,6 +13,7 @@ export const EDITOR_SECTIONS = [
   { value: "portfolio", label: "Portfolio" },
   { value: "certifications", label: "Certifications" },
   { value: "testimonials", label: "Testimonials" },
+  { value: "characterReferences", label: "Character References" },
 ] as const;
 
 export type InlineEditableFieldId =
@@ -72,6 +73,10 @@ export type InlineEditableFieldId =
   | `testimonials.${number}.authorRole`
   | `testimonials.${number}.authorCompany`
   | `testimonials.${number}.photoUrl`
+  | `characterReferences.${number}.name`
+  | `characterReferences.${number}.company`
+  | `characterReferences.${number}.position`
+  | `characterReferences.${number}.contactNo`
   | "servicesBadge"
   | "servicesTitle"
   | "servicesSubtitle"
@@ -82,7 +87,21 @@ export type InlineEditableFieldId =
   | "portfolioSubtitle"
   | "projectsBadge"
   | "projectsTitle"
-  | "projectsSubtitle";
+  | "projectsSubtitle"
+  | "educationBadge"
+  | "educationTitle"
+  | "skillsBadge"
+  | "skillsTitle"
+  | "skillsSubtitle"
+  | "certificationsBadge"
+  | "certificationsTitle"
+  | "testimonialsBadge"
+  | "testimonialsTitle"
+  | "characterReferencesBadge"
+  | "characterReferencesTitle"
+  | "contactBadge"
+  | "contactTitle"
+  | "contactSubtitle";
 
 export const INLINE_FIELD_LABELS: Partial<
   Record<InlineEditableFieldId, string>
@@ -115,6 +134,20 @@ export const INLINE_FIELD_LABELS: Partial<
   projectsBadge: "Projects Badge",
   projectsTitle: "Projects Title",
   projectsSubtitle: "Projects Subtitle",
+  educationBadge: "Education Badge",
+  educationTitle: "Education Title",
+  skillsBadge: "Skills Badge",
+  skillsTitle: "Skills Title",
+  skillsSubtitle: "Skills Subtitle",
+  certificationsBadge: "Certifications Badge",
+  certificationsTitle: "Certifications Title",
+  testimonialsBadge: "Testimonials Badge",
+  testimonialsTitle: "Testimonials Title",
+  characterReferencesBadge: "Character References Badge",
+  characterReferencesTitle: "Character References Title",
+  contactBadge: "Contact Badge",
+  contactTitle: "Contact Title",
+  contactSubtitle: "Contact Subtitle",
 };
 
 // The 11 top-level "Badge"/"Title"/"Subtitle" fields (servicesBadge,
@@ -185,6 +218,77 @@ export const SIMPLE_TEXT_FIELD_CONFIG: Partial<
     placeholder: "Latest work and technical achievements",
     field: "projectsSubtitle",
   },
+  educationBadge: {
+    label: "Education Badge",
+    placeholder: "Education",
+    field: "educationBadge",
+  },
+  educationTitle: {
+    label: "Education Title",
+    placeholder: "Education",
+    field: "educationTitle",
+  },
+  skillsBadge: {
+    label: "Skills Badge",
+    placeholder: "Skills",
+    field: "skillsBadge",
+  },
+  skillsTitle: {
+    label: "Skills Title",
+    placeholder: "Professional Skills",
+    field: "skillsTitle",
+  },
+  skillsSubtitle: {
+    label: "Skills Subtitle",
+    placeholder: "Expertise across technologies and platforms",
+    field: "skillsSubtitle",
+  },
+  certificationsBadge: {
+    label: "Certifications Badge",
+    placeholder: "Certifications",
+    field: "certificationsBadge",
+  },
+  certificationsTitle: {
+    label: "Certifications Title",
+    placeholder: "Certifications",
+    field: "certificationsTitle",
+  },
+  testimonialsBadge: {
+    label: "Testimonials Badge",
+    placeholder: "Testimonials",
+    field: "testimonialsBadge",
+  },
+  testimonialsTitle: {
+    label: "Testimonials Title",
+    placeholder: "What People Say",
+    field: "testimonialsTitle",
+  },
+  characterReferencesBadge: {
+    label: "Character References Badge",
+    placeholder: "Character References",
+    field: "characterReferencesBadge",
+  },
+  characterReferencesTitle: {
+    label: "Character References Title",
+    placeholder: "People Who Vouch For Me",
+    field: "characterReferencesTitle",
+  },
+  contactBadge: {
+    label: "Contact Badge",
+    placeholder: "Contact Info",
+    field: "contactBadge",
+  },
+  contactTitle: {
+    label: "Contact Title",
+    placeholder: "Get In Touch",
+    field: "contactTitle",
+  },
+  contactSubtitle: {
+    label: "Contact Subtitle",
+    placeholder:
+      "Reach out for collaboration, consulting, or product work. If you have a project in mind, send the details through the inquiry form and I can get back to you with the best next step.",
+    field: "contactSubtitle",
+  },
 };
 
 export const PREVIEW_SECTION_TO_EDITOR_SECTION: Record<
@@ -200,6 +304,7 @@ export const PREVIEW_SECTION_TO_EDITOR_SECTION: Record<
   skills: "skills",
   certifications: "certifications",
   testimonials: "testimonials",
+  characterReferences: "characterReferences",
   contact: "personalInfo",
   stats: "stats",
 };

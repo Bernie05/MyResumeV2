@@ -11,6 +11,7 @@ import Portfolio from "./Portfolio";
 import Projects from "./Projects";
 import Certifications from "./Certifications";
 import Testimonials from "./Testimonials";
+import CharacterReferences from "./CharacterReferences";
 import { useThemeContext } from "../../context/ThemeContext";
 import type { ResumeData } from "../../types/resume";
 import { Box, Container, Stack, Typography } from "@mui/material";
@@ -42,6 +43,7 @@ export type ResumeEditableSection =
   | "skills"
   | "certifications"
   | "testimonials"
+  | "characterReferences"
   | "contact"
   | "stats";
 
@@ -65,7 +67,7 @@ const ResumePage = ({
 }: IResumePageProps) => {
   const editor = useEditor();
   const isEditMode = useIsEditMode();
-  const activeSectionId = useEditor()?.activeSection;
+  const activeSectionId = editor?.activeSection;
   const onSectionClick = useOnSectionClick();
 
   const { isDarkMode } = useThemeContext();
@@ -201,7 +203,13 @@ const ResumePage = ({
 
           {renderSection({
             sectionId: "education",
-            children: <Education education={resume.education} />,
+            children: (
+              <Education
+                education={resume.education}
+                educationBadge={resume.educationBadge}
+                educationTitle={resume.educationTitle}
+              />
+            ),
           })}
 
           {renderSection({
@@ -210,6 +218,9 @@ const ResumePage = ({
             children: (
               <Skills
                 skills={resume.skills}
+                skillsBadge={resume.skillsBadge}
+                skillsTitle={resume.skillsTitle}
+                skillsSubtitle={resume.skillsSubtitle}
                 onInlineFieldClick={editor?.onInlineFieldClick}
                 activeInlineFieldId={editor?.activeInlineFieldId}
                 onDeleteAction={editor?.onDeleteAction}
@@ -223,6 +234,8 @@ const ResumePage = ({
             children: (
               <Certifications
                 certifications={resume.certifications}
+                certificationsBadge={resume.certificationsBadge}
+                certificationsTitle={resume.certificationsTitle}
                 onInlineFieldClick={editor?.onInlineFieldClick}
                 activeInlineFieldId={editor?.activeInlineFieldId}
                 onAddAction={editor?.onAddAction}
@@ -233,7 +246,24 @@ const ResumePage = ({
 
           {renderSection({
             sectionId: "testimonials",
-            children: <Testimonials testimonials={resume.testimonials} />,
+            children: (
+              <Testimonials
+                testimonials={resume.testimonials}
+                testimonialsBadge={resume.testimonialsBadge}
+                testimonialsTitle={resume.testimonialsTitle}
+              />
+            ),
+          })}
+
+          {renderSection({
+            sectionId: "characterReferences",
+            children: (
+              <CharacterReferences
+                characterReferences={resume.characterReferences}
+                characterReferencesBadge={resume.characterReferencesBadge}
+                characterReferencesTitle={resume.characterReferencesTitle}
+              />
+            ),
           })}
 
           {renderSection({
@@ -242,6 +272,9 @@ const ResumePage = ({
             children: (
               <ContactSection
                 personalInfo={resume.personalInfo}
+                contactBadge={resume.contactBadge}
+                contactTitle={resume.contactTitle}
+                contactSubtitle={resume.contactSubtitle}
                 onInlineFieldClick={editor?.onInlineFieldClick}
                 activeInlineFieldId={editor?.activeInlineFieldId}
               />

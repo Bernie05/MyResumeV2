@@ -2,7 +2,7 @@
 
 import { Avatar, Box, Card, CardContent, IconButton, Typography } from "@mui/material";
 import {
-  FormatQuote as FormatQuoteIcon,
+  Badge as BadgeIcon,
   DeleteOutline as DeleteOutlineIcon,
 } from "@mui/icons-material";
 import { useInlineEditing } from "@/hook/useInlineEditing";
@@ -16,26 +16,25 @@ import {
   useIsEditMode,
 } from "@/hook/useEditor";
 
-interface Testimonial {
+interface CharacterReference {
   id: number;
-  quote: string;
-  authorName: string;
-  authorRole: string;
-  authorCompany?: string;
-  photoUrl?: string;
+  name: string;
+  company: string;
+  position: string;
+  contactNo: string;
 }
 
-interface ITestimonialsProps {
-  testimonials?: Testimonial[];
-  testimonialsBadge?: string;
-  testimonialsTitle?: string;
+interface ICharacterReferencesProps {
+  characterReferences?: CharacterReference[];
+  characterReferencesBadge?: string;
+  characterReferencesTitle?: string;
 }
 
-const Testimonials = ({
-  testimonials = [],
-  testimonialsBadge,
-  testimonialsTitle,
-}: ITestimonialsProps) => {
+const CharacterReferences = ({
+  characterReferences = [],
+  characterReferencesBadge,
+  characterReferencesTitle,
+}: ICharacterReferencesProps) => {
   const { isDarkMode } = useThemeContext();
   const {
     primaryAccent,
@@ -58,12 +57,12 @@ const Testimonials = ({
   const { onDeleteAction, onAddAction } = editor || {};
 
   const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
-    targetSection: "testimonials",
+    targetSection: "characterReferences",
     activeInlineFieldId,
     onInlineFieldClick,
   });
 
-  if (testimonials.length === 0 && !onAddAction) {
+  if (characterReferences.length === 0 && !onAddAction) {
     return null;
   }
 
@@ -90,12 +89,12 @@ const Testimonials = ({
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             mb: 2,
-            ...getInlineFieldSx("testimonialsBadge"),
+            ...getInlineFieldSx("characterReferencesBadge"),
             borderRadius: 999,
           }}
-          {...createInlineFieldProps("testimonialsBadge")}
+          {...createInlineFieldProps("characterReferencesBadge")}
         >
-          {testimonialsBadge || "Testimonials"}
+          {characterReferencesBadge || "Character References"}
         </Box>
         <Typography
           variant="h3"
@@ -104,11 +103,11 @@ const Testimonials = ({
             fontWeight: "bold",
             color: titleColor,
             fontSize: { xs: "1.875rem", md: "2.25rem" },
-            ...getInlineFieldSx("testimonialsTitle"),
+            ...getInlineFieldSx("characterReferencesTitle"),
           }}
-          {...createInlineFieldProps("testimonialsTitle")}
+          {...createInlineFieldProps("characterReferencesTitle")}
         >
-          {testimonialsTitle || "What People Say"}
+          {characterReferencesTitle || "People Who Vouch For Me"}
         </Typography>
       </Box>
 
@@ -119,9 +118,9 @@ const Testimonials = ({
           gap: 3,
         }}
       >
-        {testimonials.map((testimonial, index) => (
+        {characterReferences.map((reference, index) => (
           <Card
-            key={testimonial.id}
+            key={reference.id}
             sx={{
               background: surfaceBackground,
               border: `1px solid ${outline}`,
@@ -136,10 +135,10 @@ const Testimonials = ({
           >
             {onDeleteAction && (
               <IconButton
-                aria-label="Delete testimonial"
+                aria-label="Delete character reference"
                 onClick={(event) => {
                   event.stopPropagation();
-                  onDeleteAction(`testimonials.${index}`);
+                  onDeleteAction(`characterReferences.${index}`);
                 }}
                 sx={{
                   position: "absolute",
@@ -163,63 +162,40 @@ const Testimonials = ({
               </IconButton>
             )}
             <CardContent sx={{ p: 3 }}>
-              <FormatQuoteIcon
+              <BadgeIcon
                 sx={{
                   fontSize: "2.25rem",
                   color: primaryAccent,
-                  transform: "scaleX(-1)",
                   mb: 1,
                 }}
               />
 
-              <Typography
-                variant="body1"
-                sx={{
-                  color: bodyColor,
-                  mb: 2.5,
-                  fontStyle: "italic",
-                  lineHeight: 1.6,
-                  ...getInlineFieldSx(`testimonials.${index}.quote`),
-                }}
-                {...createInlineFieldProps(`testimonials.${index}.quote`)}
-              >
-                “{testimonial.quote}”
-              </Typography>
-
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <Avatar
-                  src={testimonial.photoUrl || undefined}
                   sx={{
                     width: 44,
                     height: 44,
                     bgcolor: primaryAccent,
-                    ...getInlineFieldSx(`testimonials.${index}.photoUrl`),
                   }}
-                  {...createInlineFieldProps(
-                    `testimonials.${index}.photoUrl`,
-                  )}
                 >
-                  {!testimonial.photoUrl &&
-                    (testimonial.authorName?.charAt(0)?.toUpperCase() ?? "?")}
+                  {reference.name?.charAt(0)?.toUpperCase() ?? "?"}
                 </Avatar>
                 <Box sx={{ flexGrow: 1 }}>
                   <Typography
                     variant="subtitle2"
                     sx={{
                       fontWeight: "bold",
-                      color: testimonial.authorName ? titleColor : mutedColor,
-                      fontStyle: testimonial.authorName ? "normal" : "italic",
-                      ...getInlineFieldSx(`testimonials.${index}.authorName`),
+                      color: reference.name ? titleColor : mutedColor,
+                      fontStyle: reference.name ? "normal" : "italic",
+                      ...getInlineFieldSx(`characterReferences.${index}.name`),
                     }}
                     {...createInlineFieldProps(
-                      `testimonials.${index}.authorName`,
+                      `characterReferences.${index}.name`,
                     )}
                   >
-                    {testimonial.authorName ||
-                      (isEditMode ? "+ Add name" : "")}
+                    {reference.name || (isEditMode ? "+ Add name" : "")}
                   </Typography>
-                  {(testimonial.authorRole ||
-                    testimonial.authorCompany ||
+                  {((reference.position && reference.company) ||
                     isEditMode) && (
                     <Typography
                       variant="caption"
@@ -229,45 +205,60 @@ const Testimonials = ({
                       <Box
                         component="span"
                         sx={{
-                          fontStyle: testimonial.authorRole
-                            ? "normal"
-                            : "italic",
+                          fontStyle: reference.position ? "normal" : "italic",
                           ...getInlineFieldSx(
-                            `testimonials.${index}.authorRole`,
+                            `characterReferences.${index}.position`,
                           ),
                         }}
                         {...createInlineFieldProps(
-                          `testimonials.${index}.authorRole`,
+                          `characterReferences.${index}.position`,
                         )}
                       >
-                        {testimonial.authorRole ||
-                          (isEditMode ? "+ Add role" : "")}
+                        {reference.position ||
+                          (isEditMode ? "+ Add position" : "")}
                       </Box>
-                      {((testimonial.authorRole && testimonial.authorCompany) ||
-                        isEditMode) && (
+                      {(reference.company || isEditMode) && (
                         <>
                           {" · "}
                           <Box
                             component="span"
                             sx={{
-                              fontStyle: testimonial.authorCompany
+                              fontStyle: reference.company
                                 ? "normal"
                                 : "italic",
                               ...getInlineFieldSx(
-                                `testimonials.${index}.authorCompany`,
+                                `characterReferences.${index}.company`,
                               ),
                             }}
                             {...createInlineFieldProps(
-                              `testimonials.${index}.authorCompany`,
+                              `characterReferences.${index}.company`,
                             )}
                           >
-                            {testimonial.authorCompany ||
+                            {reference.company ||
                               (isEditMode ? "+ Add company" : "")}
                           </Box>
                         </>
                       )}
                     </Typography>
                   )}
+                  <Typography
+                    variant="caption"
+                    component="div"
+                    sx={{
+                      color: reference.contactNo ? bodyColor : mutedColor,
+                      fontStyle: reference.contactNo ? "normal" : "italic",
+                      mt: 0.5,
+                      ...getInlineFieldSx(
+                        `characterReferences.${index}.contactNo`,
+                      ),
+                    }}
+                    {...createInlineFieldProps(
+                      `characterReferences.${index}.contactNo`,
+                    )}
+                  >
+                    {reference.contactNo ||
+                      (isEditMode ? "+ Add contact no." : "")}
+                  </Typography>
                 </Box>
               </Box>
             </CardContent>
@@ -275,13 +266,13 @@ const Testimonials = ({
         ))}
       </Box>
 
-      {/* Add Testimonial Button */}
+      {/* Add Character Reference Button */}
       {onAddAction && (
-        <AddButton targetSectionId="testimonials">
+        <AddButton targetSectionId="characterReferences">
           <Typography
             sx={{ color: primaryAccent, fontWeight: 600, fontSize: "1rem" }}
           >
-            + Add Testimonial
+            + Add Character Reference
           </Typography>
         </AddButton>
       )}
@@ -289,4 +280,4 @@ const Testimonials = ({
   );
 };
 
-export default Testimonials;
+export default CharacterReferences;

@@ -6,6 +6,7 @@ import ResumePage, {
 import { useThemeContext } from "@/context/ThemeContext";
 import type {
   CertificationItem,
+  CharacterReferenceItem,
   EducationItem,
   ResumeData,
   ResumeStats,
@@ -54,6 +55,7 @@ import {
   clampProficiency,
   cloneResumeData,
   createEmptyCertificationItem,
+  createEmptyCharacterReferenceItem,
   createEmptyEducationItem,
   createEmptyExperienceItem,
   createEmptyPortfolioItem,
@@ -560,6 +562,18 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       return;
     }
 
+    if (action === "characterReferences") {
+      setDraft((current) => ({
+        ...current,
+        characterReferences: [
+          ...current.characterReferences,
+          createEmptyCharacterReferenceItem(current.characterReferences),
+        ],
+      }));
+      setNotice("New character reference added.");
+      return;
+    }
+
     const portfolioResultMatch = action.match(/^portfolio\.(\d+)\.result$/);
     if (portfolioResultMatch) {
       const portIndex = Number(portfolioResultMatch[1]);
@@ -709,6 +723,22 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       return;
     }
 
+    const characterReferenceMatch = action.match(
+      /^characterReferences\.(\d+)$/,
+    );
+    if (characterReferenceMatch) {
+      const index = Number(characterReferenceMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        characterReferences: removeItemAtIndex(
+          current.characterReferences,
+          index,
+        ),
+      }));
+      setNotice("Character reference removed.");
+      return;
+    }
+
     const serviceCardMatch = action.match(/^services\.(\d+)$/);
     if (serviceCardMatch) {
       const index = Number(serviceCardMatch[1]);
@@ -717,6 +747,41 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
         services: removeItemAtIndex(current.services, index),
       }));
       setNotice("Service card removed.");
+      return;
+    }
+
+    // Individual skill item within a category — must be checked before the
+    // category-only match below since both share the `skills.` prefix.
+    const skillItemDeleteMatch = action.match(/^skills\.(\d+)\.(\d+)$/);
+    if (skillItemDeleteMatch) {
+      const categoryIndex = Number(skillItemDeleteMatch[1]);
+      const itemIndex = Number(skillItemDeleteMatch[2]);
+      setDraft((current) => {
+        const category = current.skills[categoryIndex];
+        if (!category) {
+          return current;
+        }
+        return {
+          ...current,
+          skills: replaceItemAtIndex(current.skills, categoryIndex, {
+            ...category,
+            items: removeItemAtIndex(category.items, itemIndex),
+          }),
+        };
+      });
+      setNotice("Skill removed.");
+      return;
+    }
+
+    // Whole skill category (group), including all skill items within it.
+    const skillCategoryMatch = action.match(/^skills\.(\d+)$/);
+    if (skillCategoryMatch) {
+      const index = Number(skillCategoryMatch[1]);
+      setDraft((current) => ({
+        ...current,
+        skills: removeItemAtIndex(current.skills, index),
+      }));
+      setNotice("Skill category removed.");
       return;
     }
   }, [setDraft]);
@@ -2660,6 +2725,42 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       );
     }
 
+    const characterReferenceMatch = selectedInlineFieldId.match(
+      /^characterReferences\.(\d+)\.(name|company|position|contactNo)$/,
+    );
+
+    if (characterReferenceMatch) {
+      const index = Number(characterReferenceMatch[1]);
+      const key = characterReferenceMatch[2] as keyof CharacterReferenceItem;
+      const item = draft.characterReferences[index];
+
+      if (!item) {
+        return null;
+      }
+
+      return (
+        <TextField
+          size="small"
+          sx={{ mt: 1.5 }}
+          label={getInlineFieldLabel(selectedInlineFieldId)}
+          value={String(item[key] ?? "")}
+          onChange={(event) =>
+            setDraft((current) => ({
+              ...current,
+              characterReferences: replaceItemAtIndex(
+                current.characterReferences,
+                index,
+                {
+                  ...item,
+                  [key]: event.target.value,
+                },
+              ),
+            }))
+          }
+        />
+      );
+    }
+
     return null;
   };
 
@@ -4335,6 +4436,132 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
               }
             >
               Add testimonial
+            </Button>
+          </Stack>
+        );
+      case "characterReferences":
+        return (
+          <Stack spacing={2.5}>
+            {draft.characterReferences.map((item, index) => (
+              <Card key={item.id} variant="outlined">
+                <CardContent>
+                  <Stack spacing={2}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                        Character Reference #{index + 1}
+                      </Typography>
+                      <IconButton
+                        aria-label="Remove character reference"
+                        onClick={() =>
+                          setDraft((current) => ({
+                            ...current,
+                            characterReferences: removeItemAtIndex(
+                              current.characterReferences,
+                              index,
+                            ),
+                          }))
+                        }
+                      >
+                        <DeleteOutlineIcon />
+                      </IconButton>
+                    </Stack>
+                    <TextField
+                      label="Name"
+                      value={item.name}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          name: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          characterReferences: replaceItemAtIndex(
+                            current.characterReferences,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                    <TextField
+                      label="Company"
+                      value={item.company}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          company: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          characterReferences: replaceItemAtIndex(
+                            current.characterReferences,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                    <TextField
+                      label="Position"
+                      value={item.position}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          position: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          characterReferences: replaceItemAtIndex(
+                            current.characterReferences,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                    <TextField
+                      label="Contact No."
+                      value={item.contactNo}
+                      onChange={(event) => {
+                        const nextItem = {
+                          ...item,
+                          contactNo: event.target.value,
+                        };
+                        setDraft((current) => ({
+                          ...current,
+                          characterReferences: replaceItemAtIndex(
+                            current.characterReferences,
+                            index,
+                            nextItem,
+                          ),
+                        }));
+                      }}
+                    />
+                  </Stack>
+                </CardContent>
+              </Card>
+            ))}
+
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() =>
+                setDraft((current) => ({
+                  ...current,
+                  characterReferences: [
+                    ...current.characterReferences,
+                    createEmptyCharacterReferenceItem(
+                      current.characterReferences,
+                    ),
+                  ],
+                }))
+              }
+            >
+              Add character reference
             </Button>
           </Stack>
         );
