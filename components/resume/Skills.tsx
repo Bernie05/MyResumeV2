@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Box,
   Card,
@@ -14,6 +14,8 @@ import BoltIcon from "@mui/icons-material/Bolt";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import CircleIcon from "@mui/icons-material/Circle";
+import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import { DeleteOutline as DeleteOutlineIcon } from "@mui/icons-material";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
@@ -21,6 +23,8 @@ import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 import { TECH_ICON_MAP } from "@/components/resume/constants/techIcons";
 import { ICON_MAP } from "@/components/resume/ServicesSection";
+import { useInlineEditing } from "@/hook/useInlineEditing";
+import { useIsEditMode } from "@/hook/useEditor";
 
 interface SkillItem {
   readonly name: string;
@@ -37,6 +41,9 @@ interface SkillCategory {
 
 interface SkillsProps {
   readonly skills: readonly SkillCategory[];
+  readonly skillsBadge?: string;
+  readonly skillsTitle?: string;
+  readonly skillsSubtitle?: string;
   readonly onInlineFieldClick?: (
     section: ResumeEditableSection,
     fieldId: InlineEditableFieldId,
@@ -51,19 +58,45 @@ const ANIMATION_DURATION_MS = 1500;
 const INTERSECTION_THRESHOLD = 0.2;
 const CIRCLE_RADIUS = 45;
 const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
-const EXPERT_THRESHOLD = 90;
+
+// 4-tier proficiency levels, derived from the raw 0-100 proficiency number
+// at render time. This is a read-only display value — it is never stored
+// in Redux/the data model (see types/resume.ts SkillItem).
+const PROFICIENCY_LEVEL_THRESHOLDS = {
+  beginner: 25,
+  intermediate: 50,
+  advanced: 75,
+} as const;
+
+// Gold/trophy chip styling shares this check with getProficiencyLabel below
+// so a skill's "Expert" text label and its gold/trophy styling always agree.
+const isExpertProficiency = (proficiency: number): boolean =>
+  proficiency > PROFICIENCY_LEVEL_THRESHOLDS.advanced;
 
 const createSkillKey = (category: string, skillName: string): string => {
   return `${category}-${skillName}`;
 };
 
 const getProficiencyLabel = (proficiency: number): string => {
-  if (proficiency >= EXPERT_THRESHOLD) return "Expert";
-  if (proficiency >= 80) return "Advanced";
-  if (proficiency >= 70) return "Proficient";
-  return "Intermediate";
+  if (proficiency <= PROFICIENCY_LEVEL_THRESHOLDS.beginner) return "Beginner";
+  if (proficiency <= PROFICIENCY_LEVEL_THRESHOLDS.intermediate)
+    return "Intermediate";
+  if (proficiency <= PROFICIENCY_LEVEL_THRESHOLDS.advanced) return "Advanced";
+  return "Expert";
 };
 
+// 1 = Beginner, 2 = Intermediate, 3 = Advanced, 4 = Expert — how many of the
+// 4 tier dots should render filled. Mirrors getProficiencyLabel's thresholds.
+const getProficiencyTierLevel = (proficiency: number): 1 | 2 | 3 | 4 => {
+  if (proficiency <= PROFICIENCY_LEVEL_THRESHOLDS.beginner) return 1;
+  if (proficiency <= PROFICIENCY_LEVEL_THRESHOLDS.intermediate) return 2;
+  if (proficiency <= PROFICIENCY_LEVEL_THRESHOLDS.advanced) return 3;
+  return 4;
+};
+
+const TIER_DOT_COUNT = 4;
+
+// The color of the category icon and the progress bar/circle is determined by the category name. "Backend" uses the secondary accent color, while all other categories use the primary accent color.
 const getCategoryColor = (
   category: string,
   primaryAccent: string,
@@ -72,6 +105,7 @@ const getCategoryColor = (
   return category === "Backend" ? secondaryAccent : primaryAccent;
 };
 
+// The icon for the category is determined by the category name. If a custom icon is provided and exists in the ICON_MAP, it will be used. Otherwise, default icons are used for "Frontend" and "Backend" categories, and a generic icon is used for all other categories.
 const getCategoryIcon = (category: string, color: string, icon?: string) => {
   if (icon && ICON_MAP[icon]) {
     const Icon = ICON_MAP[icon];
@@ -88,6 +122,7 @@ const getCategoryIcon = (category: string, color: string, icon?: string) => {
   }
 };
 
+// Builds a record of animated values for each skill, based on the current progress of the animation. The keys are generated using the category and skill name, and the values are the proficiency percentages scaled by the progress (0 to 1).
 const buildAnimatedValues = (
   skills: readonly SkillCategory[],
   progress: number,
@@ -105,6 +140,9 @@ const buildAnimatedValues = (
 
 const Skills = ({
   skills,
+  skillsBadge,
+  skillsTitle,
+  skillsSubtitle,
   onInlineFieldClick,
   activeInlineFieldId,
   onDeleteAction,
@@ -130,70 +168,33 @@ const Skills = ({
   );
   const sectionRef = useRef<HTMLDivElement>(null);
   const hasTriggeredRef = useRef(false);
+  const isEditMode = useIsEditMode();
 
-  const getInlineFieldSx = useCallback(
-    (fieldId: string) => ({
-      borderRadius: 1,
-      outline:
-        activeInlineFieldId === fieldId
-          ? "2px solid rgba(20, 184, 166, 0.9)"
-          : "2px solid transparent",
-      outlineOffset: 2,
-      cursor: onInlineFieldClick ? "pointer" : "inherit",
-      transition: "outline-color 160ms ease, box-shadow 160ms ease",
-      "&:hover": onInlineFieldClick
-        ? {
-            outlineColor: "rgba(20, 184, 166, 0.55)",
-            boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
-          }
-        : undefined,
-    }),
-    [activeInlineFieldId, onInlineFieldClick],
-  );
-
-  const createInlineFieldProps = useCallback(
-    (fieldId: InlineEditableFieldId) => {
-      if (!onInlineFieldClick) {
-        return {};
-      }
-
-      return {
-        onClick: (event: React.MouseEvent) => {
-          event.stopPropagation();
-          onInlineFieldClick(
-            "skills",
-            fieldId,
-            event.currentTarget as HTMLElement,
-          );
-        },
-        onKeyDown: (event: React.KeyboardEvent) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            event.stopPropagation();
-            onInlineFieldClick(
-              "skills",
-              fieldId,
-              event.currentTarget as HTMLElement,
-            );
-          }
-        },
-        role: "button",
-        tabIndex: 0,
-        "aria-label": `Edit ${fieldId}`,
-      };
-    },
-    [onInlineFieldClick],
-  );
+  const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
+    targetSection: "skills",
+    activeInlineFieldId,
+    onInlineFieldClick,
+  });
 
   useEffect(() => {
     const sectionElement = sectionRef.current;
 
-    if (hasTriggeredRef.current || !sectionElement) {
+    // Once the entrance animation has already played, don't replay it on
+    // every data change (e.g. editing a skill's proficiency) — just snap
+    // the displayed values straight to the current proficiency numbers so
+    // the ring/bar/percentage stay in sync with the live `skills` prop.
+    if (hasTriggeredRef.current) {
+      setAnimatedValues(buildAnimatedValues(skills, 1));
+      return;
+    }
+
+    if (!sectionElement) {
       return;
     }
 
     let frameId = 0;
 
+    // Run the entrance animation, which animates the proficiency values from 0 to their actual values over a fixed duration. The animation is driven by requestAnimationFrame for smoothness.
     const runAnimation = () => {
       const startTime = performance.now();
 
@@ -211,6 +212,7 @@ const Skills = ({
       frameId = requestAnimationFrame(animate);
     };
 
+    // Use IntersectionObserver to trigger the entrance animation when the skills section comes into view. This ensures that the animation only plays when the user scrolls to this part of the page, improving performance and user experience.
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) {
@@ -242,13 +244,13 @@ const Skills = ({
         border: `1px solid ${outline}`,
       }}
     >
+      {/* Section Badge */}
       <Box sx={{ mb: 8 }}>
         <Box
           sx={{
             display: "inline-flex",
             px: 1.75,
             py: 0.75,
-            borderRadius: 999,
             background: buttonGradient,
             color: accentText,
             fontWeight: 700,
@@ -256,10 +258,15 @@ const Skills = ({
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             mb: 2,
+            ...getInlineFieldSx("skillsBadge"),
+            borderRadius: 999,
           }}
+          {...createInlineFieldProps("skillsBadge")}
         >
-          Skills
+          {skillsBadge || "Skills"}
         </Box>
+
+        {/* Section Title */}
         <Typography
           variant="h3"
           sx={{
@@ -267,22 +274,29 @@ const Skills = ({
             fontSize: { xs: "2rem", md: "2.5rem" },
             color: titleColor,
             mb: 2,
+            ...getInlineFieldSx("skillsTitle"),
           }}
+          {...createInlineFieldProps("skillsTitle")}
         >
-          Professional Skills
+          {skillsTitle || "Professional Skills"}
         </Typography>
+
+        {/* Section Subtitle */}
         <Typography
           variant="h6"
           sx={{
             color: mutedColor,
             fontWeight: 400,
             fontSize: "1.125rem",
+            ...getInlineFieldSx("skillsSubtitle"),
           }}
+          {...createInlineFieldProps("skillsSubtitle")}
         >
-          Expertise across technologies and platforms
+          {skillsSubtitle || "Expertise across technologies and platforms"}
         </Typography>
       </Box>
 
+      {/* Skill Groups */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {skills.map((skillGroup, categoryIndex) => {
           const categoryColor = getCategoryColor(
@@ -292,7 +306,7 @@ const Skills = ({
           );
 
           return (
-            <Box key={skillGroup.category}>
+            <Box key={categoryIndex}>
               <Box
                 sx={{
                   display: "flex",
@@ -308,6 +322,7 @@ const Skills = ({
                   categoryColor,
                   skillGroup.icon,
                 )}
+                {/* Category Title */}
                 <Typography
                   variant="h5"
                   sx={{
@@ -321,10 +336,40 @@ const Skills = ({
                     `skills.${categoryIndex}.category`,
                   )}
                 >
-                  {skillGroup.category} Development
+                  {skillGroup.category
+                    ? `${skillGroup.category} Development`
+                    : "+ Add category"}
                 </Typography>
+
+                {/* Delete Button */}
+                {isEditMode && onDeleteAction && (
+                  <IconButton
+                    aria-label="Delete category"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onDeleteAction(`skills.${categoryIndex}`);
+                    }}
+                    sx={{
+                      flexShrink: 0,
+                      backgroundColor: "rgba(0,0,0,0.55)",
+                      color: "common.white",
+                      width: 32,
+                      height: 32,
+                      boxShadow: "0 10px 24px rgba(0, 0, 0, 0.16)",
+                      transition: "transform 0.2s ease, opacity 0.2s ease",
+                      opacity: 0.9,
+                      "&:hover": {
+                        transform: "scale(1.05)",
+                        backgroundColor: "rgba(0,0,0,0.75)",
+                      },
+                    }}
+                  >
+                    <DeleteOutlineIcon fontSize="small" />
+                  </IconButton>
+                )}
               </Box>
 
+              {/* Skill Items */}
               <Box
                 sx={{
                   display: "grid",
@@ -336,6 +381,7 @@ const Skills = ({
                   gap: 3,
                 }}
               >
+                {/* Skill Cards */}
                 {skillGroup.items.map((skill, itemIndex) => {
                   const skillKey = createSkillKey(
                     skillGroup.category,
@@ -347,7 +393,7 @@ const Skills = ({
 
                   return (
                     <Card
-                      key={skillKey}
+                      key={itemIndex}
                       sx={{
                         background: surfaceBackground,
                         border: `1px solid ${outline}`,
@@ -395,6 +441,8 @@ const Skills = ({
                           <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
                       )}
+
+                      {/* Skill Content */}
                       <CardContent sx={{ p: 3, height: "100%" }}>
                         <Box sx={{ display: "flex", gap: 3, height: "100%" }}>
                           <Box
@@ -406,7 +454,13 @@ const Skills = ({
                               position: "relative",
                               width: "100px",
                               height: "100px",
+                              ...getInlineFieldSx(
+                                `skills.${categoryIndex}.${itemIndex}.proficiency`,
+                              ),
                             }}
+                            {...createInlineFieldProps(
+                              `skills.${categoryIndex}.${itemIndex}.proficiency`,
+                            )}
                           >
                             <svg
                               width="100"
@@ -438,6 +492,7 @@ const Skills = ({
                                 }}
                               />
                             </svg>
+                            {/* Skill Value */}
                             <Box
                               sx={{
                                 position: "absolute",
@@ -460,6 +515,7 @@ const Skills = ({
                             </Box>
                           </Box>
 
+                          {/* Skill Name */}
                           <Box sx={{ flex: 1 }}>
                             <Box
                               sx={{
@@ -485,21 +541,22 @@ const Skills = ({
                                   }}
                                 />
                               )}
+                              {/* Skill Name */}
                               <Typography
                                 variant="subtitle1"
                                 sx={{
                                   fontWeight: 700,
-                                  color: titleColor,
+                                  color: skill.name ? titleColor : mutedColor,
                                   fontSize: "1rem",
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
                                   whiteSpace: "nowrap",
                                 }}
                               >
-                                {skill.name}
+                                {skill.name || "+ Add skill"}
                               </Typography>
                             </Box>
-
+                            {/* Skill Progress */}
                             <Box sx={{ mb: 2 }}>
                               <LinearProgress
                                 variant="determinate"
@@ -516,44 +573,82 @@ const Skills = ({
                                 }}
                               />
                             </Box>
-
+                            {/* Proficiency Chip */}
                             <Box
                               sx={{
                                 display: "flex",
+                                alignItems: "center",
                                 gap: 1,
                                 mb: 2,
                                 flexWrap: "wrap",
                               }}
                             >
                               <Chip
+                                icon={
+                                  isExpertProficiency(skill.proficiency) ? (
+                                    <EmojiEventsIcon sx={{ fontSize: 14 }} />
+                                  ) : undefined
+                                }
                                 label={getProficiencyLabel(skill.proficiency)}
                                 size="small"
-                                sx={{
-                                  backgroundColor: isDarkMode
-                                    ? `${categoryColor}33`
-                                    : `${categoryColor}20`,
-                                  color: categoryColor,
-                                  fontWeight: 600,
-                                  fontSize: "0.75rem",
-                                }}
+                                sx={
+                                  isExpertProficiency(skill.proficiency)
+                                    ? {
+                                        background: isDarkMode
+                                          ? categoryColor
+                                          : `linear-gradient(135deg, ${categoryColor}, ${categoryColor}dd)`,
+                                        color: accentText,
+                                        fontWeight: 600,
+                                        fontSize: "0.75rem",
+                                      }
+                                    : {
+                                        backgroundColor: isDarkMode
+                                          ? `${categoryColor}33`
+                                          : `${categoryColor}20`,
+                                        color: categoryColor,
+                                        fontWeight: 600,
+                                        fontSize: "0.75rem",
+                                      }
+                                }
                               />
-                              {skill.proficiency >= EXPERT_THRESHOLD && (
-                                <Chip
-                                  icon={
-                                    <EmojiEventsIcon sx={{ fontSize: 14 }} />
-                                  }
-                                  label="Expert"
-                                  size="small"
-                                  sx={{
-                                    background: isDarkMode
-                                      ? categoryColor
-                                      : `linear-gradient(135deg, ${categoryColor}, ${categoryColor}dd)`,
-                                    color: accentText,
-                                    fontWeight: 600,
-                                    fontSize: "0.75rem",
-                                  }}
-                                />
-                              )}
+                              {/* Proficiency Dots */}
+                              <Box
+                                role="img"
+                                aria-label={`Proficiency tier: ${getProficiencyTierLevel(
+                                  skill.proficiency,
+                                )} of ${TIER_DOT_COUNT}`}
+                                sx={{ display: "flex", gap: 0.25 }}
+                              >
+                                {Array.from({ length: TIER_DOT_COUNT }).map(
+                                  (_, dotIndex) => {
+                                    const isFilled =
+                                      dotIndex <
+                                      getProficiencyTierLevel(
+                                        skill.proficiency,
+                                      );
+
+                                    return isFilled ? (
+                                      <CircleIcon
+                                        key={dotIndex}
+                                        sx={{
+                                          fontSize: 8,
+                                          color: categoryColor,
+                                        }}
+                                      />
+                                    ) : (
+                                      <CircleOutlinedIcon
+                                        key={dotIndex}
+                                        sx={{
+                                          fontSize: 8,
+                                          color: isDarkMode
+                                            ? `${categoryColor}55`
+                                            : `${categoryColor}40`,
+                                        }}
+                                      />
+                                    );
+                                  },
+                                )}
+                              </Box>
                             </Box>
                           </Box>
                         </Box>

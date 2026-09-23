@@ -1,20 +1,19 @@
 import type { ResumeData } from "@/types/resume";
 
-// TODO
-// Make a key of social media
 export const resumeData: ResumeData = {
   personalInfo: {
     name: "Bernie A. Baltazar",
     title: "Sr. Software Engineer I",
     email: "baltazarbernie05@gmail.com",
-    phone: "09765720622",
-    location: "Urban Deca Homes Rosario Extension, Pasig City",
+    phone: "09564283912",
+    location: "Urban Deca Homes Rosario Extension Pasig City",
     photoUrl:
       "https://i.pinimg.com/736x/21/8b/fa/218bfa98ae6f59f19eecf4791a2f8730.jpg",
     backgroundUrl:
       "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&h=600&fit=crop",
     summary:
-      "Seeking a position as software developer to apply my knowledge and experience in my field of specialization, where I can utilize my technical skill and dedication to learn new technologies.",
+      "Seeking a position as software developer to apply my knowledge and experience in my field of specialization, where I can utilize my technical skill and dedication to learn new technologies",
+    dateOfBirth: "March 22, 1995",
   },
   socialMedia: [
     { icon: "facebook", href: "#/facebook", label: "Facebook" },
@@ -40,7 +39,7 @@ export const resumeData: ResumeData = {
       company: "HCL Technologies",
       position: "Sr. Software Engineer I",
       duration: "March 2022 - Present",
-      location: "Remote",
+      location: "Capital Commons, Estancia mall office, Camino Verde Rd, Pasig",
       description: [
         "Write reusable, optimized code and apply best coding practices",
         "Select and use appropriate algorithms and data structures based on business logic",
@@ -55,9 +54,9 @@ export const resumeData: ResumeData = {
     {
       id: 2,
       company: "Accenture",
-      position: "Software Engineer (Salesforce Developer)",
+      position: "Software Engineer (Salesforce Developer/Sysad)",
       duration: "January 2021 - March 2022",
-      location: "Remote",
+      location: "Uptown Mall BGC Tower 2 Office",
       description: [
         "Develop custom configurations (Object, fields, and relationships) applications",
         "Design and implement solutions using Apex, Visualforce, LWC, and Salesforce tools",
@@ -69,10 +68,10 @@ export const resumeData: ResumeData = {
     },
     {
       id: 3,
-      company: "Yondu Inc.",
+      company: "Yondu Inc. (Consultant at Bangko Sentral ng Pilipinas)",
       position: "Jr. Java Developer",
       duration: "January 2020 - December 2020",
-      location: "Remote",
+      location: "A. Mabini St, Malate, Manila",
       description: [
         "System enhancement and develop new features",
         "Contribute to the improvement of software",
@@ -86,7 +85,7 @@ export const resumeData: ResumeData = {
       company: "Code Disruptors Inc.",
       position: "Backend Software Developer",
       duration: "January 2019 - December 2019",
-      location: "Manila, Philippines",
+      location: "Los Banos, Laguna",
       description: [
         "System enhancement and develop new features",
         "Documented and maintainable code",
@@ -96,57 +95,60 @@ export const resumeData: ResumeData = {
       ],
     },
   ],
+  educationBadge: "Education",
+  educationTitle: "Education",
   education: [
     {
       id: 1,
       school: "Eulogio Amang Rodriguez Institute of Science and Technology",
       degree: "Bachelor of Science",
       field: "Computer Science",
-      year: "2018",
+      year: "2014 - April 2018",
       location: "General Mariano Alvarez, Cavite",
     },
     {
       id: 2,
       school: "Department of Information and Communications Technology",
-      degree: "Certificate",
-      field: "Software Development and Specialization Training Program",
-      year: "2018",
-      location: "Quezon City, Metro Manila",
+      degree: "Certificate (Scholar)",
+      field:
+        "Software Development and Specialization Training Program, Coding Bootcamp",
+      year: "April 2018 - September 2018",
+      location: "C.P Garcia Ave, Dilima, Quezon City, 1101 Metro Manila",
     },
   ],
+  skillsBadge: "Skills",
+  skillsTitle: "Professional Skills",
+  skillsSubtitle: "Expertise across technologies and platforms",
+  certificationsBadge: "Certifications",
+  certificationsTitle: "Certifications",
+  testimonialsBadge: "Testimonials",
+  testimonialsTitle: "What People Say",
+  characterReferencesBadge: "Character References",
+  characterReferencesTitle: "People Who Vouch For Me",
+  contactBadge: "Contact Info",
+  contactTitle: "Get In Touch",
+  contactSubtitle:
+    "Reach out for collaboration, consulting, or product work. If you have a project in mind, send the details through the inquiry form and I can get back to you with the best next step.",
   skills: [
     {
-      category: "Backend",
+      category: "Technical Skills",
       items: [
-        { name: "Java", proficiency: 95 },
-        { name: "Node.js", proficiency: 90 },
-        { name: "SQL", proficiency: 88 },
-        { name: "Salesforce", proficiency: 90 },
-        { name: "Jenkins", proficiency: 80 },
-      ],
-    },
-    {
-      category: "Frontend",
-      items: [
-        { name: "JavaScript", proficiency: 92 },
-        { name: "TypeScript", proficiency: 88 },
-        { name: "React", proficiency: 90 },
-        { name: "HTML", proficiency: 92 },
-        { name: "CSS", proficiency: 92 },
-        { name: "JSF", proficiency: 85 },
-      ],
-    },
-    {
-      category: "Tools & Design",
-      items: [
-        { name: "Figma", proficiency: 90 },
-        { name: "Photoshop", proficiency: 80 },
-        { name: "Git", proficiency: 90 },
-        { name: "Apex", proficiency: 85 },
-        { name: "Visualforce", proficiency: 85 },
+        { name: "Java", proficiency: 90 },
+        { name: "JSF", proficiency: 75 },
+        { name: "Node JS", proficiency: 80 },
+        { name: "SQL", proficiency: 85 },
+        { name: "HTML", proficiency: 85 },
+        { name: "CSS", proficiency: 80 },
+        { name: "Salesforce", proficiency: 85 },
+        { name: "TypeScript", proficiency: 80 },
+        { name: "JavaScript", proficiency: 85 },
+        { name: "Jenkins", proficiency: 70 },
       ],
     },
   ],
+  servicesBadge: "Services",
+  servicesTitle: "What I Offer",
+  servicesSubtitle: "Professional services tailored to your project needs",
   services: [
     {
       id: 1,
@@ -216,6 +218,31 @@ export const resumeData: ResumeData = {
       photoUrl: "",
     },
   ],
+  characterReferences: [
+    {
+      id: 1,
+      name: "Mr. Kayle Bernard Sicat",
+      company: "Tenerity",
+      position: "Lead Developer",
+      contactNo: "09913987279",
+    },
+    {
+      id: 2,
+      name: "Ms. Princess Espiel",
+      company: "Vertere Global Solutions",
+      position: "Programmer Analyst IV",
+      contactNo: "09989599310",
+    },
+    {
+      id: 3,
+      name: "Mr. Jerome John Tactac",
+      company: "HCL Technologies",
+      position: "Sr. Software Engineer I",
+      contactNo: "09453459717",
+    },
+  ],
+  declaration:
+    "I hereby attest that the above information are true and correct at the best of my knowledge",
   projectsBadge: "Projects",
   projectsTitle: "Recent Projects",
   projectsSubtitle: "Latest work and technical achievements",

@@ -20,6 +20,7 @@ import Box from "@mui/material/Box/Box";
 import { getSectionPalette, IThemePalette } from "@/theme/sectionPalette";
 import { useThemeContext } from "@/context/ThemeContext";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
+import { useInlineEditing } from "@/hook/useInlineEditing";
 
 interface ContactItem {
   icon: JSX.Element;
@@ -38,6 +39,9 @@ interface SocialLinkItem {
 
 interface ContactSectionProps {
   personalInfo: PersonalInfo;
+  contactBadge?: string;
+  contactTitle?: string;
+  contactSubtitle?: string;
   onInlineFieldClick?: (
     section: ResumeEditableSection,
     fieldId: InlineEditableFieldId,
@@ -48,6 +52,9 @@ interface ContactSectionProps {
 
 export const ContactSection = ({
   personalInfo,
+  contactBadge,
+  contactTitle,
+  contactSubtitle,
   onInlineFieldClick,
   activeInlineFieldId,
 }: ContactSectionProps) => {
@@ -66,7 +73,9 @@ export const ContactSection = ({
     softBackground,
   } = getSectionPalette(isDarkMode);
 
-  // change this and use the herosection funvc
+  // Define social links based on the provided personalInfo. Each link includes an icon, href, label,
+  // and a unique fieldId for inline editing. The links are filtered to remove any null values,
+  // ensuring only valid social links are included in the final array.
   const socialLinks: SocialLinkItem[] = [
     personalInfo.linkedin
       ? {
@@ -94,6 +103,9 @@ export const ContactSection = ({
       : null,
   ].filter(Boolean) as SocialLinkItem[];
 
+  // Define contact items based on the provided personalInfo. Each item includes an icon, label, value,
+  // optional href for clickable links, and a unique fieldId for inline editing. These items are used
+  // to display the user's contact information in the contact section of the resume.
   const contactItems: ContactItem[] = [
     {
       icon: <EmailOutlinedIcon fontSize="small" />,
@@ -117,45 +129,11 @@ export const ContactSection = ({
     },
   ];
 
-  const getInlineFieldSx = (fieldId: InlineEditableFieldId) => ({
-    outline:
-      activeInlineFieldId === fieldId
-        ? "2px solid rgba(20, 184, 166, 0.9)"
-        : "2px solid transparent",
-    outlineOffset: 2,
-    cursor: onInlineFieldClick ? "pointer" : "inherit",
+  const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
+    targetSection: "contact",
+    activeInlineFieldId,
+    onInlineFieldClick,
   });
-
-  const createInlineFieldProps = (fieldId: InlineEditableFieldId) => {
-    if (!onInlineFieldClick) {
-      return {};
-    }
-
-    return {
-      onClick: (event: React.MouseEvent) => {
-        event.stopPropagation();
-        onInlineFieldClick(
-          "contact",
-          fieldId,
-          event.currentTarget as HTMLElement,
-        );
-      },
-      onKeyDown: (event: React.KeyboardEvent) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          event.stopPropagation();
-          onInlineFieldClick(
-            "contact",
-            fieldId,
-            event.currentTarget as HTMLElement,
-          );
-        }
-      },
-      role: "button",
-      tabIndex: 0,
-      "aria-label": `Edit ${fieldId}`,
-    };
-  };
 
   return (
     <Box
@@ -166,13 +144,13 @@ export const ContactSection = ({
         border: `1px solid ${outline}`,
       }}
     >
+      {/* Contact Badge */}
       <Box sx={{ mb: 5 }}>
         <Box
           sx={{
             display: "inline-flex",
             px: 1.75,
             py: 0.75,
-            borderRadius: 999,
             background: buttonGradient,
             color: accentText,
             fontWeight: 700,
@@ -180,20 +158,29 @@ export const ContactSection = ({
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             mb: 2,
+            ...getInlineFieldSx("contactBadge"),
+            borderRadius: 999,
           }}
+          {...createInlineFieldProps("contactBadge")}
         >
-          Contact Info
+          {contactBadge || "Contact Info"}
         </Box>
+
+        {/* Contact Title */}
         <Typography
           variant="h3"
           sx={{
             fontWeight: 800,
             fontSize: { xs: "2rem", md: "2.5rem" },
             color: titleColor,
+            ...getInlineFieldSx("contactTitle"),
           }}
+          {...createInlineFieldProps("contactTitle")}
         >
-          Get In Touch
+          {contactTitle || "Get In Touch"}
         </Typography>
+
+        {/* Contact Subtitle */}
         <Typography
           sx={{
             mt: 1.5,
@@ -201,14 +188,16 @@ export const ContactSection = ({
             color: bodyColor,
             lineHeight: 1.8,
             fontSize: { xs: "1rem", md: "1.05rem" },
+            ...getInlineFieldSx("contactSubtitle"),
           }}
+          {...createInlineFieldProps("contactSubtitle")}
         >
-          Reach out for collaboration, consulting, or product work. If you have
-          a project in mind, send the details through the inquiry form and I can
-          get back to you with the best next step.
+          {contactSubtitle ||
+            "Reach out for collaboration, consulting, or product work. If you have a project in mind, send the details through the inquiry form and I can get back to you with the best next step."}
         </Typography>
       </Box>
 
+      {/* Contact Items and Social Links */}
       <Box
         sx={{
           display: "grid",
@@ -231,6 +220,7 @@ export const ContactSection = ({
             border: `1px solid ${divider}`,
           }}
         >
+          {/* Contact Form title and subtitle */}
           <Stack spacing={1.25}>
             <Typography
               variant="h5"
@@ -245,6 +235,7 @@ export const ContactSection = ({
             </Typography>
           </Stack>
 
+          {/* Contact Items */}
           <Stack spacing={1.5}>
             {contactItems.map(({ icon, label, value, href, fieldId }) => (
               <Box
@@ -254,12 +245,13 @@ export const ContactSection = ({
                   alignItems: "flex-start",
                   gap: 1.5,
                   p: 1.5,
-                  borderRadius: 3,
                   backgroundColor: softBackground,
                   ...getInlineFieldSx(fieldId),
+                  borderRadius: 3,
                 }}
                 {...createInlineFieldProps(fieldId)}
               >
+                {/* Contact Icon */}
                 <Box
                   sx={{
                     width: 36,
@@ -274,6 +266,7 @@ export const ContactSection = ({
                 >
                   {icon}
                 </Box>
+                {/* Contact Value */}
                 <Box sx={{ minWidth: 0 }}>
                   <Typography
                     sx={{
@@ -306,6 +299,7 @@ export const ContactSection = ({
             ))}
           </Stack>
 
+          {/* Social Media Links for now it is no value */}
           {socialLinks.length > 0 ? (
             <Box sx={{ pt: 1, borderTop: `1px solid ${divider}` }}>
               <Typography
@@ -319,6 +313,7 @@ export const ContactSection = ({
               >
                 Social Media
               </Typography>
+              {/* Social Media Icons */}
               <Stack direction="row" spacing={1.5} flexWrap="wrap">
                 {socialLinks.map(({ icon, href, label, fieldId }) => (
                   <IconButton
@@ -337,13 +332,13 @@ export const ContactSection = ({
                         : "rgba(255, 255, 255, 0.7)",
                       border: `1px solid ${divider}`,
                       backdropFilter: "blur(12px)",
+                      ...getInlineFieldSx(fieldId),
                       transition:
                         "transform 0.25s ease, background-color 0.25s ease",
                       "&:hover": {
                         transform: "translateY(-3px)",
                         backgroundColor: `${primaryAccent}33`,
                       },
-                      ...getInlineFieldSx(fieldId),
                     }}
                     onClick={(event) => {
                       if (onInlineFieldClick) {
@@ -365,6 +360,7 @@ export const ContactSection = ({
           ) : null}
         </Box>
 
+        {/* Contact Form */}
         <Box
           sx={{
             p: { xs: 2.5, md: 3 },

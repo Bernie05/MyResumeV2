@@ -56,8 +56,6 @@ import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import { IEditorProps } from "../secret/SecretResumeEditor";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 import { CustomTypography } from "../component/CustomTypography";
-import { CustomCard } from "../component/CustomCard";
-import { CustomBox } from "../component/CustomBox";
 import { TECH_ICON_MAP } from "@/components/resume/constants/techIcons";
 import { useInlineEditing } from "@/hook/useInlineEditing";
 
@@ -148,6 +146,7 @@ const getIconForSkill = (
   return SKILL_ICONS.default;
 };
 
+// Card-level icons (services.N.icon) are picked from ICON_MAP (MUI icons,
 const getCategoryIcon = (
   category: string,
   iconKey?: string,
@@ -171,6 +170,7 @@ export interface IServiceSection extends IEditorProps {
   servicesSubtitle: string | undefined;
 }
 
+// ServicesSection is a React component that renders a section of service cards, each representing a specific service offered. The component accepts props for the services data, section badge, title, subtitle, and optional handlers for inline editing and adding/deleting services. It utilizes MUI components for layout and styling, and provides interactive features such as inline editing of service details and the ability to add or remove services dynamically.
 const ServicesSection = ({
   services,
   servicesBadge,
@@ -234,6 +234,7 @@ const ServicesSection = ({
     >
       {/* Section Header */}
       <Box sx={{ mb: 6 }}>
+        {/* Section Badge */}
         <Box
           sx={{
             display: "inline-flex",
@@ -254,6 +255,8 @@ const ServicesSection = ({
         >
           {servicesBadge || "Services"}
         </Box>
+
+        {/* Section Title */}
         <CustomTypography
           variant="h3"
           targetSectionId="services"
@@ -267,6 +270,8 @@ const ServicesSection = ({
         >
           {servicesTitle || "What I Offer"}
         </CustomTypography>
+
+        {/* Section Subtitle */}
         <CustomTypography
           variant="h6"
           targetSectionId="services"
@@ -289,6 +294,7 @@ const ServicesSection = ({
           gap: 4,
         }}
       >
+        {/* Service Cards */}
         {services.map((card, cardIndex) => (
           <Card
             key={card.id}
@@ -305,6 +311,7 @@ const ServicesSection = ({
               },
             }}
           >
+            {/* Delete Button */}
             {onDeleteAction && (
               <IconButton
                 aria-label="Delete service card"
@@ -333,6 +340,7 @@ const ServicesSection = ({
                 <DeleteOutlineIcon fontSize="small" />
               </IconButton>
             )}
+            {/* Service Content */}
             <CardContent sx={{ p: 4 }}>
               {/* Header with Icon */}
               <Box
@@ -393,6 +401,7 @@ const ServicesSection = ({
                   >
                     {card.title || "Development"}
                   </CustomTypography>
+                  {/* Subtitle */}
                   <CustomTypography
                     variant="caption"
                     sx={{

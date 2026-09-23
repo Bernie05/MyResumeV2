@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import ResumePage from "@/components/resume/ResumePage";
 import { useResumeOperations, useResumeData } from "@/store/hooks";
+// Import the resume data from the local file
 import { resumeData } from "@/data/resume";
 
 const MainView = () => {

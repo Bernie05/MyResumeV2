@@ -11,6 +11,7 @@ import Portfolio from "./Portfolio";
 import Projects from "./Projects";
 import Certifications from "./Certifications";
 import Testimonials from "./Testimonials";
+import CharacterReferences from "./CharacterReferences";
 import { useThemeContext } from "../../context/ThemeContext";
 import type { ResumeData } from "../../types/resume";
 import { Box, Container, Stack, Typography } from "@mui/material";
@@ -42,6 +43,7 @@ export type ResumeEditableSection =
   | "skills"
   | "certifications"
   | "testimonials"
+  | "characterReferences"
   | "contact"
   | "stats";
 
@@ -65,7 +67,7 @@ const ResumePage = ({
 }: IResumePageProps) => {
   const editor = useEditor();
   const isEditMode = useIsEditMode();
-  const activeSectionId = useEditor()?.activeSection;
+  const activeSectionId = editor?.activeSection;
   const onSectionClick = useOnSectionClick();
 
   const { isDarkMode } = useThemeContext();
@@ -74,6 +76,7 @@ const ResumePage = ({
   const { data: session, status } = useSession();
   const hasAccess = isAuthenticated(status, session);
 
+  // Function to get the styles for each section based on its active states
   const getSectionSx = (sectionId: ResumeEditableSection) => {
     const isActiveSection = activeSectionId === sectionId;
 
@@ -97,6 +100,7 @@ const ResumePage = ({
     };
   };
 
+  // Function to render each section with its respective props and styles
   const renderSection = ({
     children,
     sectionId,
@@ -130,6 +134,7 @@ const ResumePage = ({
     <Box component="main" sx={{ width: "100%", minHeight: "100vh" }}>
       <Navbar isAuthenticated={hasAccess} position={position} />
 
+      {/* About Section */}
       {renderSection({
         sectionId: "about",
         component: "section",
@@ -145,6 +150,7 @@ const ResumePage = ({
         maxWidth="xl"
         sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, sm: 3, lg: 4 } }}
       >
+        {/* Section Stack */}
         <Stack spacing={{ xs: 10, md: 14 }}>
           {renderSection({
             sectionId: "services",
@@ -162,6 +168,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Experience Section */}
           {renderSection({
             sectionId: "experience",
             component: "section",
@@ -174,6 +181,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Portfolio Section */}
           {renderSection({
             sectionId: "portfolio",
             component: "section",
@@ -187,6 +195,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/*  */}
           {renderSection({
             sectionId: "projects",
             children: (
@@ -199,17 +208,28 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Education Section */}
           {renderSection({
             sectionId: "education",
-            children: <Education education={resume.education} />,
+            children: (
+              <Education
+                education={resume.education}
+                educationBadge={resume.educationBadge}
+                educationTitle={resume.educationTitle}
+              />
+            ),
           })}
 
+          {/* Skills Section */}
           {renderSection({
             sectionId: "skills",
             component: "section",
             children: (
               <Skills
                 skills={resume.skills}
+                skillsBadge={resume.skillsBadge}
+                skillsTitle={resume.skillsTitle}
+                skillsSubtitle={resume.skillsSubtitle}
                 onInlineFieldClick={editor?.onInlineFieldClick}
                 activeInlineFieldId={editor?.activeInlineFieldId}
                 onDeleteAction={editor?.onDeleteAction}
@@ -218,11 +238,14 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Certifications Section */}
           {renderSection({
             sectionId: "certifications",
             children: (
               <Certifications
                 certifications={resume.certifications}
+                certificationsBadge={resume.certificationsBadge}
+                certificationsTitle={resume.certificationsTitle}
                 onInlineFieldClick={editor?.onInlineFieldClick}
                 activeInlineFieldId={editor?.activeInlineFieldId}
                 onAddAction={editor?.onAddAction}
@@ -231,23 +254,47 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Testimonials Section */}
           {renderSection({
             sectionId: "testimonials",
-            children: <Testimonials testimonials={resume.testimonials} />,
+            children: (
+              <Testimonials
+                testimonials={resume.testimonials}
+                testimonialsBadge={resume.testimonialsBadge}
+                testimonialsTitle={resume.testimonialsTitle}
+              />
+            ),
           })}
 
+          {/* Character References Section */}
+          {renderSection({
+            sectionId: "characterReferences",
+            children: (
+              <CharacterReferences
+                characterReferences={resume.characterReferences}
+                characterReferencesBadge={resume.characterReferencesBadge}
+                characterReferencesTitle={resume.characterReferencesTitle}
+              />
+            ),
+          })}
+
+          {/* Contact Section */}
           {renderSection({
             sectionId: "contact",
             component: "section",
             children: (
               <ContactSection
                 personalInfo={resume.personalInfo}
+                contactBadge={resume.contactBadge}
+                contactTitle={resume.contactTitle}
+                contactSubtitle={resume.contactSubtitle}
                 onInlineFieldClick={editor?.onInlineFieldClick}
                 activeInlineFieldId={editor?.activeInlineFieldId}
               />
             ),
           })}
 
+          {/* Footer */}
           <Box
             component="footer"
             id="footer"

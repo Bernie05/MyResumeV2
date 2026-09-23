@@ -31,6 +31,9 @@ yarn-error.log*
 *.swo
 *~
 
+# Claude Code
+.claude/
+
 # OS
 Thumbs.db
 

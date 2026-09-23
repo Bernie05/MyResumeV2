@@ -20,8 +20,10 @@ interface ThemeContextType {
   theme: Theme;
 }
 
+// Create a context for theme management, providing the current theme mode, a toggle function, and the MUI theme object.
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// Create a MUI theme based on the current mode (dark or light)
 const createAppTheme = (isDarkMode: boolean) =>
   createTheme({
     palette: {
@@ -54,24 +56,29 @@ const createAppTheme = (isDarkMode: boolean) =>
     },
   });
 
+// Default context value to avoid undefined checks in consumers
 const DEFAULT_THEME_CONTEXT: ThemeContextType = {
   isDarkMode: true,
   toggleTheme: () => {},
   theme: createAppTheme(true),
 };
 
+// ThemeContextProvider component that wraps the app and provides theme state and toggle functionality
 export const ThemeContextProvider = ({ children }: { children: ReactNode }) => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [mounted, setMounted] = useState(false);
 
+  // Load the theme preference from localStorage on mount and set the initial theme state
   useEffect(() => {
     setMounted(true);
     const savedTheme = localStorage.getItem("theme-mode");
+
     if (savedTheme) {
       setIsDarkMode(savedTheme === "dark");
     }
   }, []);
 
+  // Update the HTML data attribute for color mode whenever the theme changes
   useEffect(() => {
     if (typeof document !== "undefined") {
       const htmlElement = document.documentElement;
@@ -82,6 +89,7 @@ export const ThemeContextProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isDarkMode]);
 
+  // Toggle the theme mode and persist the preference in localStorage
   const toggleTheme = () => {
     setIsDarkMode((prev) => {
       const newMode = !prev;
@@ -90,12 +98,14 @@ export const ThemeContextProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  // Memoize the theme object to avoid unnecessary re-renders of the ThemeProvider
   const theme = useMemo(() => createAppTheme(isDarkMode), [isDarkMode]);
 
   if (!mounted) {
     return <>{children}</>;
   }
 
+  // Provide the theme context and wrap children with MUI ThemeProvider
   return (
     <ThemeContext.Provider value={{ isDarkMode, toggleTheme, theme }}>
       <MuiThemeProvider theme={theme}>{children}</MuiThemeProvider>
@@ -103,9 +113,10 @@ export const ThemeContextProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// Custom hook to access the ThemeContext, providing theme state and toggle functionality
 export const useThemeContext = () => {
   const context = useContext(ThemeContext);
-  console.log("useThemeContext: ", context);
+
   if (context === undefined) {
     return DEFAULT_THEME_CONTEXT;
   }

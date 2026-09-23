@@ -31,6 +31,7 @@ export const CustomStats = ({ stats, animatedValues }: ICustomStatsProps) => {
   const { onAddAction } = editor || {};
   const activeInlineFieldId = activeFieldId;
   const onInlineFieldClick = onFieldClick;
+  const customStats = stats.custom ?? [];
 
   const inlineFieldClick = onInlineFieldClick as
     | ((section: string, fieldId: string, anchor?: HTMLElement) => void)
@@ -38,7 +39,8 @@ export const CustomStats = ({ stats, animatedValues }: ICustomStatsProps) => {
 
   return (
     <>
-      {(stats.custom ?? []).map((customStat, idx) => (
+      {/* Custom Stats */}
+      {customStats.map((customStat, idx) => (
         <Box
           key={`custom-stat-${idx}`}
           sx={{

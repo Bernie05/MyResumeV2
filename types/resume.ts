@@ -7,6 +7,7 @@ export interface PersonalInfo {
   photoUrl: string;
   backgroundUrl: string;
   summary: string;
+  dateOfBirth?: string;
   website?: string;
   linkedin?: string;
   github?: string;
@@ -92,6 +93,14 @@ export interface TestimonialItem {
   photoUrl?: string;
 }
 
+export interface CharacterReferenceItem {
+  id: number;
+  name: string;
+  company: string;
+  position: string;
+  contactNo: string;
+}
+
 export interface ProjectItem {
   id: number;
   name: string;
@@ -130,6 +139,8 @@ export interface ResumeData {
   projects: ProjectItem[];
   portfolio: PortfolioItem[];
   testimonials: TestimonialItem[];
+  characterReferences: CharacterReferenceItem[];
+  declaration?: string;
   servicesBadge?: string;
   servicesTitle?: string;
   servicesSubtitle?: string;
@@ -141,4 +152,18 @@ export interface ResumeData {
   projectsBadge?: string;
   projectsTitle?: string;
   projectsSubtitle?: string;
+  educationBadge?: string;
+  educationTitle?: string;
+  skillsBadge?: string;
+  skillsTitle?: string;
+  skillsSubtitle?: string;
+  certificationsBadge?: string;
+  certificationsTitle?: string;
+  testimonialsBadge?: string;
+  testimonialsTitle?: string;
+  characterReferencesBadge?: string;
+  characterReferencesTitle?: string;
+  contactBadge?: string;
+  contactTitle?: string;
+  contactSubtitle?: string;
 }

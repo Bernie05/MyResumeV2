@@ -9,6 +9,9 @@ import { ThemeContextProvider } from "@/context/ThemeContext";
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
+    // Order matters: PersistGate must sit under Redux's Provider (it rehydrates
+    // the same store), and blocks rendering children until localStorage state
+    // has loaded, avoiding a flash of empty initial state.
     <SessionProvider>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>

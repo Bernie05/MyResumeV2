@@ -88,6 +88,7 @@ export const ProjectCardComponent = ({
         },
       }}
     >
+      {/* Delete Button */}
       {onDeleteAction && (
         <IconButton
           aria-label="Delete item"
@@ -117,6 +118,7 @@ export const ProjectCardComponent = ({
         </IconButton>
       )}
 
+      {/* Image */}
       {(item.image || isEditMode) && (
         <Box
           sx={{
@@ -150,6 +152,7 @@ export const ProjectCardComponent = ({
         </Box>
       )}
 
+      {/* Content */}
       <CardContent
         sx={{ p: 3, flexGrow: 1, display: "flex", flexDirection: "column" }}
       >
@@ -170,6 +173,7 @@ export const ProjectCardComponent = ({
           />
         )}
 
+        {/* Title */}
         {(displayTitle || isEditMode) && (
           <Typography
             variant="h6"
@@ -186,6 +190,7 @@ export const ProjectCardComponent = ({
           </Typography>
         )}
 
+        {/* Description */}
         {(item.description || isEditMode) && (
           <Typography
             variant="body2"
@@ -202,6 +207,7 @@ export const ProjectCardComponent = ({
           </Typography>
         )}
 
+        {/* Technologies */}
         {(technologies.length > 0 || isEditMode) && (
           <Box
             sx={{
@@ -212,6 +218,7 @@ export const ProjectCardComponent = ({
               alignItems: "center",
             }}
           >
+            {/* Technology Tags */}
             {technologies.map((tech, techIndex) => {
               const techFieldId =
                 inlineSection === "portfolio" || inlineSection === "projects"
@@ -235,6 +242,8 @@ export const ProjectCardComponent = ({
                 />
               );
             })}
+
+            {/* Add Tag Button */}
             {isEditMode &&
               onAddAction &&
               (inlineSection === "portfolio" ||
@@ -263,6 +272,7 @@ export const ProjectCardComponent = ({
           </Box>
         )}
 
+        {/* Testimonial */}
         {((item.client && item.testimonial) || isEditMode) && (
           <Box
             sx={{
@@ -285,9 +295,7 @@ export const ProjectCardComponent = ({
                 mb: 0.5,
               }}
             >
-              {item.testimonial
-                ? `“${item.testimonial}”`
-                : "+ Add testimonial"}
+              {item.testimonial ? `“${item.testimonial}”` : "+ Add testimonial"}
             </Typography>
             <Typography
               variant="caption"
@@ -303,6 +311,7 @@ export const ProjectCardComponent = ({
           </Box>
         )}
 
+        {/* Links */}
         <Box sx={{ display: "flex", gap: 1.5, mt: "auto" }}>
           {(demoUrl || isEditMode) && (
             <Box
@@ -327,6 +336,8 @@ export const ProjectCardComponent = ({
               {demoUrl ? "Live Demo" : "+ Add live demo link"}
             </Box>
           )}
+
+          {/* Code Link */}
           {(codeUrl || isEditMode) && (
             <Box
               component={isEditMode ? "span" : "a"}
@@ -343,11 +354,15 @@ export const ProjectCardComponent = ({
                 fontStyle: codeUrl ? "normal" : "italic",
                 textDecoration: "none",
                 ...getInlineFieldSx(
-                  buildFieldId(inlineSection === "portfolio" ? "githubUrl" : "link"),
+                  buildFieldId(
+                    inlineSection === "portfolio" ? "githubUrl" : "link",
+                  ),
                 ),
               }}
               {...createInlineFieldProps(
-                buildFieldId(inlineSection === "portfolio" ? "githubUrl" : "link"),
+                buildFieldId(
+                  inlineSection === "portfolio" ? "githubUrl" : "link",
+                ),
               )}
             >
               <GitHubIcon sx={{ fontSize: "1rem" }} />

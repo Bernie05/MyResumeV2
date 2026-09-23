@@ -80,6 +80,7 @@ const Projects = ({
     >
       {/* Section Header */}
       <Box sx={{ mb: 8 }}>
+        {/* Badge */}
         <Box
           sx={{
             display: "inline-flex",
@@ -99,6 +100,8 @@ const Projects = ({
         >
           {projectsBadge || "Projects"}
         </Box>
+
+        {/* Title */}
         <Typography
           variant="h3"
           sx={{
@@ -112,6 +115,8 @@ const Projects = ({
         >
           {projectsTitle || "Recent Projects"}
         </Typography>
+
+        {/* Subtitle */}
         <Typography
           variant="h6"
           sx={{

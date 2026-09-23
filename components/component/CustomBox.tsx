@@ -11,6 +11,7 @@ interface CustomBoxProps extends Omit<BoxProps, "sx"> {
   targetFieldId?: any;
 }
 
+// CustomBox is a React component that wraps the MUI Box component and enhances it with editable field functionality. It accepts standard BoxProps, along with additional props for styling (sx), children, and identifiers for the target section and field. The component is wrapped with the withEditableField HOC to provide editing capabilities in the context of a resume editor application.
 const BaseBox = React.forwardRef<HTMLDivElement, CustomBoxProps>(
   ({ sx, ...props }, ref) => {
     return (
@@ -24,6 +25,8 @@ const BaseBox = React.forwardRef<HTMLDivElement, CustomBoxProps>(
     );
   },
 );
+
 BaseBox.displayName = "BaseBox";
 
+// Wrap the BaseBox component with the withEditableField HOC to create the CustomBox component, which includes editable field functionality. This allows the box to be interactive and editable within the context of a resume editor application.
 export const CustomBox = withEditableField(BaseBox);

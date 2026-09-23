@@ -25,6 +25,8 @@ interface Certification {
 
 interface CertificationsProps {
   certifications: Certification[];
+  certificationsBadge?: string;
+  certificationsTitle?: string;
   onInlineFieldClick?: (
     section: ResumeEditableSection,
     fieldId: InlineEditableFieldId,
@@ -37,12 +39,15 @@ interface CertificationsProps {
 
 const Certifications = ({
   certifications,
+  certificationsBadge,
+  certificationsTitle,
   onInlineFieldClick,
   activeInlineFieldId,
   onAddAction,
   onDeleteAction,
 }: CertificationsProps) => {
   const { isDarkMode } = useThemeContext();
+
   const {
     primaryAccent,
     titleColor,
@@ -78,7 +83,6 @@ const Certifications = ({
             display: "inline-flex",
             px: 1.75,
             py: 0.75,
-            borderRadius: 999,
             background: buttonGradient,
             color: accentText,
             fontWeight: 700,
@@ -86,9 +90,12 @@ const Certifications = ({
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             mb: 2,
+            ...getInlineFieldSx("certificationsBadge"),
+            borderRadius: 999,
           }}
+          {...createInlineFieldProps("certificationsBadge")}
         >
-          Certifications
+          {certificationsBadge || "Certifications"}
         </Box>
         <Typography
           variant="h3"
@@ -97,9 +104,11 @@ const Certifications = ({
             fontWeight: "bold",
             color: titleColor,
             fontSize: { xs: "1.875rem", md: "2.25rem" },
+            ...getInlineFieldSx("certificationsTitle"),
           }}
+          {...createInlineFieldProps("certificationsTitle")}
         >
-          Certifications
+          {certificationsTitle || "Certifications"}
         </Typography>
       </Box>
 
@@ -111,6 +120,7 @@ const Certifications = ({
           gap: 3,
         }}
       >
+        {/* Certification Cards */}
         {certifications.map((cert, index) => (
           <Card
             key={cert.id}
@@ -126,6 +136,7 @@ const Certifications = ({
               },
             }}
           >
+            {/* Delete Button */}
             {onDeleteAction && (
               <IconButton
                 aria-label="Delete certification"
@@ -154,6 +165,7 @@ const Certifications = ({
                 <DeleteOutlineIcon fontSize="small" />
               </IconButton>
             )}
+            {/* Content */}
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: "flex", gap: 2 }}>
                 {/* Icon */}

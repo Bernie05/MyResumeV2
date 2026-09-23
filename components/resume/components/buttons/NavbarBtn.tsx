@@ -1,6 +1,4 @@
-import { useThemeContext } from "@/context/ThemeContext";
-import { getSectionPalette } from "@/theme/sectionPalette";
-import { Button, Stack } from "@mui/material";
+import { Button } from "@mui/material";
 
 interface INavbarBtnProps {
   id: string;
@@ -14,6 +12,9 @@ interface INavbarBtnProps {
   };
 }
 
+// NavbarBtn is a React component that renders a set of navigation buttons based on the provided props.
+// Each button is created using the MUI Button component and is styled according to the provided CSS properties.
+// The component also supports an optional click handler for each button, allowing for custom behavior when a button is clicked.
 export const NavbarBtn = ({
   id,
   navbarBtns,
