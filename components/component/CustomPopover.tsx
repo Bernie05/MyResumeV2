@@ -17,11 +17,11 @@ export const CustomPopover = ({
   getInlineFieldLabel,
   renderInlineFieldToolbox,
 }: CustomPopoverProps) => {
+  // Access the theme context to determine if dark mode is active.
+  // This will be used to style the Popover component accordingly, ensuring that it matches the overall theme of the application.
   const { isDarkMode } = useThemeContext();
-  console.log(
-    "Rendering CustomPopover with selectedInlineFieldId: ",
-    selectedInlineFieldId,
-  );
+
+  // Render the Popover component, which is a floating container that appears when an inline field is selected for editing. The Popover is anchored to the specified element (anchorEl) and displays the label of the selected inline field along with a toolbox for editing. The appearance of the Popover is customized based on the current theme (dark or light mode).
   return (
     <Popover
       open={Boolean(anchorEl) && Boolean(selectedInlineFieldId)}
@@ -53,6 +53,7 @@ export const CustomPopover = ({
         },
       }}
     >
+      {/* Popover content */}
       {selectedInlineFieldId && (
         <Stack spacing={1.5}>
           <Stack

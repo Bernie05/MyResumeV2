@@ -73,7 +73,9 @@ export const ContactSection = ({
     softBackground,
   } = getSectionPalette(isDarkMode);
 
-  // change this and use the herosection funvc
+  // Define social links based on the provided personalInfo. Each link includes an icon, href, label,
+  // and a unique fieldId for inline editing. The links are filtered to remove any null values,
+  // ensuring only valid social links are included in the final array.
   const socialLinks: SocialLinkItem[] = [
     personalInfo.linkedin
       ? {
@@ -101,6 +103,9 @@ export const ContactSection = ({
       : null,
   ].filter(Boolean) as SocialLinkItem[];
 
+  // Define contact items based on the provided personalInfo. Each item includes an icon, label, value,
+  // optional href for clickable links, and a unique fieldId for inline editing. These items are used
+  // to display the user's contact information in the contact section of the resume.
   const contactItems: ContactItem[] = [
     {
       icon: <EmailOutlinedIcon fontSize="small" />,
@@ -139,6 +144,7 @@ export const ContactSection = ({
         border: `1px solid ${outline}`,
       }}
     >
+      {/* Contact Badge */}
       <Box sx={{ mb: 5 }}>
         <Box
           sx={{
@@ -159,6 +165,8 @@ export const ContactSection = ({
         >
           {contactBadge || "Contact Info"}
         </Box>
+
+        {/* Contact Title */}
         <Typography
           variant="h3"
           sx={{
@@ -171,6 +179,8 @@ export const ContactSection = ({
         >
           {contactTitle || "Get In Touch"}
         </Typography>
+
+        {/* Contact Subtitle */}
         <Typography
           sx={{
             mt: 1.5,
@@ -187,6 +197,7 @@ export const ContactSection = ({
         </Typography>
       </Box>
 
+      {/* Contact Items and Social Links */}
       <Box
         sx={{
           display: "grid",
@@ -209,6 +220,7 @@ export const ContactSection = ({
             border: `1px solid ${divider}`,
           }}
         >
+          {/* Contact Form title and subtitle */}
           <Stack spacing={1.25}>
             <Typography
               variant="h5"
@@ -223,6 +235,7 @@ export const ContactSection = ({
             </Typography>
           </Stack>
 
+          {/* Contact Items */}
           <Stack spacing={1.5}>
             {contactItems.map(({ icon, label, value, href, fieldId }) => (
               <Box
@@ -238,6 +251,7 @@ export const ContactSection = ({
                 }}
                 {...createInlineFieldProps(fieldId)}
               >
+                {/* Contact Icon */}
                 <Box
                   sx={{
                     width: 36,
@@ -252,6 +266,7 @@ export const ContactSection = ({
                 >
                   {icon}
                 </Box>
+                {/* Contact Value */}
                 <Box sx={{ minWidth: 0 }}>
                   <Typography
                     sx={{
@@ -284,6 +299,7 @@ export const ContactSection = ({
             ))}
           </Stack>
 
+          {/* Social Media Links for now it is no value */}
           {socialLinks.length > 0 ? (
             <Box sx={{ pt: 1, borderTop: `1px solid ${divider}` }}>
               <Typography
@@ -297,6 +313,7 @@ export const ContactSection = ({
               >
                 Social Media
               </Typography>
+              {/* Social Media Icons */}
               <Stack direction="row" spacing={1.5} flexWrap="wrap">
                 {socialLinks.map(({ icon, href, label, fieldId }) => (
                   <IconButton
@@ -343,6 +360,7 @@ export const ContactSection = ({
           ) : null}
         </Box>
 
+        {/* Contact Form */}
         <Box
           sx={{
             p: { xs: 2.5, md: 3 },

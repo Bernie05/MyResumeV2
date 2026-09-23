@@ -22,6 +22,8 @@ export interface WithEditableFieldProps {
 }
 
 // Higher-Order Component to wrap any component with editable field functionality
+// This HOC provides the wrapped component with the ability to be interactive and editable in the context of a resume editor application.
+// It manages edit mode, active field state, and click interactions, while also allowing for custom styles and click handlers.
 export const withEditableField = <P extends WithEditableFieldProps>(
   Component: React.ComponentType<P>,
   defaultSx?: SxProps,

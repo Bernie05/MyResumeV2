@@ -12,8 +12,6 @@ import { DeleteOutline as DeleteOutlineIcon } from "@mui/icons-material";
 import { useInlineEditing } from "@/hook/useInlineEditing";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
-import type { ResumeEditableSection } from "./ResumePage";
-import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 import { AddButton } from "../component/static/AddButton";
 import {
   useEditor,
@@ -100,6 +98,8 @@ const Education = ({
         >
           {educationBadge || "Education"}
         </Box>
+
+        {/* Education Title */}
         <Typography
           variant="h3"
           sx={{
@@ -132,6 +132,7 @@ const Education = ({
                 },
               }}
             >
+              {/* Delete Button */}
               {onDeleteAction && (
                 <IconButton
                   aria-label="Delete education"
@@ -160,8 +161,8 @@ const Education = ({
                   <DeleteOutlineIcon fontSize="small" />
                 </IconButton>
               )}
+              {/* Education Details */}
               <CardContent sx={{ p: 4 }}>
-                {/* Header Row */}
                 <Box
                   sx={{
                     display: "flex",
@@ -172,6 +173,7 @@ const Education = ({
                     mb: 2,
                   }}
                 >
+                  {/* Education Info */}
                   <Box>
                     {(edu.school || isEditMode) && (
                       <Typography
@@ -183,9 +185,7 @@ const Education = ({
                           mb: 1,
                           ...getInlineFieldSx(`education.${index}.school`),
                         }}
-                        {...createInlineFieldProps(
-                          `education.${index}.school`,
-                        )}
+                        {...createInlineFieldProps(`education.${index}.school`)}
                       >
                         {edu.school || "+ Add school"}
                       </Typography>
@@ -199,9 +199,7 @@ const Education = ({
                           color: primaryAccent,
                           ...getInlineFieldSx(`education.${index}.degree`),
                         }}
-                        {...createInlineFieldProps(
-                          `education.${index}.degree`,
-                        )}
+                        {...createInlineFieldProps(`education.${index}.degree`)}
                       >
                         {edu.degree
                           ? `${edu.degree}${edu.field ? ` in ${edu.field}` : ""}`
@@ -232,9 +230,7 @@ const Education = ({
                       color: mutedColor,
                       ...getInlineFieldSx(`education.${index}.location`),
                     }}
-                    {...createInlineFieldProps(
-                      `education.${index}.location`,
-                    )}
+                    {...createInlineFieldProps(`education.${index}.location`)}
                   >
                     📍 {edu.location || "+ Add location"}
                   </Typography>

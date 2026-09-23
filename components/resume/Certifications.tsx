@@ -47,6 +47,7 @@ const Certifications = ({
   onDeleteAction,
 }: CertificationsProps) => {
   const { isDarkMode } = useThemeContext();
+
   const {
     primaryAccent,
     titleColor,
@@ -119,6 +120,7 @@ const Certifications = ({
           gap: 3,
         }}
       >
+        {/* Certification Cards */}
         {certifications.map((cert, index) => (
           <Card
             key={cert.id}
@@ -134,6 +136,7 @@ const Certifications = ({
               },
             }}
           >
+            {/* Delete Button */}
             {onDeleteAction && (
               <IconButton
                 aria-label="Delete certification"
@@ -162,6 +165,7 @@ const Certifications = ({
                 <DeleteOutlineIcon fontSize="small" />
               </IconButton>
             )}
+            {/* Content */}
             <CardContent sx={{ p: 3 }}>
               <Box sx={{ display: "flex", gap: 2 }}>
                 {/* Icon */}

@@ -1,6 +1,13 @@
 "use client";
 
-import { Avatar, Box, Card, CardContent, IconButton, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  IconButton,
+  Typography,
+} from "@mui/material";
 import {
   Badge as BadgeIcon,
   DeleteOutline as DeleteOutlineIcon,
@@ -96,6 +103,7 @@ const CharacterReferences = ({
         >
           {characterReferencesBadge || "Character References"}
         </Box>
+        {/* Section Title */}
         <Typography
           variant="h3"
           component="h2"
@@ -111,6 +119,7 @@ const CharacterReferences = ({
         </Typography>
       </Box>
 
+      {/* Character Reference Cards */}
       <Box
         sx={{
           display: "grid",
@@ -118,6 +127,7 @@ const CharacterReferences = ({
           gap: 3,
         }}
       >
+        {/* Character Reference Cards */}
         {characterReferences.map((reference, index) => (
           <Card
             key={reference.id}
@@ -133,6 +143,7 @@ const CharacterReferences = ({
               },
             }}
           >
+            {/* Delete Button */}
             {onDeleteAction && (
               <IconButton
                 aria-label="Delete character reference"
@@ -161,6 +172,8 @@ const CharacterReferences = ({
                 <DeleteOutlineIcon fontSize="small" />
               </IconButton>
             )}
+
+            {/* Content */}
             <CardContent sx={{ p: 3 }}>
               <BadgeIcon
                 sx={{
@@ -171,6 +184,7 @@ const CharacterReferences = ({
               />
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                {/* Avatar */}
                 <Avatar
                   sx={{
                     width: 44,
@@ -180,6 +194,8 @@ const CharacterReferences = ({
                 >
                   {reference.name?.charAt(0)?.toUpperCase() ?? "?"}
                 </Avatar>
+
+                {/* Reference Details */}
                 <Box sx={{ flexGrow: 1 }}>
                   <Typography
                     variant="subtitle2"
@@ -195,6 +211,8 @@ const CharacterReferences = ({
                   >
                     {reference.name || (isEditMode ? "+ Add name" : "")}
                   </Typography>
+
+                  {/* Position and Company */}
                   {((reference.position && reference.company) ||
                     isEditMode) && (
                     <Typography
@@ -202,6 +220,7 @@ const CharacterReferences = ({
                       component="div"
                       sx={{ color: mutedColor }}
                     >
+                      {/* Position */}
                       <Box
                         component="span"
                         sx={{
@@ -217,6 +236,7 @@ const CharacterReferences = ({
                         {reference.position ||
                           (isEditMode ? "+ Add position" : "")}
                       </Box>
+                      {/* Company */}
                       {(reference.company || isEditMode) && (
                         <>
                           {" · "}
@@ -241,6 +261,8 @@ const CharacterReferences = ({
                       )}
                     </Typography>
                   )}
+
+                  {/* Contact Number */}
                   <Typography
                     variant="caption"
                     component="div"

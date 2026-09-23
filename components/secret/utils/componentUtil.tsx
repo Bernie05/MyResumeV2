@@ -289,10 +289,12 @@ export const createInlineFieldProps = (
       ) => void)
     | undefined,
 ) => {
+  // If no onInlineFieldClick handler is provided, return an empty object to avoid adding unnecessary event handlers or accessibility attributes.
   if (!onInlineFieldClick) {
     return {};
   }
 
+  // Return the props needed to make the field interactive, including click and keyboard event handlers, role, tabIndex, and aria-label for accessibility. The onClick and onKeyDown handlers invoke the provided onInlineFieldClick function with the appropriate sectionId and fieldId, allowing the editor to know which field was interacted with.
   return {
     onClick: (event: React.MouseEvent) => {
       event.stopPropagation();

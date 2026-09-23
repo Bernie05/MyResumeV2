@@ -52,6 +52,8 @@ export const EditorProvider = ({ value, children }: EditorProviderProps) => {
   // State to track currently clicked field and section
   const [activeInlineFieldId, setActiveInlineFieldId] =
     useState<InlineEditableFieldId | null>(value?.activeInlineFieldId ?? null);
+
+  // State to track currently clicked section
   const [activeSection, setActiveSection] =
     useState<ResumeEditableSection | null>(value?.activeSection ?? null);
 
@@ -59,11 +61,11 @@ export const EditorProvider = ({ value, children }: EditorProviderProps) => {
   // Memoized so consumers only re-render when a field actually referenced by the
   // context (not just the parent) changes, rather than on every parent render.
   const contextValue: EditorContextValue = useMemo(() => {
+    // if value is provided, merge it with the current state and setters, otherwise return the current state and setters
     return value
       ? {
           ...value,
-          activeInlineFieldId:
-            value.activeInlineFieldId ?? activeInlineFieldId,
+          activeInlineFieldId: value.activeInlineFieldId ?? activeInlineFieldId,
           activeSection: value.activeSection ?? activeSection,
           setActiveInlineFieldId,
           setActiveSection,

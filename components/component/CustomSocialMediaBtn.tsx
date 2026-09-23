@@ -19,6 +19,7 @@ interface SocialMediaBtnProps {
   maxPerRow?: number;
 }
 
+// SocialMediaBtn is a React component that renders a grid of social media buttons based on the provided links. Each button can either be a clickable link or an editable field, depending on the presence of the onInlineFieldClick callback. The component uses the theme context to style the buttons according to the current theme (dark or light mode) and provides an option to add new social links if the onAddAction callback is available.
 const SocialMediaButton = React.memo(
   ({
     icon,
@@ -47,6 +48,7 @@ const SocialMediaButton = React.memo(
     const fieldId = `personalInfo.social.${index}`;
     const isActive = activeInlineFieldId === fieldId;
 
+    // Handle click event for the social media button. If the onInlineFieldClick callback is provided, it will be called with the section name, field ID, and the current target element. This allows for inline editing of the social media link when in edit mode.
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         if (onInlineFieldClick) {
@@ -98,9 +100,12 @@ const SocialMediaButton = React.memo(
         onClick={onInlineFieldClick ? handleClick : undefined}
         sx={buttonSx}
       >
-        {icon && ICON_MAP[icon as keyof typeof ICON_MAP]
-          ? React.createElement(ICON_MAP[icon as keyof typeof ICON_MAP])
-          : <LinkIcon fontSize="small" />}
+        {/* Icon */}
+        {icon && ICON_MAP[icon as keyof typeof ICON_MAP] ? (
+          React.createElement(ICON_MAP[icon as keyof typeof ICON_MAP])
+        ) : (
+          <LinkIcon fontSize="small" />
+        )}
       </IconButton>
     );
   },
@@ -108,6 +113,7 @@ const SocialMediaButton = React.memo(
 
 SocialMediaButton.displayName = "SocialMediaButton";
 
+// SocialMediaBtn is a React component that renders a grid of social media buttons based on the provided links. Each button can either be a clickable link or an editable field, depending on the presence of the onInlineFieldClick callback. The component uses the theme context to style the buttons according to the current theme (dark or light mode) and provides an option to add new social links if the onAddAction callback is available.
 export const SocialMediaBtn = ({
   links = [],
   maxPerRow = 6,
@@ -138,6 +144,7 @@ export const SocialMediaBtn = ({
     [links, isDarkMode, primaryAccent, onFieldClick, activeFieldId],
   );
 
+  // Render the SocialMediaBtn component, which is a grid of social media buttons. Each button can be either a clickable link or an editable field, depending on the presence of the onInlineFieldClick callback. The component also provides an option to add new social links if the onAddAction callback is available. The appearance of the buttons is styled based on the current theme (dark or light mode).
   return (
     <Box
       sx={{

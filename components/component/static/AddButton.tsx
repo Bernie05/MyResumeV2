@@ -11,10 +11,14 @@ interface IAddButtonProps {
 }
 
 export const AddButton = ({ children, targetSectionId }: IAddButtonProps) => {
+  // Access the theme context to determine if dark mode is active
+  // Retrieve the appropriate color palette for the section
+  // Also, access the editor context to handle the add action when the button is clicked.
   const { isDarkMode } = useThemeContext();
   const { primaryAccent, softBackground } = getSectionPalette(isDarkMode);
   const { onAddAction } = useEditor() || {};
 
+  // Render the AddButton component, which is a styled Box that triggers the onAddAction callback when clicked. The button's appearance changes based on the current theme (dark or light mode).
   return (
     <Box
       sx={{
