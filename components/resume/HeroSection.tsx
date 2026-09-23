@@ -76,11 +76,6 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
   const activeInlineFieldId = useActiveField();
   const onInlineFieldClick = useOnFieldClick();
 
-  console.log("HeroSection render: ", {
-    isEditMode,
-    activeInlineFieldId,
-  });
-
   const { isDarkMode } = useThemeContext();
   const theme = getSectionPalette(isDarkMode);
 
@@ -90,6 +85,7 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
   // useAnimatedStats resets its whole animation whenever this reference
   // changes, so a fresh object here on every render would reset it
   // continuously and the count-up would never finish.
+  // Ex ample: { custom_0: 42, custom_1: 100 } for two custom stats.
   const statsForAnimation = useMemo(() => {
     if (!stats) {
       return stats;
@@ -109,7 +105,7 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
 
   const { animatedStats, statsRef } = useAnimatedStats(statsForAnimation, 2000);
 
-  const { primaryAccent, accentGlow, accentText, buttonGradient } = theme;
+  const { primaryAccent, accentGlow } = theme;
 
   const inlineFieldClick = onInlineFieldClick as
     | ((
@@ -166,7 +162,6 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
             py: { xs: 10, md: 14 },
           }}
         >
-          {/* Content Stack */}
           <Stack
             id={`${heroSectionId}-content-stack`}
             spacing={4}
@@ -292,7 +287,9 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
             </Stack>
 
             {/* Social Media */}
-            <SocialMediaBtn links={(personalInfo.social ?? []) as SocialLink[]} />
+            <SocialMediaBtn
+              links={(personalInfo.social ?? []) as SocialLink[]}
+            />
           </Stack>
         </Container>
       </CustomBox>

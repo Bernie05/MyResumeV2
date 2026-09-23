@@ -58,6 +58,7 @@ const ANIMATION_DURATION_MS = 1500;
 const INTERSECTION_THRESHOLD = 0.2;
 const CIRCLE_RADIUS = 45;
 const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
+
 // 4-tier proficiency levels, derived from the raw 0-100 proficiency number
 // at render time. This is a read-only display value — it is never stored
 // in Redux/the data model (see types/resume.ts SkillItem).
@@ -95,6 +96,7 @@ const getProficiencyTierLevel = (proficiency: number): 1 | 2 | 3 | 4 => {
 
 const TIER_DOT_COUNT = 4;
 
+// The color of the category icon and the progress bar/circle is determined by the category name. "Backend" uses the secondary accent color, while all other categories use the primary accent color.
 const getCategoryColor = (
   category: string,
   primaryAccent: string,
@@ -103,6 +105,7 @@ const getCategoryColor = (
   return category === "Backend" ? secondaryAccent : primaryAccent;
 };
 
+// The icon for the category is determined by the category name. If a custom icon is provided and exists in the ICON_MAP, it will be used. Otherwise, default icons are used for "Frontend" and "Backend" categories, and a generic icon is used for all other categories.
 const getCategoryIcon = (category: string, color: string, icon?: string) => {
   if (icon && ICON_MAP[icon]) {
     const Icon = ICON_MAP[icon];
@@ -119,6 +122,7 @@ const getCategoryIcon = (category: string, color: string, icon?: string) => {
   }
 };
 
+// Builds a record of animated values for each skill, based on the current progress of the animation. The keys are generated using the category and skill name, and the values are the proficiency percentages scaled by the progress (0 to 1).
 const buildAnimatedValues = (
   skills: readonly SkillCategory[],
   progress: number,
@@ -190,6 +194,7 @@ const Skills = ({
 
     let frameId = 0;
 
+    // Run the entrance animation, which animates the proficiency values from 0 to their actual values over a fixed duration. The animation is driven by requestAnimationFrame for smoothness.
     const runAnimation = () => {
       const startTime = performance.now();
 
@@ -207,6 +212,7 @@ const Skills = ({
       frameId = requestAnimationFrame(animate);
     };
 
+    // Use IntersectionObserver to trigger the entrance animation when the skills section comes into view. This ensures that the animation only plays when the user scrolls to this part of the page, improving performance and user experience.
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) {
@@ -238,6 +244,7 @@ const Skills = ({
         border: `1px solid ${outline}`,
       }}
     >
+      {/* Section Badge */}
       <Box sx={{ mb: 8 }}>
         <Box
           sx={{
@@ -258,6 +265,8 @@ const Skills = ({
         >
           {skillsBadge || "Skills"}
         </Box>
+
+        {/* Section Title */}
         <Typography
           variant="h3"
           sx={{
@@ -271,6 +280,8 @@ const Skills = ({
         >
           {skillsTitle || "Professional Skills"}
         </Typography>
+
+        {/* Section Subtitle */}
         <Typography
           variant="h6"
           sx={{
@@ -285,6 +296,7 @@ const Skills = ({
         </Typography>
       </Box>
 
+      {/* Skill Groups */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {skills.map((skillGroup, categoryIndex) => {
           const categoryColor = getCategoryColor(
@@ -310,6 +322,7 @@ const Skills = ({
                   categoryColor,
                   skillGroup.icon,
                 )}
+                {/* Category Title */}
                 <Typography
                   variant="h5"
                   sx={{
@@ -327,6 +340,8 @@ const Skills = ({
                     ? `${skillGroup.category} Development`
                     : "+ Add category"}
                 </Typography>
+
+                {/* Delete Button */}
                 {isEditMode && onDeleteAction && (
                   <IconButton
                     aria-label="Delete category"
@@ -354,6 +369,7 @@ const Skills = ({
                 )}
               </Box>
 
+              {/* Skill Items */}
               <Box
                 sx={{
                   display: "grid",
@@ -365,6 +381,7 @@ const Skills = ({
                   gap: 3,
                 }}
               >
+                {/* Skill Cards */}
                 {skillGroup.items.map((skill, itemIndex) => {
                   const skillKey = createSkillKey(
                     skillGroup.category,
@@ -424,6 +441,8 @@ const Skills = ({
                           <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
                       )}
+
+                      {/* Skill Content */}
                       <CardContent sx={{ p: 3, height: "100%" }}>
                         <Box sx={{ display: "flex", gap: 3, height: "100%" }}>
                           <Box
@@ -473,6 +492,7 @@ const Skills = ({
                                 }}
                               />
                             </svg>
+                            {/* Skill Value */}
                             <Box
                               sx={{
                                 position: "absolute",
@@ -495,6 +515,7 @@ const Skills = ({
                             </Box>
                           </Box>
 
+                          {/* Skill Name */}
                           <Box sx={{ flex: 1 }}>
                             <Box
                               sx={{
@@ -520,6 +541,7 @@ const Skills = ({
                                   }}
                                 />
                               )}
+                              {/* Skill Name */}
                               <Typography
                                 variant="subtitle1"
                                 sx={{
@@ -534,7 +556,7 @@ const Skills = ({
                                 {skill.name || "+ Add skill"}
                               </Typography>
                             </Box>
-
+                            {/* Skill Progress */}
                             <Box sx={{ mb: 2 }}>
                               <LinearProgress
                                 variant="determinate"
@@ -551,7 +573,7 @@ const Skills = ({
                                 }}
                               />
                             </Box>
-
+                            {/* Proficiency Chip */}
                             <Box
                               sx={{
                                 display: "flex",
@@ -589,6 +611,7 @@ const Skills = ({
                                       }
                                 }
                               />
+                              {/* Proficiency Dots */}
                               <Box
                                 role="img"
                                 aria-label={`Proficiency tier: ${getProficiencyTierLevel(

@@ -19,11 +19,8 @@ import {
 import { useInlineEditing } from "@/hook/useInlineEditing";
 import { useThemeContext } from "@/context/ThemeContext";
 import { getSectionPalette } from "../../theme/sectionPalette";
-import type { ResumeEditableSection } from "@/components/resume/ResumePage";
-import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 import { AddButton } from "../component/static/AddButton";
 import { useEditor, useActiveField, useOnFieldClick } from "@/hook/useEditor";
-import { useMemo } from "react";
 
 interface Job {
   id: number;
@@ -84,6 +81,7 @@ const Experience = ({
     >
       {/* Section Header */}
       <Box sx={{ mb: 5 }}>
+        {/* Experience Badge */}
         <Box
           sx={{
             display: "inline-flex",
@@ -103,6 +101,8 @@ const Experience = ({
         >
           {experienceBadge || "Experience"}
         </Box>
+
+        {/* Experience Title */}
         <Typography
           variant="h3"
           sx={{
@@ -117,6 +117,7 @@ const Experience = ({
         </Typography>
       </Box>
 
+      {/* Experience Details */}
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
         {experience.map((job, index) => (
           <Box key={job.id}>
@@ -136,6 +137,7 @@ const Experience = ({
                 },
               }}
             >
+              {/* Delete Button */}
               {onDeleteAction && (
                 <IconButton
                   aria-label="Delete experience"
@@ -164,6 +166,7 @@ const Experience = ({
                   <DeleteOutlineIcon fontSize="small" />
                 </IconButton>
               )}
+              {/* Experience Details */}
               <CardContent sx={{ p: 4 }}>
                 {/* Header Row */}
                 <Box
@@ -176,6 +179,7 @@ const Experience = ({
                   }}
                 >
                   <Box>
+                    {/* Job Title */}
                     <Typography
                       variant="h5"
                       sx={{
@@ -191,6 +195,8 @@ const Experience = ({
                     >
                       {job.position}
                     </Typography>
+
+                    {/* Company */}
                     <Typography
                       variant="h6"
                       sx={{
@@ -205,7 +211,7 @@ const Experience = ({
                     </Typography>
                   </Box>
 
-                  {/*  */}
+                  {/* Duration */}
                   <Chip
                     label={job.duration}
                     sx={{
@@ -249,6 +255,7 @@ const Experience = ({
                         `experience.${index}.description.${bulletIndex}`,
                       )}
                     >
+                      {/* Bullet Point */}
                       <ListItemIcon
                         sx={{
                           minWidth: "24px",
@@ -262,6 +269,8 @@ const Experience = ({
                           sx={{ fontSize: "0.5rem", fill: "currentColor" }}
                         />
                       </ListItemIcon>
+
+                      {/* Description */}
                       <ListItemText
                         primary={desc}
                         sx={{ m: 0 }}

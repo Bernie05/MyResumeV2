@@ -76,6 +76,7 @@ const ResumePage = ({
   const { data: session, status } = useSession();
   const hasAccess = isAuthenticated(status, session);
 
+  // Function to get the styles for each section based on its active states
   const getSectionSx = (sectionId: ResumeEditableSection) => {
     const isActiveSection = activeSectionId === sectionId;
 
@@ -99,6 +100,7 @@ const ResumePage = ({
     };
   };
 
+  // Function to render each section with its respective props and styles
   const renderSection = ({
     children,
     sectionId,
@@ -132,6 +134,7 @@ const ResumePage = ({
     <Box component="main" sx={{ width: "100%", minHeight: "100vh" }}>
       <Navbar isAuthenticated={hasAccess} position={position} />
 
+      {/* About Section */}
       {renderSection({
         sectionId: "about",
         component: "section",
@@ -147,6 +150,7 @@ const ResumePage = ({
         maxWidth="xl"
         sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, sm: 3, lg: 4 } }}
       >
+        {/* Section Stack */}
         <Stack spacing={{ xs: 10, md: 14 }}>
           {renderSection({
             sectionId: "services",
@@ -164,6 +168,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Experience Section */}
           {renderSection({
             sectionId: "experience",
             component: "section",
@@ -176,6 +181,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Portfolio Section */}
           {renderSection({
             sectionId: "portfolio",
             component: "section",
@@ -189,6 +195,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/*  */}
           {renderSection({
             sectionId: "projects",
             children: (
@@ -201,6 +208,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Education Section */}
           {renderSection({
             sectionId: "education",
             children: (
@@ -212,6 +220,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Skills Section */}
           {renderSection({
             sectionId: "skills",
             component: "section",
@@ -229,6 +238,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Certifications Section */}
           {renderSection({
             sectionId: "certifications",
             children: (
@@ -244,6 +254,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Testimonials Section */}
           {renderSection({
             sectionId: "testimonials",
             children: (
@@ -255,6 +266,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Character References Section */}
           {renderSection({
             sectionId: "characterReferences",
             children: (
@@ -266,6 +278,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Contact Section */}
           {renderSection({
             sectionId: "contact",
             component: "section",
@@ -281,6 +294,7 @@ const ResumePage = ({
             ),
           })}
 
+          {/* Footer */}
           <Box
             component="footer"
             id="footer"

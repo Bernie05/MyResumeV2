@@ -100,6 +100,7 @@ const Navbar = ({ isAuthenticated, position }: INavbarProps) => {
               alignItems: "center",
             }}
           >
+            {/* Navigation Buttons */}
             <NavbarBtn
               id={navbarId}
               navbarBtns={NAV_ITEMS}
