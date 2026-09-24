@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useThemeContext } from "@/context/ThemeContext";
 import { useAnimatedStats } from "@/hook/useAnimated";
 import { getSectionPalette, IThemePalette } from "../../theme/sectionPalette";
@@ -67,12 +67,27 @@ export interface StatsItems {
 export interface HeroSectionProps {
   personalInfo: PersonalInfo;
   stats?: HeroStats;
+  onDownloadCv?: () => Promise<void>;
 }
 
-const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
+const HeroSection = ({ personalInfo, stats, onDownloadCv }: HeroSectionProps) => {
   const sectionId = "about";
 
   const isEditMode = useIsEditMode();
+  const [isPreparingCv, setIsPreparingCv] = useState(false);
+
+  // In edit mode a click selects the button for editing instead of downloading
+  const handleDownloadCv = async () => {
+    if (isEditMode || !onDownloadCv || isPreparingCv) return;
+    setIsPreparingCv(true);
+    try {
+      await onDownloadCv();
+    } catch (error) {
+      console.error("Failed to generate CV PDF", error);
+    } finally {
+      setIsPreparingCv(false);
+    }
+  };
   const activeInlineFieldId = useActiveField();
   const onInlineFieldClick = useOnFieldClick();
 
@@ -281,8 +296,12 @@ const HeroSection = ({ personalInfo, stats }: HeroSectionProps) => {
                 targetFieldId="personalInfo.downloadButtonText"
                 variant="outlined"
                 startIcon={<DownloadIcon />}
+                onClick={handleDownloadCv}
+                aria-busy={isPreparingCv}
               >
-                {personalInfo.downloadButtonText || "Download CV"}
+                {isPreparingCv
+                  ? "Preparing…"
+                  : personalInfo.downloadButtonText || "Download CV"}
               </CustomButton>
             </Stack>
 

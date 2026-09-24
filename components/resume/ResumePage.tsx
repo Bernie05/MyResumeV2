@@ -3,6 +3,7 @@
 import type { ElementType, ReactNode } from "react";
 import Navbar from "./Navbar";
 import HeroSection from "./HeroSection";
+import { downloadResumePdf } from "./pdf/downloadResumePdf";
 import ServicesSection from "./ServicesSection";
 import Experience from "./Experience";
 import Education from "./Education";
@@ -142,6 +143,7 @@ const ResumePage = ({
           <HeroSection
             personalInfo={resume.personalInfo}
             stats={resume.stats}
+            onDownloadCv={() => downloadResumePdf(resume)}
           />
         ),
       })}
