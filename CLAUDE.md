@@ -20,10 +20,10 @@ Required env vars (`.env.local`): `AUTH_SECRET`, `RESUME_OWNER_PASSWORD`, `NEXTA
 
 Next.js 14 App Router resume site with two faces built from one dataset:\
 
-- **Public view** — `app/cv/page.tsx` renders `MainView` → `ResumePage`, which reads resume content from `data/resume.ts` (seeded into Redux on mount via `useResumeOperations().loadResume`, with `data/resume.ts` as the fallback if the store is empty).
+- **Public view** — `app/page.tsx` (route `/`) renders `MainView` → `ResumePage`, which reads resume content from `data/resume.ts` (seeded into Redux on mount via `useResumeOperations().loadResume`, with `data/resume.ts` as the fallback if the store is empty).
 - **Private editor** — `app/secret/page.tsx` renders `SecretResumeEditor`, gated by `middleware.ts` (matches `/secret/:path*`) which checks a NextAuth JWT and redirects to `/secret/login` if absent, preserving the original path in a `?next=` param.
 
-Note: there is currently no `app/page.tsx` (no route for bare `/`) — `/cv` is effectively the resume home page in this branch's state.
+The old `/cv` URL permanently redirects to `/` (see `next.config.js`).
 
 ### Data flow
 

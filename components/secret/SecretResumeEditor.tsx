@@ -255,6 +255,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   // Use the resume editor hook for all draft management
   const { draft, hasDraft, setDraft, hasChanges } = useResumeEditor();
@@ -291,10 +292,29 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
   };
   // TODO: We need to create a handler for holding the new value and default value
 
-  // TODO: This will save on the session Storage
-  const handleSaveDraft = () => {
-    mainDispatch(markAsSaved());
-    setNotice("Draft saved.");
+  // Publishes the draft by committing data/resume.json to GitHub (see app/api/resume/route.ts)
+  const handleSaveDraft = async () => {
+    if (!draft) return;
+    setIsPublishing(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/resume", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(draft),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error ?? `Request failed (${res.status})`);
+      }
+      mainDispatch(markAsSaved());
+      setNotice("Published! Your live resume will update in about 1 minute.");
+    } catch (publishError) {
+      console.error(publishError);
+      setError("Publish failed. Your draft is still saved locally — please try again.");
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   const handleDiscardChangesClick = () => {
@@ -332,7 +352,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     setSelectedPreviewSection(null);
     setSelectedInlineFieldId(null);
 
-    router.replace("/cv");
+    router.replace("/");
     router.refresh();
   };
 
@@ -4670,9 +4690,10 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
                   variant="contained"
                   startIcon={<SaveOutlinedIcon />}
                   onClick={handleSaveDraft}
+                  disabled={isPublishing}
                   sx={{ textTransform: "none", fontWeight: 700 }}
                 >
-                  Save draft
+                  {isPublishing ? "Publishing..." : "Publish"}
                 </Button>
                 <Button
                   variant="outlined"
