@@ -8,7 +8,14 @@
     "photoUrl": "https://i.pinimg.com/736x/21/8b/fa/218bfa98ae6f59f19eecf4791a2f8730.jpg",
     "backgroundUrl": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&h=600&fit=crop",
     "summary": "Seeking a position as software developer to apply my knowledge and experience in my field of specialization, where I can utilize my technical skill and dedication to learn new technologies",
-    "dateOfBirth": "March 22, 1995"
+    "dateOfBirth": "March 22, 1995",
+    "social": [
+      {
+        "label": "Facebook",
+        "url": "https://facebook.com/UnknownZxS",
+        "icon": "facebook"
+      }
+    ]
   },
   "socialMedia": [
     {
@@ -38,8 +45,6 @@
     "clients": 15,
     "awards": 0
   },
-  "experienceBadge": "Experience",
-  "experienceTitle": "Professional Experience",
   "experience": [
     {
       "id": 1,
@@ -102,8 +107,6 @@
       ]
     }
   ],
-  "educationBadge": "Education",
-  "educationTitle": "Education",
   "education": [
     {
       "id": 1,
@@ -122,18 +125,6 @@
       "location": "C.P Garcia Ave, Dilima, Quezon City, 1101 Metro Manila"
     }
   ],
-  "skillsBadge": "Skills",
-  "skillsTitle": "Professional Skills",
-  "skillsSubtitle": "Expertise across technologies and platforms",
-  "certificationsBadge": "Certifications",
-  "certificationsTitle": "Certifications",
-  "testimonialsBadge": "Testimonials",
-  "testimonialsTitle": "What People Say",
-  "characterReferencesBadge": "Character References",
-  "characterReferencesTitle": "People Who Vouch For Me",
-  "contactBadge": "Contact Info",
-  "contactTitle": "Get In Touch",
-  "contactSubtitle": "Reach out for collaboration, consulting, or product work. If you have a project in mind, send the details through the inquiry form and I can get back to you with the best next step.",
   "skills": [
     {
       "category": "Technical Skills",
@@ -181,9 +172,6 @@
       ]
     }
   ],
-  "servicesBadge": "Services",
-  "servicesTitle": "What I Offer",
-  "servicesSubtitle": "Professional services tailored to your project needs",
   "services": [
     {
       "id": 1,
@@ -254,59 +242,6 @@
       "year": "2018"
     }
   ],
-  "testimonials": [
-    {
-      "id": 1,
-      "quote": "One of the most reliable engineers I've worked with — turned a messy legacy Salesforce setup into something the whole team could actually build on.",
-      "authorName": "Maria Santos",
-      "authorRole": "Engineering Manager",
-      "authorCompany": "Acme Corp",
-      "photoUrl": ""
-    },
-    {
-      "id": 2,
-      "quote": "Delivered our backend migration ahead of schedule and took the time to document everything for the rest of the team. Would work with again in a heartbeat.",
-      "authorName": "James Cooper",
-      "authorRole": "CTO",
-      "authorCompany": "Northwind Solutions",
-      "photoUrl": ""
-    },
-    {
-      "id": 3,
-      "quote": "Great communicator and problem solver. Consistently found the simplest fix instead of the flashiest one, which saved us a lot of headaches later.",
-      "authorName": "Priya Nair",
-      "authorRole": "Product Lead",
-      "authorCompany": "",
-      "photoUrl": ""
-    }
-  ],
-  "characterReferences": [
-    {
-      "id": 1,
-      "name": "Mr. Kayle Bernard Sicat",
-      "company": "Tenerity",
-      "position": "Lead Developer",
-      "contactNo": "09913987279"
-    },
-    {
-      "id": 2,
-      "name": "Ms. Princess Espiel",
-      "company": "Vertere Global Solutions",
-      "position": "Programmer Analyst IV",
-      "contactNo": "09989599310"
-    },
-    {
-      "id": 3,
-      "name": "Mr. Jerome John Tactac",
-      "company": "HCL Technologies",
-      "position": "Sr. Software Engineer I",
-      "contactNo": "09453459717"
-    }
-  ],
-  "declaration": "I hereby attest that the above information are true and correct at the best of my knowledge",
-  "projectsBadge": "Projects",
-  "projectsTitle": "Recent Projects",
-  "projectsSubtitle": "Latest work and technical achievements",
   "projects": [
     {
       "id": 1,
@@ -354,9 +289,6 @@
       "caseStudy": "Created responsive React application with TypeScript, improving user experience and reducing page load time by 45%."
     }
   ],
-  "portfolioBadge": "Portfolio",
-  "portfolioTitle": "Featured Work",
-  "portfolioSubtitle": "Explore my best projects and case studies. Each project showcases strategic problem-solving and technical excellence.",
   "portfolio": [
     {
       "id": 1,
@@ -429,5 +361,80 @@
       "testimonial": "Beautiful and performant React application. Great attention to detail.",
       "client": "Digital Ventures"
     }
-  ]
+  ],
+  "testimonials": [
+    {
+      "id": 1,
+      "quote": "One of the most reliable engineers I've worked with — turned a messy legacy Salesforce setup into something the whole team could actually build on.",
+      "authorName": "Maria Santos",
+      "authorRole": "Engineering Manager",
+      "authorCompany": "Acme Corp",
+      "photoUrl": ""
+    },
+    {
+      "id": 2,
+      "quote": "Delivered our backend migration ahead of schedule and took the time to document everything for the rest of the team. Would work with again in a heartbeat.",
+      "authorName": "James Cooper",
+      "authorRole": "CTO",
+      "authorCompany": "Northwind Solutions",
+      "photoUrl": ""
+    },
+    {
+      "id": 3,
+      "quote": "Great communicator and problem solver. Consistently found the simplest fix instead of the flashiest one, which saved us a lot of headaches later.",
+      "authorName": "Priya Nair",
+      "authorRole": "Product Lead",
+      "authorCompany": "",
+      "photoUrl": ""
+    }
+  ],
+  "characterReferences": [
+    {
+      "id": 1,
+      "name": "Mr. Kayle Bernard Sicat",
+      "company": "Tenerity",
+      "position": "Lead Developer",
+      "contactNo": "09913987279"
+    },
+    {
+      "id": 2,
+      "name": "Ms. Princess Espiel",
+      "company": "Vertere Global Solutions",
+      "position": "Programmer Analyst IV",
+      "contactNo": "09989599310"
+    },
+    {
+      "id": 3,
+      "name": "Mr. Jerome John Tactac",
+      "company": "HCL Technologies",
+      "position": "Sr. Software Engineer I",
+      "contactNo": "09453459717"
+    }
+  ],
+  "declaration": "I hereby attest that the above information are true and correct at the best of my knowledge",
+  "servicesBadge": "Services",
+  "servicesTitle": "What I Offer",
+  "servicesSubtitle": "Professional services tailored to your project needs",
+  "experienceBadge": "Experience",
+  "experienceTitle": "Professional Experience",
+  "portfolioBadge": "Portfolio",
+  "portfolioTitle": "Featured Work",
+  "portfolioSubtitle": "Explore my best projects and case studies. Each project showcases strategic problem-solving and technical excellence.",
+  "projectsBadge": "Projects",
+  "projectsTitle": "Recent Projects",
+  "projectsSubtitle": "Latest work and technical achievements",
+  "educationBadge": "Education",
+  "educationTitle": "Education",
+  "skillsBadge": "Skills",
+  "skillsTitle": "Professional Skills",
+  "skillsSubtitle": "Expertise across technologies and platforms",
+  "certificationsBadge": "Certifications",
+  "certificationsTitle": "Certifications",
+  "testimonialsBadge": "Testimonials",
+  "testimonialsTitle": "What People Say",
+  "characterReferencesBadge": "Character References",
+  "characterReferencesTitle": "People Who Vouch For Me",
+  "contactBadge": "Contact Info",
+  "contactTitle": "Get In Touch",
+  "contactSubtitle": "Reach out for collaboration, consulting, or product work. If you have a project in mind, send the details through the inquiry form and I can get back to you with the best next step."
 }
