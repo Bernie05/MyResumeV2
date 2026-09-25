@@ -67,6 +67,14 @@ const Certifications = ({
     onInlineFieldClick,
   });
 
+  // A newly added certification has empty fields, which render with no size and
+  // can't be clicked. In the editor, show a faded placeholder instead.
+  const isEditable = Boolean(onInlineFieldClick);
+  const placeholderSx = { fontStyle: "italic", opacity: 0.55 };
+  const withPlaceholder = (value: string, placeholder: string) =>
+    value.trim() || !isEditable ? value : placeholder;
+  const isPlaceholder = (value: string) => isEditable && !value.trim();
+
   return (
     <Box
       sx={{
@@ -185,11 +193,12 @@ const Certifications = ({
                       fontWeight: "bold",
                       color: titleColor,
                       mb: 0.5,
+                      ...(isPlaceholder(cert.name) && placeholderSx),
                       ...getInlineFieldSx(`certifications.${index}.name`),
                     }}
                     {...createInlineFieldProps(`certifications.${index}.name`)}
                   >
-                    {cert.name}
+                    {withPlaceholder(cert.name, "Certification name")}
                   </Typography>
 
                   <Typography
@@ -197,24 +206,26 @@ const Certifications = ({
                     sx={{
                       color: mutedColor,
                       mb: 1,
+                      ...(isPlaceholder(cert.issuer) && placeholderSx),
                       ...getInlineFieldSx(`certifications.${index}.issuer`),
                     }}
                     {...createInlineFieldProps(
                       `certifications.${index}.issuer`,
                     )}
                   >
-                    {cert.issuer}
+                    {withPlaceholder(cert.issuer, "Issuing school or organization")}
                   </Typography>
 
                   {/* Year Chip */}
                   <Chip
-                    label={cert.year}
+                    label={withPlaceholder(cert.year, "Year")}
                     size="small"
                     sx={{
                       background: softBackground,
                       color: primaryAccent,
                       fontWeight: "600",
                       fontSize: "0.875rem",
+                      ...(isPlaceholder(cert.year) && placeholderSx),
                       ...getInlineFieldSx(`certifications.${index}.year`),
                     }}
                     {...createInlineFieldProps(`certifications.${index}.year`)}
