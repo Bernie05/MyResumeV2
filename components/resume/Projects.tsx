@@ -72,14 +72,14 @@ const Projects = ({
   return (
     <Box
       sx={{
-        p: { xs: 3, md: 4.5 },
+        p: { xs: 2, sm: 3, md: 4.5 },
         borderRadius: { xs: 4, md: 5 },
         background: sectionBackground,
         border: `1px solid ${outline}`,
       }}
     >
       {/* Section Header */}
-      <Box sx={{ mb: 8 }}>
+      <Box sx={{ mb: { xs: 4, md: 8 } }}>
         {/* Badge */}
         <Box
           sx={{
@@ -106,7 +106,7 @@ const Projects = ({
           variant="h3"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: "2rem", md: "2.5rem" },
+            fontSize: { xs: "1.625rem", sm: "2rem", md: "2.5rem" },
             color: titleColor,
             mb: 2,
             ...getInlineFieldSx("projectsTitle"),
@@ -120,7 +120,7 @@ const Projects = ({
         <Typography
           variant="h6"
           sx={{
-            fontSize: "1.125rem",
+            fontSize: { xs: "1rem", md: "1.125rem" },
             color: mutedColor,
             fontWeight: 400,
             ...getInlineFieldSx("projectsSubtitle"),

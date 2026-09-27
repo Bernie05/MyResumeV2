@@ -71,14 +71,14 @@ const Education = ({
   return (
     <Box
       sx={{
-        p: { xs: 3, md: 4.5 },
+        p: { xs: 2, sm: 3, md: 4.5 },
         borderRadius: { xs: 4, md: 5 },
         background: sectionBackground,
         border: `1px solid ${outline}`,
       }}
     >
       {/* Section Header */}
-      <Box sx={{ mb: 5 }}>
+      <Box sx={{ mb: { xs: 3, md: 5 } }}>
         <Box
           sx={{
             display: "inline-flex",
@@ -104,7 +104,7 @@ const Education = ({
           variant="h3"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: "2rem", md: "2.5rem" },
+            fontSize: { xs: "1.625rem", sm: "2rem", md: "2.5rem" },
             color: titleColor,
             ...getInlineFieldSx("educationTitle"),
           }}
@@ -162,7 +162,7 @@ const Education = ({
                 </IconButton>
               )}
               {/* Education Details */}
-              <CardContent sx={{ p: 4 }}>
+              <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
                 <Box
                   sx={{
                     display: "flex",
@@ -180,7 +180,7 @@ const Education = ({
                         variant="h5"
                         sx={{
                           fontWeight: 700,
-                          fontSize: "1.5rem",
+                          fontSize: { xs: "1.2rem", sm: "1.35rem", md: "1.5rem" },
                           color: edu.school ? titleColor : mutedColor,
                           mb: 1,
                           ...getInlineFieldSx(`education.${index}.school`),
@@ -195,7 +195,7 @@ const Education = ({
                         variant="h6"
                         sx={{
                           fontWeight: 600,
-                          fontSize: "1.125rem",
+                          fontSize: { xs: "1rem", md: "1.125rem" },
                           color: primaryAccent,
                           ...getInlineFieldSx(`education.${index}.degree`),
                         }}

@@ -154,7 +154,12 @@ export const ProjectCardComponent = ({
 
       {/* Content */}
       <CardContent
-        sx={{ p: 3, flexGrow: 1, display: "flex", flexDirection: "column" }}
+        sx={{
+          p: { xs: 2, sm: 3 },
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
         {(item.category || isEditMode) && (
           <Chip

@@ -153,7 +153,7 @@ const ResumePage = ({
         sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, sm: 3, lg: 4 } }}
       >
         {/* Section Stack */}
-        <Stack spacing={{ xs: 10, md: 14 }}>
+        <Stack spacing={{ xs: 6, sm: 8, md: 14 }}>
           {renderSection({
             sectionId: "services",
             children: (
@@ -302,8 +302,8 @@ const ResumePage = ({
             id="footer"
             sx={{
               textAlign: "center",
-              py: 8,
-              mt: 10,
+              py: { xs: 5, md: 8 },
+              mt: { xs: 4, md: 10 },
               borderTop: "1px solid",
               borderColor: footerBorderColor,
             }}

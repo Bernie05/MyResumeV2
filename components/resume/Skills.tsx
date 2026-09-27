@@ -238,14 +238,14 @@ const Skills = ({
     <Box
       ref={sectionRef}
       sx={{
-        p: { xs: 3, md: 4.5 },
+        p: { xs: 2, sm: 3, md: 4.5 },
         borderRadius: { xs: 4, md: 5 },
         background: sectionBackground,
         border: `1px solid ${outline}`,
       }}
     >
       {/* Section Badge */}
-      <Box sx={{ mb: 8 }}>
+      <Box sx={{ mb: { xs: 4, md: 8 } }}>
         <Box
           sx={{
             display: "inline-flex",
@@ -271,7 +271,7 @@ const Skills = ({
           variant="h3"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: "2rem", md: "2.5rem" },
+            fontSize: { xs: "1.625rem", sm: "2rem", md: "2.5rem" },
             color: titleColor,
             mb: 2,
             ...getInlineFieldSx("skillsTitle"),
@@ -287,7 +287,7 @@ const Skills = ({
           sx={{
             color: mutedColor,
             fontWeight: 400,
-            fontSize: "1.125rem",
+            fontSize: { xs: "1rem", md: "1.125rem" },
             ...getInlineFieldSx("skillsSubtitle"),
           }}
           {...createInlineFieldProps("skillsSubtitle")}
@@ -297,7 +297,9 @@ const Skills = ({
       </Box>
 
       {/* Skill Groups */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <Box
+        sx={{ display: "flex", flexDirection: "column", gap: { xs: 6, md: 10 } }}
+      >
         {skills.map((skillGroup, categoryIndex) => {
           const categoryColor = getCategoryColor(
             skillGroup.category,
@@ -312,7 +314,7 @@ const Skills = ({
                   display: "flex",
                   alignItems: "center",
                   gap: 2,
-                  mb: 5,
+                  mb: { xs: 3, md: 5 },
                   pb: 2,
                   borderBottom: `2px solid ${divider}`,
                 }}
@@ -326,7 +328,7 @@ const Skills = ({
                 <Typography
                   variant="h5"
                   sx={{
-                    fontSize: { xs: "1.5rem", md: "1.875rem" },
+                    fontSize: { xs: "1.25rem", sm: "1.5rem", md: "1.875rem" },
                     fontWeight: 700,
                     color: categoryColor,
                     flexGrow: 1,
@@ -443,8 +445,16 @@ const Skills = ({
                       )}
 
                       {/* Skill Content */}
-                      <CardContent sx={{ p: 3, height: "100%" }}>
-                        <Box sx={{ display: "flex", gap: 3, height: "100%" }}>
+                      <CardContent
+                        sx={{ p: { xs: 2, sm: 3 }, height: "100%" }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: { xs: 2, sm: 3 },
+                            height: "100%",
+                          }}
+                        >
                           <Box
                             sx={{
                               display: "flex",
@@ -516,7 +526,7 @@ const Skills = ({
                           </Box>
 
                           {/* Skill Name */}
-                          <Box sx={{ flex: 1 }}>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
                             <Box
                               sx={{
                                 display: "flex",

@@ -78,7 +78,7 @@ const Certifications = ({
   return (
     <Box
       sx={{
-        p: { xs: 3, md: 4.5 },
+        p: { xs: 2, sm: 3, md: 4.5 },
         borderRadius: { xs: 4, md: 5 },
         background: sectionBackground,
         border: `1px solid ${outline}`,
@@ -111,7 +111,7 @@ const Certifications = ({
           sx={{
             fontWeight: "bold",
             color: titleColor,
-            fontSize: { xs: "1.875rem", md: "2.25rem" },
+            fontSize: { xs: "1.5rem", sm: "1.875rem", md: "2.25rem" },
             ...getInlineFieldSx("certificationsTitle"),
           }}
           {...createInlineFieldProps("certificationsTitle")}
@@ -174,7 +174,7 @@ const Certifications = ({
               </IconButton>
             )}
             {/* Content */}
-            <CardContent sx={{ p: 3 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
               <Box sx={{ display: "flex", gap: 2 }}>
                 {/* Icon */}
                 <SchoolIcon
