@@ -81,9 +81,9 @@ const Navbar = ({ isAuthenticated, position }: INavbarProps) => {
             href="#"
             sx={{
               textDecoration: "none",
-              fontSize: "1.25rem",
+              fontSize: { xs: "1rem", sm: "1.25rem" },
               fontWeight: 800,
-              letterSpacing: "0.14em",
+              letterSpacing: { xs: "0.08em", sm: "0.14em" },
               color: "inherit",
             }}
           >

@@ -70,7 +70,7 @@ const Testimonials = ({
   return (
     <Box
       sx={{
-        p: { xs: 3, md: 4.5 },
+        p: { xs: 2, sm: 3, md: 4.5 },
         borderRadius: { xs: 4, md: 5 },
         background: sectionBackground,
         border: `1px solid ${outline}`,
@@ -103,7 +103,7 @@ const Testimonials = ({
           sx={{
             fontWeight: "bold",
             color: titleColor,
-            fontSize: { xs: "1.875rem", md: "2.25rem" },
+            fontSize: { xs: "1.5rem", sm: "1.875rem", md: "2.25rem" },
             ...getInlineFieldSx("testimonialsTitle"),
           }}
           {...createInlineFieldProps("testimonialsTitle")}
@@ -162,7 +162,7 @@ const Testimonials = ({
                 <DeleteOutlineIcon fontSize="small" />
               </IconButton>
             )}
-            <CardContent sx={{ p: 3 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
               <FormatQuoteIcon
                 sx={{
                   fontSize: "2.25rem",

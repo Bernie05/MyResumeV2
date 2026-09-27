@@ -146,12 +146,18 @@ export const SocialMediaBtn = ({
 
   // Render the SocialMediaBtn component, which is a grid of social media buttons. Each button can be either a clickable link or an editable field, depending on the presence of the onInlineFieldClick callback. The component also provides an option to add new social links if the onAddAction callback is available. The appearance of the buttons is styled based on the current theme (dark or light mode).
   return (
+    // Flex-wrap (not a fixed-column grid) so any number of icons stays
+    // centered, and rows wrap on narrow screens instead of overflowing.
+    // maxWidth = maxPerRow × 52px icons + (maxPerRow − 1) × 12px gaps.
     <Box
       sx={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${maxPerRow}, 52px)`,
-        gap: 1.5,
+        display: "flex",
+        flexWrap: "wrap",
         justifyContent: "center",
+        gap: 1.5,
+        width: "100%",
+        maxWidth: maxPerRow * 52 + (maxPerRow - 1) * 12,
+        mx: "auto",
       }}
     >
       {renderedLinks}

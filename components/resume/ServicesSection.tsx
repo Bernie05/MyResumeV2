@@ -225,15 +225,14 @@ const ServicesSection = ({
   return (
     <Box
       sx={{
-        mb: 8,
-        p: { xs: 3, md: 4.5 },
+        p: { xs: 2, sm: 3, md: 4.5 },
         borderRadius: { xs: 4, md: 5 },
         background: sectionBackground,
         border: `1px solid ${outline}`,
       }}
     >
       {/* Section Header */}
-      <Box sx={{ mb: 6 }}>
+      <Box sx={{ mb: { xs: 4, md: 6 } }}>
         {/* Section Badge */}
         <Box
           sx={{
@@ -263,7 +262,7 @@ const ServicesSection = ({
           targetFieldId="servicesTitle"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: "2rem", md: "2.5rem" },
+            fontSize: { xs: "1.625rem", sm: "2rem", md: "2.5rem" },
             color: titleColor,
             mb: 2,
           }}
@@ -276,6 +275,7 @@ const ServicesSection = ({
           variant="h6"
           targetSectionId="services"
           targetFieldId="servicesSubtitle"
+          sx={{ fontSize: { xs: "1rem", md: "1.25rem" } }}
         >
           {servicesSubtitle ||
             "Professional services tailored to your project needs"}
@@ -341,7 +341,7 @@ const ServicesSection = ({
               </IconButton>
             )}
             {/* Service Content */}
-            <CardContent sx={{ p: 4 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
               {/* Header with Icon */}
               <Box
                 sx={{
@@ -393,7 +393,7 @@ const ServicesSection = ({
                     variant="h5"
                     sx={{
                       fontWeight: 700,
-                      fontSize: "1.5rem",
+                      fontSize: { xs: "1.2rem", sm: "1.35rem", md: "1.5rem" },
                       color: titleColor,
                       ...getInlineFieldSx(`services.${cardIndex}.title`),
                     }}

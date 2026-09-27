@@ -47,14 +47,14 @@ const Portfolio = ({
   return (
     <Box
       sx={{
-        p: { xs: 3, md: 4.5 },
+        p: { xs: 2, sm: 3, md: 4.5 },
         borderRadius: { xs: 4, md: 5 },
         background: sectionBackground,
         border: `1px solid ${outline}`,
       }}
     >
       {/* Section Header */}
-      <Box sx={{ mb: 8 }}>
+      <Box sx={{ mb: { xs: 4, md: 8 } }}>
         <Box
           sx={{
             display: "inline-flex",
@@ -78,7 +78,7 @@ const Portfolio = ({
           variant="h3"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: "2rem", md: "2.5rem", lg: "3rem" },
+            fontSize: { xs: "1.625rem", sm: "2rem", md: "2.5rem", lg: "3rem" },
             color: titleColor,
             mb: 2,
             ...getInlineFieldSx("portfolioTitle"),
@@ -91,7 +91,7 @@ const Portfolio = ({
           variant="h6"
           sx={{
             maxWidth: "42rem",
-            fontSize: "1.125rem",
+            fontSize: { xs: "1rem", md: "1.125rem" },
             color: mutedColor,
             fontWeight: 400,
             ...getInlineFieldSx("portfolioSubtitle"),

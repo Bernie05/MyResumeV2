@@ -138,14 +138,14 @@ export const ContactSection = ({
   return (
     <Box
       sx={{
-        p: { xs: 3, md: 4.5 },
+        p: { xs: 2, sm: 3, md: 4.5 },
         borderRadius: { xs: 4, md: 5 },
         background: sectionBackground,
         border: `1px solid ${outline}`,
       }}
     >
       {/* Contact Badge */}
-      <Box sx={{ mb: 5 }}>
+      <Box sx={{ mb: { xs: 3, md: 5 } }}>
         <Box
           sx={{
             display: "inline-flex",
@@ -171,7 +171,7 @@ export const ContactSection = ({
           variant="h3"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: "2rem", md: "2.5rem" },
+            fontSize: { xs: "1.625rem", sm: "2rem", md: "2.5rem" },
             color: titleColor,
             ...getInlineFieldSx("contactTitle"),
           }}
@@ -224,7 +224,11 @@ export const ContactSection = ({
           <Stack spacing={1.25}>
             <Typography
               variant="h5"
-              sx={{ color: titleColor, fontWeight: 800 }}
+              sx={{
+                color: titleColor,
+                fontWeight: 800,
+                fontSize: { xs: "1.25rem", md: "1.5rem" },
+              }}
             >
               Let&apos;s talk about your next build
             </Typography>
@@ -373,7 +377,12 @@ export const ContactSection = ({
             <Box sx={{ pb: 2, borderBottom: `1px solid ${divider}` }}>
               <Typography
                 variant="h5"
-                sx={{ color: titleColor, fontWeight: 800, mb: 0.75 }}
+                sx={{
+                  color: titleColor,
+                  fontWeight: 800,
+                  mb: 0.75,
+                  fontSize: { xs: "1.25rem", md: "1.5rem" },
+                }}
               >
                 Inquiry Form
               </Typography>

@@ -235,8 +235,9 @@ const HeroSection = ({ personalInfo, stats, onDownloadCv }: HeroSectionProps) =>
                 component="h1"
                 fontWeight="800"
                 letterSpacing="-0.04em"
-                fontSize={{ xs: "2.75rem", sm: "4rem", md: "5.25rem" }}
-                lineHeight="0.96"
+                fontSize={{ xs: "2.1rem", sm: "3.5rem", md: "5.25rem" }}
+                lineHeight={{ xs: 1.05, md: 0.96 }}
+                sx={{ overflowWrap: "anywhere" }}
               >
                 {personalInfo.name}
               </CustomTypography>
@@ -246,9 +247,9 @@ const HeroSection = ({ personalInfo, stats, onDownloadCv }: HeroSectionProps) =>
                 targetSectionId="about"
                 targetFieldId="personalInfo.title"
                 fontWeight="700"
-                letterSpacing="0.24em"
+                letterSpacing={{ xs: "0.12em", sm: "0.18em", md: "0.24em" }}
                 textTransform="uppercase"
-                fontSize={{ xs: "0.8rem", md: "0.95rem" }}
+                fontSize={{ xs: "0.72rem", sm: "0.85rem", md: "0.95rem" }}
               >
                 {personalInfo.title}
               </CustomTypography>
@@ -260,9 +261,9 @@ const HeroSection = ({ personalInfo, stats, onDownloadCv }: HeroSectionProps) =>
                   targetFieldId="personalInfo.summary"
                   color="common.white"
                   fontWeight="700"
-                  letterSpacing="0.24em"
+                  letterSpacing={{ xs: "0.12em", sm: "0.18em", md: "0.24em" }}
                   textTransform="uppercase"
-                  fontSize={{ xs: "0.8rem", md: "0.95rem" }}
+                  fontSize={{ xs: "0.72rem", sm: "0.85rem", md: "0.95rem" }}
                 >
                   {personalInfo.summary}
                 </CustomTypography>
