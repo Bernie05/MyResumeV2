@@ -14,7 +14,7 @@ npm run type-check   # tsc --noEmit
 
 There is no test runner configured (no `test`/`format` scripts) — don't invoke `npm test`. Verify changes with `npm run type-check` and `npm run lint`, and by running the dev server for UI changes.
 
-Required env vars (`.env.local`): `AUTH_SECRET`, `RESUME_OWNER_PASSWORD`, `NEXTAUTH_URL`. See `README.md` for setup, local run, and Vercel deployment instructions.
+Required env vars (`.env.local`): `AUTH_SECRET`, `RESUME_OWNER_PASSWORD`, `NEXTAUTH_URL`; `RESEND_API_KEY` + `INQUIRY_TO_EMAIL` for the contact form (`app/api/inquiry/route.ts`). See `README.md` for setup, local run, and Vercel deployment instructions.
 
 ## Architecture
 
