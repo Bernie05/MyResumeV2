@@ -316,6 +316,39 @@
   "projectsSubtitle": "Latest work and technical achievements",
   "projects": [
     {
+      "id": 4,
+      "name": "TodoPro",
+      "description": "A smart task planner with a live dashboard (completion and day streaks), quick-add and detailed task forms, and daily/weekly recurring habits. Tasks auto-flag as active or overdue as time passes, and start-time reminders fire as in-app dialogs or browser notifications with snooze.",
+      "technologies": [
+        "React 19",
+        "TypeScript",
+        "Material UI",
+        "Vite",
+        "Vitest"
+      ],
+      "link": "https://github.com/Bernie05/TodoPro",
+      "image": "/projects/todopro.jpg",
+      "demoUrl": "",
+      "caseStudy": "Built a to-do app around a pure, unit-tested core: local-date helpers, task-status calculation and recurrence expansion live in framework-free utilities, while a reducer + React context handles state with localStorage persistence. A ticking clock hook drives live active/overdue status and start-time reminders, and the MUI theme follows the system light/dark preference with a manual toggle."
+    },
+    {
+      "id": 5,
+      "name": "MyCatBlog",
+      "description": "A full CRUD blog for cat lovers: write, edit and delete stories with photos, react to posts, save favorites, and search or filter by tag. Includes a photo/video gallery with a full-screen viewer, a live \"Cat Fact of the Day\" from a public API, reading-time estimates and a light/dark theme.",
+      "technologies": [
+        "React",
+        "TypeScript",
+        "Redux Toolkit",
+        "Material UI",
+        "React Router",
+        "JSON Server"
+      ],
+      "link": "https://github.com/Bernie05/MyCatBlog",
+      "image": "/projects/mycatblog.jpg",
+      "demoUrl": "",
+      "caseStudy": "Modeled posts with a Redux Toolkit entity adapter and async thunks for GET/POST/PUT/DELETE against a JSON Server REST API. Uploaded photos are resized client-side on a canvas to compact JPEG data URLs (multi-MB phone photos down to ~100-300 KB) since the mock API has no file storage. Favorites and theme preference persist in localStorage, and every list has dedicated loading, empty and error states."
+    },
+    {
       "id": 1,
       "name": "Salesforce Custom Solutions",
       "description": "Enterprise Salesforce configurations and integrations",
