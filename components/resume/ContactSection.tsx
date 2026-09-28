@@ -9,13 +9,17 @@ import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import LanguageIcon from "@mui/icons-material/Language";
+import React, { useState } from "react";
 import {
+  Alert,
   Button,
+  CircularProgress,
   IconButton,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
+import type { InquiryPayload } from "@/app/api/inquiry/route";
 import Box from "@mui/material/Box/Box";
 import { getSectionPalette, IThemePalette } from "@/theme/sectionPalette";
 import { useThemeContext } from "@/context/ThemeContext";
@@ -36,6 +40,20 @@ interface SocialLinkItem {
   label: string;
   fieldId: InlineEditableFieldId;
 }
+
+type InquiryStatus =
+  | { state: "idle" | "sending" | "sent" }
+  | { state: "error"; message: string };
+
+const EMPTY_INQUIRY: Required<InquiryPayload> = {
+  name: "",
+  email: "",
+  company: "",
+  phone: "",
+  subject: "",
+  message: "",
+  website: "",
+};
 
 interface ContactSectionProps {
   personalInfo: PersonalInfo;
@@ -134,6 +152,42 @@ export const ContactSection = ({
     activeInlineFieldId,
     onInlineFieldClick,
   });
+
+  const [inquiry, setInquiry] = useState(EMPTY_INQUIRY);
+  const [status, setStatus] = useState<InquiryStatus>({ state: "idle" });
+  const isSending = status.state === "sending";
+
+  // Binds a text field to its inquiry key
+  const inquiryField = (key: keyof InquiryPayload) => ({
+    value: inquiry[key],
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) =>
+      setInquiry((prev) => ({ ...prev, [key]: event.target.value })),
+    disabled: isSending,
+  });
+
+  const handleInquirySubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setStatus({ state: "sending" });
+    try {
+      const res = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(inquiry),
+      });
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: "" }));
+        throw new Error(error || "Could not send your inquiry.");
+      }
+      setInquiry(EMPTY_INQUIRY);
+      setStatus({ state: "sent" });
+    } catch (error) {
+      setStatus({
+        state: "error",
+        message:
+          error instanceof Error ? error.message : "Could not send your inquiry.",
+      });
+    }
+  };
 
   return (
     <Box
@@ -373,7 +427,11 @@ export const ContactSection = ({
             border: `1px solid ${divider}`,
           }}
         >
-          <Stack spacing={2.5}>
+          <Stack
+            component="form"
+            spacing={2.5}
+            onSubmit={handleInquirySubmit}
+          >
             <Box sx={{ pb: 2, borderBottom: `1px solid ${divider}` }}>
               <Typography
                 variant="h5"
@@ -387,37 +445,88 @@ export const ContactSection = ({
                 Inquiry Form
               </Typography>
               <Typography sx={{ color: bodyColor }}>
-                Send your details and a short message. This gives you a
-                structured place to collect inquiries before wiring it to an API
-                or email handler.
+                Send your details and a short message, and I&apos;ll reply by
+                email.
               </Typography>
             </Box>
 
+            {/* Honeypot: off-screen and skipped by keyboard/screen readers */}
+            <Box
+              component="input"
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              {...inquiryField("website")}
+              sx={{ position: "absolute", left: "-9999px", opacity: 0 }}
+            />
+
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-              <TextField label="Full name" fullWidth variant="outlined" />
+              <TextField
+                label="Full name"
+                required
+                fullWidth
+                variant="outlined"
+                autoComplete="name"
+                {...inquiryField("name")}
+              />
               <TextField
                 label="Email address"
                 type="email"
+                required
                 fullWidth
                 variant="outlined"
+                autoComplete="email"
+                {...inquiryField("email")}
               />
             </Stack>
 
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-              <TextField label="Company or team" fullWidth variant="outlined" />
-              <TextField label="Phone number" fullWidth variant="outlined" />
+              <TextField
+                label="Company or team"
+                fullWidth
+                variant="outlined"
+                autoComplete="organization"
+                {...inquiryField("company")}
+              />
+              <TextField
+                label="Phone number"
+                type="tel"
+                fullWidth
+                variant="outlined"
+                autoComplete="tel"
+                {...inquiryField("phone")}
+              />
             </Stack>
 
-            <TextField label="Inquiry subject" fullWidth variant="outlined" />
+            <TextField
+              label="Inquiry subject"
+              fullWidth
+              variant="outlined"
+              {...inquiryField("subject")}
+            />
 
             <TextField
               label="Project details"
+              required
               fullWidth
               multiline
               minRows={6}
               variant="outlined"
               placeholder="Tell me about the work, goals, timeline, and what kind of help you need."
+              {...inquiryField("message")}
             />
+
+            {status.state === "sent" && (
+              <Alert severity="success">
+                Thanks! Your inquiry was sent. I&apos;ll get back to you by
+                email soon.
+              </Alert>
+            )}
+            {status.state === "error" && (
+              <Alert severity="error">{status.message}</Alert>
+            )}
 
             <Box
               sx={{
@@ -426,8 +535,16 @@ export const ContactSection = ({
               }}
             >
               <Button
+                type="submit"
                 variant="contained"
-                endIcon={<SendRoundedIcon />}
+                disabled={isSending}
+                endIcon={
+                  isSending ? (
+                    <CircularProgress size={18} color="inherit" />
+                  ) : (
+                    <SendRoundedIcon />
+                  )
+                }
                 sx={{
                   px: 3,
                   py: 1.25,
@@ -440,7 +557,7 @@ export const ContactSection = ({
                   width: { xs: "100%", sm: "auto" },
                 }}
               >
-                Send inquiry
+                {isSending ? "Sending…" : "Send inquiry"}
               </Button>
             </Box>
           </Stack>

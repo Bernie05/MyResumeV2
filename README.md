@@ -63,6 +63,10 @@ It includes the header/contact info, summary, experience, education, skills, cer
    GITHUB_TOKEN=github_pat_xxxxxxxx
    GITHUB_REPO=your-username/MyResumeV2
    GITHUB_BRANCH=main
+
+   RESEND_API_KEY=re_xxxxxxxx
+   INQUIRY_TO_EMAIL=you@gmail.com
+   # INQUIRY_FROM_EMAIL="Resume Inquiry <inquiry@your-domain.com>"
    ```
 
    - `AUTH_SECRET` — used by NextAuth to sign/encrypt session tokens. Generate one with `openssl rand -base64 32`.
@@ -71,6 +75,9 @@ It includes the header/contact info, summary, experience, education, skills, cer
    - `GITHUB_TOKEN` — the token from step 2. Only used server-side; never prefix it with `NEXT_PUBLIC_`.
    - `GITHUB_REPO` — `owner/repo` that **Publish** commits to.
    - `GITHUB_BRANCH` — the branch Vercel deploys to production (usually `main`). Defaults to `main`.
+   - `RESEND_API_KEY` — API key from [resend.com](https://resend.com) (**API Keys → Create API key**, *Sending access*). Used by the contact form's **Send inquiry** (`/api/inquiry`) to email you. Server-side only.
+   - `INQUIRY_TO_EMAIL` — the inbox inquiries are delivered to (e.g. your Gmail). The visitor's address is set as Reply-To, so you can answer straight from Gmail.
+   - `INQUIRY_FROM_EMAIL` — optional sender. Defaults to Resend's test sender `onboarding@resend.dev`, which can **only deliver to the email you signed up to Resend with** — so sign up with the same address as `INQUIRY_TO_EMAIL`, or verify your own domain in Resend and set this to an address on it.
 
 > **Note:** Publishing from your local dev server commits to the real repo and branch above, and triggers a production redeploy.
 
@@ -105,11 +112,12 @@ The app is a standard Next.js 14 project, so Vercel's zero-config Next.js suppor
 1. Push this repo to GitHub.
 2. Go to [vercel.com/new](https://vercel.com/new) and import the repository.
 3. Vercel auto-detects the Next.js framework — leave the build command (`next build`) and output settings as default.
-4. Under **Environment Variables**, add all six variables from `.env.local`:
+4. Under **Environment Variables**, add the variables from `.env.local`:
    - `AUTH_SECRET`
    - `RESUME_OWNER_PASSWORD`
    - `NEXTAUTH_URL` — set this to your production URL, e.g. `https://your-app.vercel.app` (or your custom domain). Update it again if you later attach a custom domain.
    - `GITHUB_TOKEN`, `GITHUB_REPO`, `GITHUB_BRANCH`
+   - `RESEND_API_KEY`, `INQUIRY_TO_EMAIL` (and `INQUIRY_FROM_EMAIL` if you set it)
 5. Make sure the Vercel **Production Branch** (Settings → Git) matches `GITHUB_BRANCH`, so publishes trigger production deploys.
 6. Click **Deploy**.
 
@@ -131,6 +139,8 @@ vercel env add NEXTAUTH_URL
 vercel env add GITHUB_TOKEN
 vercel env add GITHUB_REPO
 vercel env add GITHUB_BRANCH
+vercel env add RESEND_API_KEY
+vercel env add INQUIRY_TO_EMAIL
 ```
 
 Add them for the `Production`, `Preview`, and `Development` environments as needed — `NEXTAUTH_URL` in particular should differ per environment (preview deploys get a unique `*.vercel.app` URL, so if you rely on it there, set it per-deployment or use `VERCEL_URL`).
@@ -141,6 +151,7 @@ Add them for the `Production`, `Preview`, and `Development` environments as need
 - Confirm **Download CV** downloads a PDF.
 - Confirm `/secret/login` accepts `RESUME_OWNER_PASSWORD` and redirects into `/secret`.
 - Make a small edit, click **Publish**, and check that a new commit appears on GitHub and the live site updates about a minute later.
+- Submit the contact form and check that the inquiry arrives at `INQUIRY_TO_EMAIL` (check Spam the first time).
 
 ## Troubleshooting
 
@@ -149,4 +160,5 @@ Add them for the `Production`, `Preview`, and `Development` environments as need
   - `GitHub storage is not configured` — `GITHUB_TOKEN` or `GITHUB_REPO` is missing.
   - `401` / `403` from GitHub — the token expired, or it lacks **Contents: Read and write** on this repo.
   - `404` from GitHub — `GITHUB_REPO` or `GITHUB_BRANCH` is wrong.
+- **Send inquiry fails** — the server logs the reason with an `[api/inquiry]` prefix. `Inquiry email is not configured` means `RESEND_API_KEY` or `INQUIRY_TO_EMAIL` is missing; a Resend `403` usually means you're using the test sender with a `INQUIRY_TO_EMAIL` other than your Resend sign-up address (see `INQUIRY_FROM_EMAIL` above).
 - **Published but the site didn't change** — check that Vercel's production branch matches `GITHUB_BRANCH`, and that the deploy finished in the Vercel dashboard.
