@@ -469,5 +469,6 @@
   "characterReferencesTitle": "People Who Vouch For Me",
   "contactBadge": "Contact Info",
   "contactTitle": "Get In Touch",
-  "contactSubtitle": "Reach out for collaboration, consulting, or product work. If you have a project in mind, send the details through the inquiry form and I can get back to you with the best next step."
+  "contactSubtitle": "Reach out for collaboration, consulting, or product work. If you have a project in mind, send the details through the inquiry form and I can get back to you with the best next step.",
+  "template": "showcase"
 }
