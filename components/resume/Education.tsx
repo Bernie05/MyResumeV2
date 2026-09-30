@@ -104,7 +104,7 @@ const Education = ({
           variant="h3"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: "1.625rem", sm: "2rem", md: "2.5rem" },
+            fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2.125rem" },
             color: titleColor,
             ...getInlineFieldSx("educationTitle"),
           }}
@@ -122,7 +122,7 @@ const Education = ({
                 background: surfaceBackground,
                 border: `1px solid ${outline}`,
                 borderLeft: `4px solid ${primaryAccent}`,
-                borderRadius: "1rem",
+                borderRadius: "20px",
                 transition: "all 0.3s ease",
                 position: "relative",
                 "&:hover": {
@@ -180,7 +180,7 @@ const Education = ({
                         variant="h5"
                         sx={{
                           fontWeight: 700,
-                          fontSize: { xs: "1.2rem", sm: "1.35rem", md: "1.5rem" },
+                          fontSize: { xs: "1.1rem", sm: "1.2rem", md: "1.3rem" },
                           color: edu.school ? titleColor : mutedColor,
                           mb: 1,
                           ...getInlineFieldSx(`education.${index}.school`),
@@ -195,7 +195,7 @@ const Education = ({
                         variant="h6"
                         sx={{
                           fontWeight: 600,
-                          fontSize: { xs: "1rem", md: "1.125rem" },
+                          fontSize: { xs: "1rem", md: "1.0625rem" },
                           color: primaryAccent,
                           ...getInlineFieldSx(`education.${index}.degree`),
                         }}

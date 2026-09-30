@@ -111,7 +111,7 @@ const Certifications = ({
           sx={{
             fontWeight: "bold",
             color: titleColor,
-            fontSize: { xs: "1.5rem", sm: "1.875rem", md: "2.25rem" },
+            fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2.125rem" },
             ...getInlineFieldSx("certificationsTitle"),
           }}
           {...createInlineFieldProps("certificationsTitle")}
@@ -244,7 +244,7 @@ const Certifications = ({
             mt: 3,
             p: 3,
             border: `2px dashed ${primaryAccent}50`,
-            borderRadius: "1rem",
+            borderRadius: "20px",
             textAlign: "center",
             cursor: "pointer",
             transition: "all 0.3s ease",

@@ -103,7 +103,7 @@ const Testimonials = ({
           sx={{
             fontWeight: "bold",
             color: titleColor,
-            fontSize: { xs: "1.5rem", sm: "1.875rem", md: "2.25rem" },
+            fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2.125rem" },
             ...getInlineFieldSx("testimonialsTitle"),
           }}
           {...createInlineFieldProps("testimonialsTitle")}

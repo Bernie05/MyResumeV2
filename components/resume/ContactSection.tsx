@@ -9,7 +9,7 @@ import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import LanguageIcon from "@mui/icons-material/Language";
-import React, { useState } from "react";
+import React from "react";
 import {
   Alert,
   Button,
@@ -19,7 +19,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import type { InquiryPayload } from "@/app/api/inquiry/route";
+import { useInquiryForm } from "@/hook/useInquiryForm";
 import Box from "@mui/material/Box/Box";
 import { getSectionPalette, IThemePalette } from "@/theme/sectionPalette";
 import { useThemeContext } from "@/context/ThemeContext";
@@ -40,20 +40,6 @@ interface SocialLinkItem {
   label: string;
   fieldId: InlineEditableFieldId;
 }
-
-type InquiryStatus =
-  | { state: "idle" | "sending" | "sent" }
-  | { state: "error"; message: string };
-
-const EMPTY_INQUIRY: Required<InquiryPayload> = {
-  name: "",
-  email: "",
-  company: "",
-  phone: "",
-  subject: "",
-  message: "",
-  website: "",
-};
 
 interface ContactSectionProps {
   personalInfo: PersonalInfo;
@@ -153,53 +139,20 @@ export const ContactSection = ({
     onInlineFieldClick,
   });
 
-  const [inquiry, setInquiry] = useState(EMPTY_INQUIRY);
-  const [status, setStatus] = useState<InquiryStatus>({ state: "idle" });
-  const isSending = status.state === "sending";
-
-  // Binds a text field to its inquiry key
-  const inquiryField = (key: keyof InquiryPayload) => ({
-    value: inquiry[key],
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) =>
-      setInquiry((prev) => ({ ...prev, [key]: event.target.value })),
-    disabled: isSending,
-  });
-
-  const handleInquirySubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setStatus({ state: "sending" });
-    try {
-      const res = await fetch("/api/inquiry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(inquiry),
-      });
-      if (!res.ok) {
-        const { error } = await res.json().catch(() => ({ error: "" }));
-        throw new Error(error || "Could not send your inquiry.");
-      }
-      setInquiry(EMPTY_INQUIRY);
-      setStatus({ state: "sent" });
-    } catch (error) {
-      setStatus({
-        state: "error",
-        message:
-          error instanceof Error ? error.message : "Could not send your inquiry.",
-      });
-    }
-  };
+  const { inquiryField, handleInquirySubmit, status, isSending } =
+    useInquiryForm();
 
   return (
     <Box
       sx={{
-        p: { xs: 2, sm: 3, md: 4.5 },
+        p: { xs: 2, sm: 3, md: 3.5 },
         borderRadius: { xs: 4, md: 5 },
         background: sectionBackground,
         border: `1px solid ${outline}`,
       }}
     >
       {/* Contact Badge */}
-      <Box sx={{ mb: { xs: 3, md: 5 } }}>
+      <Box sx={{ mb: { xs: 2, md: 3 } }}>
         <Box
           sx={{
             display: "inline-flex",
@@ -211,7 +164,7 @@ export const ContactSection = ({
             fontSize: "0.75rem",
             letterSpacing: "0.08em",
             textTransform: "uppercase",
-            mb: 2,
+            mb: 1.5,
             ...getInlineFieldSx("contactBadge"),
             borderRadius: 999,
           }}
@@ -225,7 +178,7 @@ export const ContactSection = ({
           variant="h3"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: "1.625rem", sm: "2rem", md: "2.5rem" },
+            fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2.125rem" },
             color: titleColor,
             ...getInlineFieldSx("contactTitle"),
           }}
@@ -237,17 +190,17 @@ export const ContactSection = ({
         {/* Contact Subtitle */}
         <Typography
           sx={{
-            mt: 1.5,
-            maxWidth: 760,
+            mt: 1,
+            maxWidth: 560,
             color: bodyColor,
-            lineHeight: 1.8,
-            fontSize: { xs: "1rem", md: "1.05rem" },
+            lineHeight: 1.6,
+            fontSize: "1rem",
             ...getInlineFieldSx("contactSubtitle"),
           }}
           {...createInlineFieldProps("contactSubtitle")}
         >
           {contactSubtitle ||
-            "Reach out for collaboration, consulting, or product work. If you have a project in mind, send the details through the inquiry form and I can get back to you with the best next step."}
+            "Have a project in mind? Send a note and I'll reply by email."}
         </Typography>
       </Box>
 
@@ -259,7 +212,7 @@ export const ContactSection = ({
             xs: "1fr",
             lg: "minmax(0, 0.95fr) minmax(0, 1.05fr)",
           },
-          gap: { xs: 3, md: 4 },
+          gap: { xs: 2, md: 3 },
           alignItems: "start",
         }}
       >
@@ -267,34 +220,15 @@ export const ContactSection = ({
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 3,
-            p: { xs: 2.5, md: 3 },
+            gap: 2,
+            p: { xs: 2, md: 2.5 },
             borderRadius: 4,
             background: surfaceBackground,
             border: `1px solid ${divider}`,
           }}
         >
-          {/* Contact Form title and subtitle */}
-          <Stack spacing={1.25}>
-            <Typography
-              variant="h5"
-              sx={{
-                color: titleColor,
-                fontWeight: 800,
-                fontSize: { xs: "1.25rem", md: "1.5rem" },
-              }}
-            >
-              Let&apos;s talk about your next build
-            </Typography>
-            <Typography sx={{ color: bodyColor, lineHeight: 1.8 }}>
-              Share a project brief, product idea, or team requirement. I&apos;m
-              open to engineering work, architecture support, and
-              delivery-focused collaboration.
-            </Typography>
-          </Stack>
-
           {/* Contact Items */}
-          <Stack spacing={1.5}>
+          <Stack spacing={1}>
             {contactItems.map(({ icon, label, value, href, fieldId }) => (
               <Box
                 key={label}
@@ -302,7 +236,7 @@ export const ContactSection = ({
                   display: "flex",
                   alignItems: "flex-start",
                   gap: 1.5,
-                  p: 1.5,
+                  p: 1,
                   backgroundColor: softBackground,
                   ...getInlineFieldSx(fieldId),
                   borderRadius: 3,
@@ -382,8 +316,8 @@ export const ContactSection = ({
                     rel="noreferrer"
                     aria-label={label}
                     sx={{
-                      width: 52,
-                      height: 52,
+                      width: 40,
+                      height: 40,
                       color: isDarkMode ? "common.white" : titleColor,
                       backgroundColor: isDarkMode
                         ? "rgba(15, 23, 42, 0.78)"
@@ -421,7 +355,7 @@ export const ContactSection = ({
         {/* Contact Form */}
         <Box
           sx={{
-            p: { xs: 2.5, md: 3 },
+            p: { xs: 2, md: 2.5 },
             borderRadius: 4,
             background: surfaceBackground,
             border: `1px solid ${divider}`,
@@ -429,27 +363,9 @@ export const ContactSection = ({
         >
           <Stack
             component="form"
-            spacing={2.5}
+            spacing={2}
             onSubmit={handleInquirySubmit}
           >
-            <Box sx={{ pb: 2, borderBottom: `1px solid ${divider}` }}>
-              <Typography
-                variant="h5"
-                sx={{
-                  color: titleColor,
-                  fontWeight: 800,
-                  mb: 0.75,
-                  fontSize: { xs: "1.25rem", md: "1.5rem" },
-                }}
-              >
-                Inquiry Form
-              </Typography>
-              <Typography sx={{ color: bodyColor }}>
-                Send your details and a short message, and I&apos;ll reply by
-                email.
-              </Typography>
-            </Box>
-
             {/* Honeypot: off-screen and skipped by keyboard/screen readers */}
             <Box
               component="input"
@@ -482,39 +398,14 @@ export const ContactSection = ({
               />
             </Stack>
 
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-              <TextField
-                label="Company or team"
-                fullWidth
-                variant="outlined"
-                autoComplete="organization"
-                {...inquiryField("company")}
-              />
-              <TextField
-                label="Phone number"
-                type="tel"
-                fullWidth
-                variant="outlined"
-                autoComplete="tel"
-                {...inquiryField("phone")}
-              />
-            </Stack>
-
             <TextField
-              label="Inquiry subject"
-              fullWidth
-              variant="outlined"
-              {...inquiryField("subject")}
-            />
-
-            <TextField
-              label="Project details"
+              label="Message"
               required
               fullWidth
               multiline
-              minRows={6}
+              minRows={4}
               variant="outlined"
-              placeholder="Tell me about the work, goals, timeline, and what kind of help you need."
+              placeholder="What are you working on, and how can I help?"
               {...inquiryField("message")}
             />
 
@@ -557,7 +448,7 @@ export const ContactSection = ({
                   width: { xs: "100%", sm: "auto" },
                 }}
               >
-                {isSending ? "Sending…" : "Send inquiry"}
+                {isSending ? "Sending…" : "Send message"}
               </Button>
             </Box>
           </Stack>

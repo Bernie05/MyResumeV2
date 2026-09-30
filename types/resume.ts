@@ -1,3 +1,4 @@
+import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 export interface PersonalInfo {
   name: string;
   title: string;
@@ -128,6 +129,12 @@ export interface PortfolioItem {
 }
 
 export interface ResumeData {
+  /** Sections hidden from the public page (owner still sees them dimmed in the editor). Absent = all visible. */
+  hiddenSections?: ResumeEditableSection[];
+  /** Order of the sections between the hero and contact (see templates/shared/sectionOrder). Absent = the design's default order. */
+  sectionOrder?: ResumeEditableSection[];
+  /** Registry id of the design to render (see components/templates); falls back to "default". */
+  template?: string;
   personalInfo: PersonalInfo;
   socialMedia: SocialMediaLink[];
   stats: ResumeStats;

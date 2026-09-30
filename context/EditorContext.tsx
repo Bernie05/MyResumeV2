@@ -24,6 +24,8 @@ export interface EditorContextValue {
   onDeleteAction?: (actionId: string) => void;
   isEditMode: boolean;
   onDelete?: (actionId: string) => void;
+  // Hide/show a section on the public page (editor only)
+  onToggleSectionHidden?: (section: ResumeEditableSection) => void;
 
   // Currently clicked tracking
   setActiveInlineFieldId?: (fieldId: InlineEditableFieldId) => void | null;

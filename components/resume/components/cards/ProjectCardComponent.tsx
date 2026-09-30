@@ -75,7 +75,7 @@ export const ProjectCardComponent = ({
       sx={{
         background: surfaceBackground,
         border: `1px solid ${outline}`,
-        borderRadius: "1rem",
+        borderRadius: "20px",
         overflow: "hidden",
         transition: "all 0.3s ease",
         position: "relative",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import ResumePage from "@/components/resume/ResumePage";
+import { resolveTemplate } from "@/components/templates";
 import { useResumeOperations, useResumeData } from "@/store/hooks";
 // Import the resume data from the local file
 import { resumeData } from "@/data/resume";
@@ -28,7 +28,10 @@ const MainView = () => {
     ? { ...resumeData, ...storedResumeData }
     : resumeData;
 
-  return <ResumePage resume={displayData} position="sticky" />;
+  // Render whichever design the owner picked in the editor (Design 1 by default)
+  const { Component: Template } = resolveTemplate(displayData.template);
+
+  return <Template resume={displayData} position="sticky" />;
 };
 
 export default MainView;

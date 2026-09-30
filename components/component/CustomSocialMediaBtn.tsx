@@ -1,3 +1,4 @@
+import { editAccent } from "@/theme/editAccent";
 import React, { useCallback, useMemo } from "react";
 import { getSectionPalette } from "@/theme/sectionPalette";
 import { Box, IconButton, SxProps, Theme } from "@mui/material";
@@ -71,7 +72,7 @@ const SocialMediaButton = React.memo(
         border: "1px solid rgba(255,255,255,0.16)",
         backdropFilter: "blur(12px)",
         outline: isActive
-          ? "2px solid rgba(20, 184, 166, 0.9)"
+          ? `2px solid ${editAccent(90)}`
           : "2px solid transparent",
         outlineOffset: 2,
         transition:
@@ -81,8 +82,8 @@ const SocialMediaButton = React.memo(
           backgroundColor: `${primaryAccent}55`,
           ...(onInlineFieldClick
             ? {
-                outlineColor: "rgba(20, 184, 166, 0.55)",
-                boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
+                outlineColor: editAccent(55),
+                boxShadow: `0 0 0 4px ${editAccent(20)}`,
               }
             : {}),
         },
@@ -175,10 +176,10 @@ export const SocialMediaBtn = ({
             width: 52,
             height: 52,
             color: "common.white",
-            backgroundColor: "rgba(20, 184, 166, 0.25)",
-            border: "2px dashed rgba(20, 184, 166, 0.5)",
+            backgroundColor: editAccent(25),
+            border: `2px dashed ${editAccent(50)}`,
             "&:hover": {
-              backgroundColor: "rgba(20, 184, 166, 0.4)",
+              backgroundColor: editAccent(40),
             },
           }}
         >
