@@ -1,3 +1,4 @@
+import { editAccent } from "@/theme/editAccent";
 import { Box, IconButton } from "@mui/material";
 import { ResumeEditableSection } from "@/components/resume/ResumePage";
 import { ICON_MAP, ICON_NAMES } from "@/components/resume/ServicesSection";
@@ -20,14 +21,14 @@ export const getInlineFieldSxV2 = ({
   borderRadius: 1,
   outline:
     activeInlineFieldId === fieldId
-      ? "2px solid rgba(20, 184, 166, 0.9)"
+      ? `2px solid ${editAccent(90)}`
       : "2px solid transparent",
   outlineOffset: 2,
   cursor: getCursorPointer(isEditMode),
   transition: "outline-color 160ms ease, box-shadow 160ms ease",
   "&:hover": isEditMode && {
-    outlineColor: "rgba(20, 184, 166, 0.55)",
-    boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
+    outlineColor: editAccent(55),
+    boxShadow: `0 0 0 4px ${editAccent(20)}`,
   },
 });
 

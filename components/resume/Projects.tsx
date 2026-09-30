@@ -106,7 +106,7 @@ const Projects = ({
           variant="h3"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: "1.625rem", sm: "2rem", md: "2.5rem" },
+            fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2.125rem" },
             color: titleColor,
             mb: 2,
             ...getInlineFieldSx("projectsTitle"),
@@ -120,7 +120,7 @@ const Projects = ({
         <Typography
           variant="h6"
           sx={{
-            fontSize: { xs: "1rem", md: "1.125rem" },
+            fontSize: { xs: "1rem", md: "1.0625rem" },
             color: mutedColor,
             fontWeight: 400,
             ...getInlineFieldSx("projectsSubtitle"),

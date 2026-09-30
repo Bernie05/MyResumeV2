@@ -262,7 +262,7 @@ const ServicesSection = ({
           targetFieldId="servicesTitle"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: "1.625rem", sm: "2rem", md: "2.5rem" },
+            fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2.125rem" },
             color: titleColor,
             mb: 2,
           }}
@@ -275,7 +275,7 @@ const ServicesSection = ({
           variant="h6"
           targetSectionId="services"
           targetFieldId="servicesSubtitle"
-          sx={{ fontSize: { xs: "1rem", md: "1.25rem" } }}
+          sx={{ fontSize: { xs: "1rem", md: "1.0625rem" } }}
         >
           {servicesSubtitle ||
             "Professional services tailored to your project needs"}
@@ -301,7 +301,7 @@ const ServicesSection = ({
             sx={{
               background: surfaceBackground,
               border: `1px solid ${outline}`,
-              borderRadius: "1rem",
+              borderRadius: "20px",
               transition: "all 0.3s ease",
               height: "100%",
               position: "relative",
@@ -393,7 +393,7 @@ const ServicesSection = ({
                     variant="h5"
                     sx={{
                       fontWeight: 700,
-                      fontSize: { xs: "1.2rem", sm: "1.35rem", md: "1.5rem" },
+                      fontSize: { xs: "1.1rem", sm: "1.2rem", md: "1.3rem" },
                       color: titleColor,
                       ...getInlineFieldSx(`services.${cardIndex}.title`),
                     }}
@@ -554,7 +554,7 @@ const ServicesSection = ({
             sx={{
               background: "transparent",
               border: `2px dashed ${primaryAccent}50`,
-              borderRadius: "1rem",
+              borderRadius: "20px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

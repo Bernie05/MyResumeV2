@@ -1,8 +1,9 @@
 "use client";
 
-import ResumePage, {
-  type ResumeEditableSection,
-} from "@/components/resume/ResumePage";
+import type { ResumeEditableSection } from "@/components/resume/ResumePage";
+import { resolveTemplate, templateOptions, type TemplateId } from "@/components/templates";
+import EditorSidebar from "./EditorSidebar";
+import { resolveSectionOrder } from "@/components/templates/shared/sectionOrder";
 import { useThemeContext } from "@/context/ThemeContext";
 import type {
   CertificationItem,
@@ -14,6 +15,8 @@ import type {
 } from "@/types/resume";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import MenuIcon from "@mui/icons-material/Menu";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import LogoutIcon from "@mui/icons-material/Logout";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
@@ -29,16 +32,21 @@ import {
   CardContent,
   Chip,
   Divider,
+  Drawer,
   IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
   Popover,
   Slider,
   Snackbar,
   Stack,
   Tab,
   Tabs,
-  TextField,
   Typography,
 } from "@mui/material";
+import TextField from "./AutoGrowTextField";
+import { ThemeProvider } from "@mui/material/styles";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -82,8 +90,11 @@ import {
   PREVIEW_SECTION_TO_EDITOR_SECTION,
   SIMPLE_TEXT_FIELD_CONFIG,
 } from "./constants/constant";
-import { CustomPopover } from "../component/CustomPopover";
+import { CustomPopover, withReadableLightText } from "../component/CustomPopover";
 import { EditorProvider } from "@/context/EditorContext";
+
+const TOP_BAR_HEIGHT = 56;
+const SIDEBAR_WIDTH = 360;
 
 export type EditorSection = (typeof EDITOR_SECTIONS)[number]["value"];
 
@@ -271,6 +282,10 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     useState<InlineEditableFieldId | null>(null);
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Sidebar shows the selected section's form (true) or the sections list (false)
+  const [sidebarForm, setSidebarForm] = useState(false);
 
   useEffect(() => {
     if (hasDraft) {
@@ -350,6 +365,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
 
   const handlePreviewClick = () => {
     setSelectedPreviewSection(null);
+    setSidebarForm(false);
     setSelectedInlineFieldId(null);
 
     router.replace("/");
@@ -359,10 +375,25 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
   const handlePreviewSectionClick = useCallback(
     (section: ResumeEditableSection) => {
       setSelectedPreviewSection(section);
+      setSidebarForm(true);
       setSelectedInlineFieldId(null);
       setActiveSection(PREVIEW_SECTION_TO_EDITOR_SECTION[section]);
     },
     [],
+  );
+
+  // Hide/show a section on the public page; saved and published like any other edit
+  const handleToggleSectionHidden = useCallback(
+    (section: ResumeEditableSection) => {
+      setDraft((current) => {
+        const hidden = current.hiddenSections ?? [];
+        const next = hidden.includes(section)
+          ? hidden.filter((id) => id !== section)
+          : [...hidden, section];
+        return { ...current, hiddenSections: next.length ? next : undefined };
+      });
+    },
+    [setDraft],
   );
 
   const handleInlineFieldClick = useCallback(
@@ -372,6 +403,8 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       anchor?: HTMLElement,
     ) => {
       setSelectedPreviewSection(section);
+      setSidebarForm(true);
+      setActiveSection(PREVIEW_SECTION_TO_EDITOR_SECTION[section]);
       setSelectedInlineFieldId(fieldId);
       setAnchorEl(anchor ?? null);
     },
@@ -3794,7 +3827,9 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       case "projects":
         return (
           <Stack spacing={2.5}>
-            {draft.projects.map((item, index) => (
+            {resolveTemplate(draft.template)
+              .orderProjects(draft.projects)
+              .map(({ project: item, index }, position) => (
               <Card key={item.id} variant="outlined">
                 <CardContent>
                   <Stack spacing={2}>
@@ -3804,7 +3839,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
                       alignItems="center"
                     >
                       <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                        Project #{index + 1}
+                        Project #{position + 1}
                       </Typography>
                       <IconButton
                         aria-label="Remove project"
@@ -4600,6 +4635,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       onAddAction: handleAddAction,
       onDeleteAction: handleDeleteAction,
       onDelete: handleDeleteAction,
+      onToggleSectionHidden: handleToggleSectionHidden,
     }),
     [
       handleInlineFieldClick,
@@ -4608,6 +4644,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
       selectedPreviewSection,
       handleAddAction,
       handleDeleteAction,
+      handleToggleSectionHidden,
     ],
   );
 
@@ -4615,121 +4652,218 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
     return <SecretEditorSkeleton isDarkMode={isDarkMode} />;
   }
 
+  // The canvas renders whichever design is selected; editing works the same in all of them
+  const template = resolveTemplate(draft.template);
+  const PreviewTemplate = template.Component;
+  // Popover and sidebar render outside the template root, so they get its accent here
+  const accent = template.editAccent(isDarkMode);
+
+  const handleSidebarSelect = (section: ResumeEditableSection) => {
+    handlePreviewSectionClick(section);
+    setSidebarOpen(false);
+    document.getElementById(section)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const sectionOrder = resolveSectionOrder(draft, template.sections);
+
+  // After a drop keep the section selected (sidebar stays on the list) and bring it into view.
+  // Instant, not smooth: a running page scroll would skew the next drag's measurements.
+  const handleSectionDropped = (section: ResumeEditableSection) => {
+    handlePreviewSectionClick(section);
+    setSidebarForm(false);
+    setTimeout(() => document.getElementById(section)?.scrollIntoView({ behavior: "instant", block: "start" }), 60);
+  };
+
+  const sidebar = (
+    <EditorSidebar
+      sections={sectionOrder}
+      selected={selectedPreviewSection}
+      showForm={sidebarForm}
+      hidden={draft.hiddenSections ?? []}
+      accent={accent}
+      isDarkMode={isDarkMode}
+      template={
+        templateOptions.some((option) => option.id === draft.template)
+          ? (draft.template as TemplateId)
+          : "default"
+      }
+      onTemplateChange={(id) => setDraft((current) => ({ ...current, template: id }))}
+      onSelect={handleSidebarSelect}
+      onBack={() => {
+        setSelectedPreviewSection(null);
+        setSidebarForm(false);
+      }}
+      onToggleHidden={handleToggleSectionHidden}
+      onReorder={(order) => setDraft((current) => ({ ...current, sectionOrder: order }))}
+      onDropped={handleSectionDropped}
+      form={selectedPreviewSection ? renderSectionEditor() : null}
+    />
+  );
+
   return (
     <EditorProvider value={editorProps}>
       <Box
         sx={{
           minHeight: "100vh",
-          background: isDarkMode
-            ? "linear-gradient(180deg, #020617 0%, #0f172a 100%)"
-            : "linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)",
+          background: isDarkMode ? "#020617" : "#f1f5f9",
         }}
       >
-        <Box
-          sx={{
-            position: "sticky",
-            top: 0,
-            zIndex: 30,
-            backdropFilter: "blur(16px)",
-            borderBottom: "1px solid",
-            borderColor: isDarkMode
-              ? "rgba(51, 65, 85, 0.8)"
-              : "rgba(203, 213, 225, 0.9)",
-            backgroundColor: isDarkMode
-              ? "rgba(2, 6, 23, 0.88)"
-              : "rgba(248, 250, 252, 0.92)",
-          }}
-        >
-          <Stack spacing={2} sx={{ px: { xs: 2, md: 3 }, py: 2 }}>
-            <Stack
-              direction={{ xs: "column", xl: "row" }}
-              justifyContent="space-between"
-              spacing={2}
+        <ThemeProvider theme={withReadableLightText}>
+          <Box
+            component="header"
+            sx={{
+              position: "sticky",
+              top: 0,
+              zIndex: 30,
+              height: TOP_BAR_HEIGHT,
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 1, md: 1.5 },
+              px: { xs: 1.5, md: 2 },
+              color: "text.primary",
+              borderBottom: "1px solid",
+              borderColor: isDarkMode ? "rgba(51, 65, 85, 0.8)" : "rgba(203, 213, 225, 0.9)",
+              backgroundColor: isDarkMode ? "rgba(2, 6, 23, 0.94)" : "rgba(255, 255, 255, 0.94)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            <IconButton
+              aria-label="Open sections panel"
+              onClick={() => setSidebarOpen(true)}
+              edge="start"
+              sx={{ display: { md: "none" } }}
             >
-              <Stack spacing={0.75}>
-                <Typography
-                  variant="overline"
-                  sx={{ color: isDarkMode ? "#67e8f9" : "#0f766e" }}
-                >
-                  Owner-only access
-                </Typography>
-                <Typography variant="h4" sx={{ fontWeight: 800 }}>
-                  Private Resume Editor
-                </Typography>
-                <Typography sx={{ color: isDarkMode ? "#94a3b8" : "#475569" }}>
-                  Edit the local draft, preview the live resume UI, and keep the
-                  public site pinned to the static data source.
-                </Typography>
-              </Stack>
-
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={1.25}
-                alignItems={{ sm: "center" }}
+              <MenuIcon />
+            </IconButton>
+            <Typography
+              component="h1"
+              sx={{ display: { xs: "none", md: "block" }, fontSize: "1rem", fontWeight: 600, whiteSpace: "nowrap" }}
+            >
+              Resume editor
+            </Typography>
+            <Box sx={{ flex: 1 }} />
+            <Chip
+              size="small"
+              label={hasUnsavedChanges ? "Unsaved" : "Saved"}
+              color={hasUnsavedChanges ? "warning" : "success"}
+              variant={hasUnsavedChanges ? "filled" : "outlined"}
+              title={hasUnsavedChanges ? "Unsaved changes" : "Draft matches saved local copy"}
+            />
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={hasUnsavedChanges}
+              onClick={handlePreviewClick}
+              sx={{ display: { xs: "none", sm: "inline-flex" }, textTransform: "none", fontWeight: 600 }}
+            >
+              Preview
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<SaveOutlinedIcon />}
+              onClick={handleSaveDraft}
+              disabled={isPublishing}
+              sx={{ textTransform: "none", fontWeight: 600 }}
+            >
+              {isPublishing ? "Publishing..." : "Publish"}
+            </Button>
+            <IconButton
+              aria-label="More actions"
+              aria-haspopup="menu"
+              aria-expanded={Boolean(menuAnchor)}
+              onClick={(event) => setMenuAnchor(event.currentTarget)}
+            >
+              <MoreVertIcon />
+            </IconButton>
+            <Menu
+              anchorEl={menuAnchor}
+              open={Boolean(menuAnchor)}
+              onClose={() => setMenuAnchor(null)}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+              <MenuItem
+                disabled={hasUnsavedChanges}
+                onClick={() => {
+                  setMenuAnchor(null);
+                  handlePreviewClick();
+                }}
+                sx={{ display: { sm: "none" } }}
               >
-                {/* Unsaved changes indicator */}
-                <Chip
-                  label={
-                    hasUnsavedChanges
-                      ? "Unsaved changes"
-                      : "Draft matches saved local copy"
-                  }
-                  color={hasUnsavedChanges ? "warning" : "success"}
-                  variant={hasUnsavedChanges ? "filled" : "outlined"}
-                />
-                <Button
-                  variant="contained"
-                  startIcon={<SaveOutlinedIcon />}
-                  disabled={hasUnsavedChanges}
-                  onClick={handlePreviewClick}
-                  sx={{ textTransform: "none", fontWeight: 700 }}
-                >
-                  Preview
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<SaveOutlinedIcon />}
-                  onClick={handleSaveDraft}
-                  disabled={isPublishing}
-                  sx={{ textTransform: "none", fontWeight: 700 }}
-                >
-                  {isPublishing ? "Publishing..." : "Publish"}
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<RefreshIcon />}
-                  onClick={handleDiscardChangesClick}
-                  disabled={!hasChanges}
-                  sx={{ textTransform: "none" }}
-                >
-                  Discard changes
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="warning"
-                  startIcon={<SettingsBackupRestoreIcon />}
-                  onClick={handleResetToBaselineClick}
-                  sx={{ textTransform: "none" }}
-                >
-                  Reset to baseline
-                </Button>
-                <Button
-                  variant="text"
-                  color="inherit"
-                  startIcon={<LogoutIcon />}
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                  sx={{ textTransform: "none" }}
-                >
-                  Logout
-                </Button>
-              </Stack>
-            </Stack>
-          </Stack>
-        </Box>
+                Preview
+              </MenuItem>
+              <MenuItem
+                disabled={!hasChanges}
+                onClick={() => {
+                  setMenuAnchor(null);
+                  handleDiscardChangesClick();
+                }}
+              >
+                <ListItemIcon>
+                  <RefreshIcon fontSize="small" />
+                </ListItemIcon>
+                Discard changes
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setMenuAnchor(null);
+                  handleResetToBaselineClick();
+                }}
+              >
+                <ListItemIcon>
+                  <SettingsBackupRestoreIcon fontSize="small" />
+                </ListItemIcon>
+                Reset to baseline
+              </MenuItem>
+              <Divider />
+              <MenuItem
+                disabled={isLoggingOut}
+                onClick={() => {
+                  setMenuAnchor(null);
+                  handleLogout();
+                }}
+              >
+                <ListItemIcon>
+                  <LogoutIcon fontSize="small" />
+                </ListItemIcon>
+                Logout
+              </MenuItem>
+            </Menu>
+          </Box>
+        </ThemeProvider>
 
-        <Box>
-          <ResumePage resume={draft} position="static" />
+        <Box sx={{ display: "flex", alignItems: "flex-start" }}>
+          {/* Sections + per-section forms: fixed column on desktop, drawer below md */}
+          <Box
+            component="aside"
+            sx={{
+              display: { xs: "none", md: "block" },
+              width: SIDEBAR_WIDTH,
+              flexShrink: 0,
+              position: "sticky",
+              top: TOP_BAR_HEIGHT,
+              height: `calc(100dvh - ${TOP_BAR_HEIGHT}px)`,
+              overflowY: "auto",
+              borderRight: "1px solid",
+              borderColor: isDarkMode ? "rgba(51, 65, 85, 0.8)" : "rgba(203, 213, 225, 0.9)",
+            }}
+          >
+            {sidebar}
+          </Box>
+          <Drawer
+            open={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            sx={{ display: { md: "none" } }}
+            slotProps={{ paper: { sx: { width: SIDEBAR_WIDTH, maxWidth: "88vw" } } }}
+          >
+            {sidebar}
+          </Drawer>
+
+          {/* No scroll anchoring: live reordering must not shift the page mid-drag */}
+          <Box sx={{ flex: 1, minWidth: 0, overflowAnchor: "none" }}>
+            <PreviewTemplate resume={draft} position="static" />
+          </Box>
         </Box>
 
         {/* Popover */}
@@ -4739,6 +4873,7 @@ const SecretResumeEditor = ({ initialResume }: SecretResumeEditorProps) => {
           handleCloseInlineEditor={handleCloseInlineEditor}
           getInlineFieldLabel={getInlineFieldLabel}
           renderInlineFieldToolbox={renderInlineFieldToolbox}
+          accent={accent}
         />
 
         <Snackbar

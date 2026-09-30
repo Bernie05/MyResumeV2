@@ -271,7 +271,7 @@ const Skills = ({
           variant="h3"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: "1.625rem", sm: "2rem", md: "2.5rem" },
+            fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2.125rem" },
             color: titleColor,
             mb: 2,
             ...getInlineFieldSx("skillsTitle"),
@@ -287,7 +287,7 @@ const Skills = ({
           sx={{
             color: mutedColor,
             fontWeight: 400,
-            fontSize: { xs: "1rem", md: "1.125rem" },
+            fontSize: { xs: "1rem", md: "1.0625rem" },
             ...getInlineFieldSx("skillsSubtitle"),
           }}
           {...createInlineFieldProps("skillsSubtitle")}
@@ -328,7 +328,7 @@ const Skills = ({
                 <Typography
                   variant="h5"
                   sx={{
-                    fontSize: { xs: "1.25rem", sm: "1.5rem", md: "1.875rem" },
+                    fontSize: { xs: "1.125rem", sm: "1.25rem", md: "1.5rem" },
                     fontWeight: 700,
                     color: categoryColor,
                     flexGrow: 1,
@@ -399,7 +399,7 @@ const Skills = ({
                       sx={{
                         background: surfaceBackground,
                         border: `1px solid ${outline}`,
-                        borderRadius: "1rem",
+                        borderRadius: "20px",
                         transition: "all 0.3s ease",
                         cursor: "pointer",
                         height: "100%",
@@ -674,7 +674,7 @@ const Skills = ({
                     mt: 3,
                     p: 2.5,
                     border: `2px dashed ${categoryColor}50`,
-                    borderRadius: "1rem",
+                    borderRadius: "20px",
                     textAlign: "center",
                     cursor: "pointer",
                     transition: "all 0.3s ease",

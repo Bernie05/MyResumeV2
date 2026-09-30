@@ -25,7 +25,7 @@ export const AddButton = ({ children, targetSectionId }: IAddButtonProps) => {
         mt: 3,
         p: 3,
         border: `2px dashed ${primaryAccent}50`,
-        borderRadius: "1rem",
+        borderRadius: "20px",
         textAlign: "center",
         cursor: "pointer",
         transition: "all 0.3s ease",

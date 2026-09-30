@@ -1,4 +1,6 @@
+import { editAccent } from "@/theme/editAccent";
 import { useMemo } from "react";
+import { useActiveField, useEditor, useOnFieldClick } from "@/hook/useEditor";
 import type { ResumeEditableSection } from "@/components/resume/ResumePage";
 import type { InlineEditableFieldId } from "@/components/secret/constants/constant";
 
@@ -40,15 +42,15 @@ export const useInlineEditing = ({
       borderRadius: 1,
       outline:
         fieldId && activeInlineFieldId === fieldId
-          ? "2px solid rgba(20, 184, 166, 0.9)"
+          ? `2px solid ${editAccent(90)}`
           : "2px solid transparent",
       outlineOffset: 2,
       cursor: isActiveField(fieldId) ? "pointer" : "inherit",
       transition: "outline-color 160ms ease, box-shadow 160ms ease",
       "&:hover": isActiveField(fieldId)
         ? {
-            outlineColor: "rgba(20, 184, 166, 0.55)",
-            boxShadow: "0 0 0 4px rgba(20, 184, 166, 0.2)",
+            outlineColor: editAccent(55),
+            boxShadow: `0 0 0 4px ${editAccent(20)}`,
           }
         : undefined,
     }),
@@ -139,5 +141,34 @@ export const useInlineEditing = ({
     getInlineFieldSx,
     createInlineFieldProps,
     fieldIds,
+  };
+};
+
+/**
+ * Everything an editable template component needs for one section, bundled so
+ * new templates don't repeat the useEditor/useActiveField/useOnFieldClick +
+ * useInlineEditing boilerplate. `field(id)` returns `{ props, sx }`: the click/keyboard props and
+ * outline sx for an InlineEditableFieldId; both are inert outside edit mode.
+ */
+export const useEditableItem = (section: ResumeEditableSection) => {
+  const editor = useEditor();
+  const activeInlineFieldId = useActiveField();
+  const onInlineFieldClick = useOnFieldClick();
+  const { getInlineFieldSx, createInlineFieldProps } = useInlineEditing({
+    targetSection: section,
+    activeInlineFieldId,
+    onInlineFieldClick,
+  });
+
+  const field = (fieldId: InlineEditableFieldId) => ({
+    props: createInlineFieldProps(fieldId),
+    sx: getInlineFieldSx(fieldId),
+  });
+
+  return {
+    isEditMode: Boolean(editor.isEditMode),
+    field,
+    onAddAction: editor.onAddAction,
+    onDeleteAction: editor.onDeleteAction,
   };
 };

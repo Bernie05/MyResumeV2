@@ -6,7 +6,7 @@ import { InlineEditableFieldId } from "../secret/constants/constant";
 // The app's light palette uses near-white text.primary (meant for the resume
 // page), which is unreadable on the popover's white panel. Give the popover
 // readable dark text in light mode without changing the global theme.
-const withReadableLightText = (outerTheme: Theme): Theme =>
+export const withReadableLightText = (outerTheme: Theme): Theme =>
   outerTheme.palette.mode === "light"
     ? {
         ...outerTheme,
@@ -27,6 +27,8 @@ interface CustomPopoverProps {
   handleCloseInlineEditor: () => void;
   getInlineFieldLabel: (selectedInlineFieldId: InlineEditableFieldId) => string;
   renderInlineFieldToolbox: () => React.ReactNode;
+  /** Active template accent (border + "Editing" chip). */
+  accent: string;
 }
 
 export const CustomPopover = ({
@@ -35,6 +37,7 @@ export const CustomPopover = ({
   handleCloseInlineEditor,
   getInlineFieldLabel,
   renderInlineFieldToolbox,
+  accent,
 }: CustomPopoverProps) => {
   // Access the theme context to determine if dark mode is active.
   // This will be used to style the Popover component accordingly, ensuring that it matches the overall theme of the application.
@@ -59,9 +62,7 @@ export const CustomPopover = ({
               overflowY: "auto",
               borderRadius: 3,
               border: "2px solid",
-              borderColor: isDarkMode
-                ? "rgba(20, 184, 166, 0.5)"
-                : "rgba(15, 118, 110, 0.35)",
+              borderColor: accent,
               backgroundColor: isDarkMode
                 ? "rgba(15, 23, 42, 0.97)"
                 : "rgba(255, 255, 255, 0.97)",
@@ -89,8 +90,8 @@ export const CustomPopover = ({
               <Chip
                 size="small"
                 label="Editing"
-                color="primary"
-                variant="filled"
+                variant="outlined"
+                sx={{ color: accent, borderColor: accent, fontWeight: 600 }}
               />
             </Stack>
             {renderInlineFieldToolbox()}

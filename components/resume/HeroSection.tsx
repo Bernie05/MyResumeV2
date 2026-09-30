@@ -234,8 +234,8 @@ const HeroSection = ({ personalInfo, stats, onDownloadCv }: HeroSectionProps) =>
                 targetFieldId="personalInfo.name"
                 component="h1"
                 fontWeight="800"
-                letterSpacing="-0.04em"
-                fontSize={{ xs: "2.1rem", sm: "3.5rem", md: "5.25rem" }}
+                letterSpacing="-0.035em"
+                fontSize={{ xs: "2rem", sm: "2.75rem", md: "4rem" }}
                 lineHeight={{ xs: 1.05, md: 0.96 }}
                 sx={{ overflowWrap: "anywhere" }}
               >
@@ -247,9 +247,9 @@ const HeroSection = ({ personalInfo, stats, onDownloadCv }: HeroSectionProps) =>
                 targetSectionId="about"
                 targetFieldId="personalInfo.title"
                 fontWeight="700"
-                letterSpacing={{ xs: "0.12em", sm: "0.18em", md: "0.24em" }}
+                letterSpacing={{ xs: "0.08em", md: "0.12em" }}
                 textTransform="uppercase"
-                fontSize={{ xs: "0.72rem", sm: "0.85rem", md: "0.95rem" }}
+                fontSize={{ xs: "0.75rem", sm: "0.8125rem", md: "0.875rem" }}
               >
                 {personalInfo.title}
               </CustomTypography>
@@ -260,10 +260,10 @@ const HeroSection = ({ personalInfo, stats, onDownloadCv }: HeroSectionProps) =>
                   targetSectionId="about"
                   targetFieldId="personalInfo.summary"
                   color="common.white"
-                  fontWeight="700"
-                  letterSpacing={{ xs: "0.12em", sm: "0.18em", md: "0.24em" }}
-                  textTransform="uppercase"
-                  fontSize={{ xs: "0.72rem", sm: "0.85rem", md: "0.95rem" }}
+                  fontWeight="400"
+                  lineHeight={1.6}
+                  fontSize={{ xs: "1rem", md: "1.125rem" }}
+                  sx={{ maxWidth: "60ch" }}
                 >
                   {personalInfo.summary}
                 </CustomTypography>
@@ -356,7 +356,7 @@ const HeroSection = ({ personalInfo, stats, onDownloadCv }: HeroSectionProps) =>
                   >
                     <Typography
                       sx={{
-                        fontSize: { xs: "2rem", md: "2.5rem" },
+                        fontSize: { xs: "1.75rem", md: "2rem" },
                         fontWeight: 800,
                         color: primaryAccent,
                         lineHeight: 1,

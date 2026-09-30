@@ -1,6 +1,6 @@
 "use client";
 
-import type { ElementType, ReactNode } from "react";
+import { Fragment, type ElementType, type ReactNode } from "react";
 import Navbar from "./Navbar";
 import HeroSection from "./HeroSection";
 import { downloadResumePdf } from "./pdf/downloadResumePdf";
@@ -18,14 +18,15 @@ import type { ResumeData } from "../../types/resume";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import { ContactSection } from "./ContactSection";
 import { useSession } from "next-auth/react";
-import {
-  useEditor,
-  useIsEditMode,
-  useOnSectionClick,
-} from "../../hook/useEditor";
-import { createSectionProps } from "../secret/utils/componentUtil";
+import { useEditor } from "../../hook/useEditor";
+import { EditableSection } from "../templates/shared/EditableSection";
 import { isAuthenticated } from "./util/authUtil";
 import Footer from "./components/footer";
+import { archivo } from "@/theme/fonts";
+import { getSectionPalette } from "@/theme/sectionPalette";
+import { EDIT_ACCENT_VAR } from "@/theme/editAccent";
+import { HiddenSectionsProvider } from "../templates/shared/sectionVisibility";
+import { SectionOrderProvider, resolveSectionOrder } from "../templates/shared/sectionOrder";
 
 export type NavbarPosition =
   | "fixed"
@@ -48,6 +49,11 @@ export type ResumeEditableSection =
   | "contact"
   | "stats";
 
+/** Sections in the order Design 1 renders them by default. */
+export const RESUME_PAGE_SECTIONS: readonly ResumeEditableSection[] = [
+  "about", "services", "experience", "portfolio", "projects", "education", "skills", "certifications", "testimonials", "characterReferences", "contact",
+];
+
 interface IResumePageProps {
   resume: ResumeData;
   position?: NavbarPosition;
@@ -67,62 +73,168 @@ const ResumePage = ({
   interactiveSections,
 }: IResumePageProps) => {
   const editor = useEditor();
-  const isEditMode = useIsEditMode();
-  const activeSectionId = editor?.activeSection;
-  const onSectionClick = useOnSectionClick();
 
   const { isDarkMode } = useThemeContext();
-  const sectionsAreInteractive = interactiveSections ?? Boolean(isEditMode);
 
   const { data: session, status } = useSession();
   const hasAccess = isAuthenticated(status, session);
 
-  // Function to get the styles for each section based on its active states
-  const getSectionSx = (sectionId: ResumeEditableSection) => {
-    const isActiveSection = activeSectionId === sectionId;
-
-    return {
-      borderRadius: sectionsAreInteractive ? { xs: 4, md: 5 } : undefined,
-      outline:
-        sectionsAreInteractive && isActiveSection
-          ? "2px solid rgba(20, 184, 166, 0.9)"
-          : "2px solid transparent",
-      outlineOffset: 8,
-      scrollMarginTop: { xs: 88, md: 104 },
-      transition: "outline-color 160ms ease, box-shadow 160ms ease",
-      "&:hover": sectionsAreInteractive
-        ? {
-            outlineColor: "rgba(20, 184, 166, 0.55)",
-            boxShadow: isActiveSection
-              ? "0 0 0 6px rgba(20, 184, 166, 0.2)"
-              : "0 0 0 4px rgba(20, 184, 166, 0.12)",
-          }
-        : undefined,
-    };
-  };
-
-  // Function to render each section with its respective props and styles
+  // Each top-level section is clickable/outlined in edit mode
   const renderSection = ({
     children,
     sectionId,
     component = "div",
     domId = sectionId,
-  }: PreviewSectionProps) => {
-    return (
-      <Box
-        id={domId}
-        component={component}
-        sx={getSectionSx(sectionId)}
-        // Editable section props for interactivity in edit mode
-        {...createSectionProps(
-          sectionsAreInteractive,
-          sectionId,
-          onSectionClick,
-        )}
-      >
-        {children}
-      </Box>
-    );
+  }: PreviewSectionProps) => (
+    <EditableSection
+      sectionId={sectionId}
+      component={component}
+      domId={domId}
+      interactive={interactiveSections}
+    >
+      {children}
+    </EditableSection>
+  );
+
+  // Design 1 defaults come from RESUME_PAGE_SECTIONS; a saved sectionOrder reorders the middle.
+  const order = resolveSectionOrder(resume, RESUME_PAGE_SECTIONS);
+
+  const sections: Partial<Record<ResumeEditableSection, ReactNode>> = {
+    about: renderSection({
+      sectionId: "about",
+      component: "section",
+      children: (
+        <HeroSection
+          personalInfo={resume.personalInfo}
+          stats={resume.stats}
+          onDownloadCv={() => downloadResumePdf(resume)}
+        />
+      ),
+    }),
+    services: renderSection({
+      sectionId: "services",
+      children: (
+        <ServicesSection
+          services={resume.services}
+          servicesBadge={resume.servicesBadge}
+          servicesTitle={resume.servicesTitle}
+          servicesSubtitle={resume.servicesSubtitle}
+          onInlineFieldClick={editor?.onInlineFieldClick}
+          activeInlineFieldId={editor?.activeInlineFieldId}
+          onAddAction={editor?.onAddAction}
+          onDeleteAction={editor?.onDeleteAction}
+        />
+      ),
+    }),
+    experience: renderSection({
+      sectionId: "experience",
+      component: "section",
+      children: (
+        <Experience
+          experience={resume.experience}
+          experienceBadge={resume.experienceBadge}
+          experienceTitle={resume.experienceTitle}
+        />
+      ),
+    }),
+    portfolio: renderSection({
+      sectionId: "portfolio",
+      component: "section",
+      children: (
+        <Portfolio
+          portfolio={resume.portfolio}
+          portfolioBadge={resume.portfolioBadge}
+          portfolioTitle={resume.portfolioTitle}
+          portfolioSubtitle={resume.portfolioSubtitle}
+        />
+      ),
+    }),
+    projects: renderSection({
+      sectionId: "projects",
+      children: (
+        <Projects
+          projects={resume.projects}
+          projectsBadge={resume.projectsBadge}
+          projectsTitle={resume.projectsTitle}
+          projectsSubtitle={resume.projectsSubtitle}
+        />
+      ),
+    }),
+    education: renderSection({
+      sectionId: "education",
+      children: (
+        <Education
+          education={resume.education}
+          educationBadge={resume.educationBadge}
+          educationTitle={resume.educationTitle}
+        />
+      ),
+    }),
+    skills: renderSection({
+      sectionId: "skills",
+      component: "section",
+      children: (
+        <Skills
+          skills={resume.skills}
+          skillsBadge={resume.skillsBadge}
+          skillsTitle={resume.skillsTitle}
+          skillsSubtitle={resume.skillsSubtitle}
+          onInlineFieldClick={editor?.onInlineFieldClick}
+          activeInlineFieldId={editor?.activeInlineFieldId}
+          onDeleteAction={editor?.onDeleteAction}
+          onAddAction={editor?.onAddAction}
+        />
+      ),
+    }),
+    certifications: renderSection({
+      sectionId: "certifications",
+      children: (
+        <Certifications
+          certifications={resume.certifications}
+          certificationsBadge={resume.certificationsBadge}
+          certificationsTitle={resume.certificationsTitle}
+          onInlineFieldClick={editor?.onInlineFieldClick}
+          activeInlineFieldId={editor?.activeInlineFieldId}
+          onAddAction={editor?.onAddAction}
+          onDeleteAction={editor?.onDeleteAction}
+        />
+      ),
+    }),
+    testimonials: renderSection({
+      sectionId: "testimonials",
+      children: (
+        <Testimonials
+          testimonials={resume.testimonials}
+          testimonialsBadge={resume.testimonialsBadge}
+          testimonialsTitle={resume.testimonialsTitle}
+        />
+      ),
+    }),
+    characterReferences: renderSection({
+      sectionId: "characterReferences",
+      children: (
+        <CharacterReferences
+          characterReferences={resume.characterReferences}
+          characterReferencesBadge={resume.characterReferencesBadge}
+          characterReferencesTitle={resume.characterReferencesTitle}
+        />
+      ),
+    }),
+    contact: renderSection({
+                    sectionId: "contact",
+                    component: "section",
+                    children: (
+                      <ContactSection
+                        personalInfo={resume.personalInfo}
+                        contactBadge={resume.contactBadge}
+                        contactTitle={resume.contactTitle}
+                        contactSubtitle={resume.contactSubtitle}
+                        onInlineFieldClick={editor?.onInlineFieldClick}
+                        activeInlineFieldId={editor?.activeInlineFieldId}
+                      />
+                    ),
+                  }),
+    
   };
 
   const footerBorderColor = isDarkMode
@@ -131,170 +243,36 @@ const ResumePage = ({
 
   const footerTextColor = isDarkMode ? "#94a3b8" : "#64748b";
 
+  const renderOrdered = (ids: ResumeEditableSection[]) =>
+    ids.map((id) => <Fragment key={id}>{sections[id]}</Fragment>);
+
   return (
-    <Box component="main" sx={{ width: "100%", minHeight: "100vh" }}>
+    <HiddenSectionsProvider resume={resume}>
+    <SectionOrderProvider order={order}>
+    <Box
+      component="main"
+      className={archivo.className}
+      sx={{
+        width: "100%",
+        minHeight: "100dvh",
+        [EDIT_ACCENT_VAR]: getSectionPalette(isDarkMode).primaryAccent,
+        // Shared type family with the other designs
+        "& .MuiTypography-root, & .MuiButton-root, & .MuiChip-root": {
+          fontFamily: "inherit",
+        },
+      }}
+    >
       <Navbar isAuthenticated={hasAccess} position={position} />
 
-      {/* About Section */}
-      {renderSection({
-        sectionId: "about",
-        component: "section",
-        children: (
-          <HeroSection
-            personalInfo={resume.personalInfo}
-            stats={resume.stats}
-            onDownloadCv={() => downloadResumePdf(resume)}
-          />
-        ),
-      })}
+      {/* Hero stays first */}
+      {sections.about}
 
       <Container
         maxWidth="xl"
         sx={{ py: { xs: 4, md: 6 }, px: { xs: 2, sm: 3, lg: 4 } }}
       >
-        {/* Section Stack */}
         <Stack spacing={{ xs: 6, sm: 8, md: 14 }}>
-          {renderSection({
-            sectionId: "services",
-            children: (
-              <ServicesSection
-                services={resume.services}
-                servicesBadge={resume.servicesBadge}
-                servicesTitle={resume.servicesTitle}
-                servicesSubtitle={resume.servicesSubtitle}
-                onInlineFieldClick={editor?.onInlineFieldClick}
-                activeInlineFieldId={editor?.activeInlineFieldId}
-                onAddAction={editor?.onAddAction}
-                onDeleteAction={editor?.onDeleteAction}
-              />
-            ),
-          })}
-
-          {/* Experience Section */}
-          {renderSection({
-            sectionId: "experience",
-            component: "section",
-            children: (
-              <Experience
-                experience={resume.experience}
-                experienceBadge={resume.experienceBadge}
-                experienceTitle={resume.experienceTitle}
-              />
-            ),
-          })}
-
-          {/* Portfolio Section */}
-          {renderSection({
-            sectionId: "portfolio",
-            component: "section",
-            children: (
-              <Portfolio
-                portfolio={resume.portfolio}
-                portfolioBadge={resume.portfolioBadge}
-                portfolioTitle={resume.portfolioTitle}
-                portfolioSubtitle={resume.portfolioSubtitle}
-              />
-            ),
-          })}
-
-          {/*  */}
-          {renderSection({
-            sectionId: "projects",
-            children: (
-              <Projects
-                projects={resume.projects}
-                projectsBadge={resume.projectsBadge}
-                projectsTitle={resume.projectsTitle}
-                projectsSubtitle={resume.projectsSubtitle}
-              />
-            ),
-          })}
-
-          {/* Education Section */}
-          {renderSection({
-            sectionId: "education",
-            children: (
-              <Education
-                education={resume.education}
-                educationBadge={resume.educationBadge}
-                educationTitle={resume.educationTitle}
-              />
-            ),
-          })}
-
-          {/* Skills Section */}
-          {renderSection({
-            sectionId: "skills",
-            component: "section",
-            children: (
-              <Skills
-                skills={resume.skills}
-                skillsBadge={resume.skillsBadge}
-                skillsTitle={resume.skillsTitle}
-                skillsSubtitle={resume.skillsSubtitle}
-                onInlineFieldClick={editor?.onInlineFieldClick}
-                activeInlineFieldId={editor?.activeInlineFieldId}
-                onDeleteAction={editor?.onDeleteAction}
-                onAddAction={editor?.onAddAction}
-              />
-            ),
-          })}
-
-          {/* Certifications Section */}
-          {renderSection({
-            sectionId: "certifications",
-            children: (
-              <Certifications
-                certifications={resume.certifications}
-                certificationsBadge={resume.certificationsBadge}
-                certificationsTitle={resume.certificationsTitle}
-                onInlineFieldClick={editor?.onInlineFieldClick}
-                activeInlineFieldId={editor?.activeInlineFieldId}
-                onAddAction={editor?.onAddAction}
-                onDeleteAction={editor?.onDeleteAction}
-              />
-            ),
-          })}
-
-          {/* Testimonials Section */}
-          {renderSection({
-            sectionId: "testimonials",
-            children: (
-              <Testimonials
-                testimonials={resume.testimonials}
-                testimonialsBadge={resume.testimonialsBadge}
-                testimonialsTitle={resume.testimonialsTitle}
-              />
-            ),
-          })}
-
-          {/* Character References Section */}
-          {renderSection({
-            sectionId: "characterReferences",
-            children: (
-              <CharacterReferences
-                characterReferences={resume.characterReferences}
-                characterReferencesBadge={resume.characterReferencesBadge}
-                characterReferencesTitle={resume.characterReferencesTitle}
-              />
-            ),
-          })}
-
-          {/* Contact Section */}
-          {renderSection({
-            sectionId: "contact",
-            component: "section",
-            children: (
-              <ContactSection
-                personalInfo={resume.personalInfo}
-                contactBadge={resume.contactBadge}
-                contactTitle={resume.contactTitle}
-                contactSubtitle={resume.contactSubtitle}
-                onInlineFieldClick={editor?.onInlineFieldClick}
-                activeInlineFieldId={editor?.activeInlineFieldId}
-              />
-            ),
-          })}
+          {renderOrdered(order.slice(1))}
 
           {/* Footer */}
           <Box
@@ -313,6 +291,8 @@ const ResumePage = ({
         </Stack>
       </Container>
     </Box>
+    </SectionOrderProvider>
+    </HiddenSectionsProvider>
   );
 };
 

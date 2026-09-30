@@ -20,7 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import { getSectionPalette, IThemePalette } from "@/theme/sectionPalette";
-import { NavbarPosition } from "./ResumePage";
+import type { NavbarPosition, ResumeEditableSection } from "./ResumePage";
 import {
   editorBtn,
   NAV_ITEMS,
@@ -28,7 +28,8 @@ import {
   secretEditor,
   websiteTitle,
 } from "./constants/constant";
-import { NavbarBtn } from "./components/buttons/NavbarBtn";
+import { useHiddenSections } from "../templates/shared/sectionVisibility";
+import { useSectionOrder } from "../templates/shared/sectionOrder";import { NavbarBtn } from "./components/buttons/NavbarBtn";
 
 export interface INavbarProps {
   isAuthenticated: boolean;
@@ -37,6 +38,13 @@ export interface INavbarProps {
 
 const Navbar = ({ isAuthenticated, position }: INavbarProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // Links to hidden sections are dropped
+  const hiddenSections = useHiddenSections();
+  const order = useSectionOrder();
+  const rank = (href: string) => order.indexOf(href.slice(1) as ResumeEditableSection);
+  const navItems = NAV_ITEMS.filter(({ href }) => !hiddenSections.some((id) => href === `#${id}`)).sort(
+    (a, b) => rank(a.href) - rank(b.href),
+  );
   const { toggleTheme } = useThemeContext();
   const { isDarkMode } = useThemeContext();
   const theme = getSectionPalette(isDarkMode);
@@ -103,7 +111,7 @@ const Navbar = ({ isAuthenticated, position }: INavbarProps) => {
             {/* Navigation Buttons */}
             <NavbarBtn
               id={navbarId}
-              navbarBtns={NAV_ITEMS}
+              navbarBtns={navItems}
               cssProps={{
                 buttonCss: {
                   textTransform: "uppercase",
@@ -202,7 +210,7 @@ const Navbar = ({ isAuthenticated, position }: INavbarProps) => {
               {
                 <NavbarBtn
                   id={navbarId}
-                  navbarBtns={NAV_ITEMS}
+                  navbarBtns={navItems}
                   handler={{
                     onClick: () => setIsMobileMenuOpen(false),
                   }}

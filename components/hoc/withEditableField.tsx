@@ -1,3 +1,4 @@
+import { editAccent } from "@/theme/editAccent";
 import React, { useMemo } from "react";
 import { SxProps } from "@mui/material";
 import {
@@ -45,16 +46,16 @@ export const withEditableField = <P extends WithEditableFieldProps>(
         // CSS set.
         const outline =
           isEditMode && isActiveField
-            ? "2px solid rgba(20, 184, 166, 0.9)"
+            ? `2px solid ${editAccent(90)}`
             : "";
         const cursor = isEditMode ? "pointer" : "inherit";
         const outlineColor =
           isEditMode && isActiveField
-            ? "2px solid rgba(20, 184, 166, 0.9)"
+            ? editAccent(90)
             : "inherit";
         const boxShadow =
           isEditMode && isActiveField
-            ? "0 0 0 4px rgba(20, 184, 166, 0.2)"
+            ? `0 0 0 4px ${editAccent(20)}`
             : "none";
 
         let css = {};
@@ -130,8 +131,8 @@ export const withEditableField = <P extends WithEditableFieldProps>(
 
           // apply css in sx for hover effect, this is not takeEffect
           const hoverStyles = {
-            outline: "2px solid rgb(0, 255, 225)",
-            boxShadow: "0 0 0 2px rgb(0, 255, 225)",
+            outline: `2px solid ${editAccent(70)}`,
+            boxShadow: `0 0 0 2px ${editAccent(30)}`,
           };
           // Apply hover styles directly to the element
           const target = event.currentTarget as HTMLElement;

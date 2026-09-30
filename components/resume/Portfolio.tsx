@@ -78,7 +78,7 @@ const Portfolio = ({
           variant="h3"
           sx={{
             fontWeight: 800,
-            fontSize: { xs: "1.625rem", sm: "2rem", md: "2.5rem", lg: "3rem" },
+            fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2.125rem" },
             color: titleColor,
             mb: 2,
             ...getInlineFieldSx("portfolioTitle"),
@@ -91,7 +91,7 @@ const Portfolio = ({
           variant="h6"
           sx={{
             maxWidth: "42rem",
-            fontSize: { xs: "1rem", md: "1.125rem" },
+            fontSize: { xs: "1rem", md: "1.0625rem" },
             color: mutedColor,
             fontWeight: 400,
             ...getInlineFieldSx("portfolioSubtitle"),
@@ -128,7 +128,7 @@ const Portfolio = ({
             mt: 4,
             p: 4,
             border: `2px dashed ${primaryAccent}50`,
-            borderRadius: "1rem",
+            borderRadius: "20px",
             textAlign: "center",
             cursor: "pointer",
             transition: "all 0.3s ease",
